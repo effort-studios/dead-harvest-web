@@ -38,10 +38,6 @@ export function Hud() {
         <span>Dia {data.day}</span>
       </div>
 
-      <div className="panel hud-hint">
-        <b>Shift</b> + clique: linha inteira · <b>Ctrl</b> + clique: coluna inteira
-      </div>
-
       <div className="panel hud-hotbar">
         {Array.from({ length: HOTBAR_SLOTS }, (_, i) => {
           const crop = CROP_ORDER[i]

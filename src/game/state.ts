@@ -31,6 +31,17 @@ export function clickTile(data: SaveData, row: number, col: number, seed: CropId
   return { ...data, grid: replaceTile(data.grid, row, col, newTile), money, inventory }
 }
 
+// Loja: compra 1 semente se o jogador tiver dinheiro
+export function buySeed(data: SaveData, crop: CropId): SaveData {
+  const price = CROPS[crop].seedPrice
+  if (data.money < price) return data
+  return {
+    ...data,
+    money: data.money - price,
+    inventory: { ...data.inventory, [crop]: (data.inventory[crop] ?? 0) + 1 },
+  }
+}
+
 // Como o clique age: só no tile, ou em toda a linha / coluna dele
 export type ClickMode = 'tile' | 'row' | 'col'
 

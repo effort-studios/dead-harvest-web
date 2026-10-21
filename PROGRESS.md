@@ -4,13 +4,13 @@
 - [x] 2. Projeto Vite conectado à API (criar convidado, carregar e salvar) — confirmado pelo usuário
 - [x] 3. Grade 10x10; clicar num tile alterna arar/plantar/colher (confirmado pelo print do usuário: dinheiro e sementes mudaram)
 - [ ] 4. 2 ou 3 tipos de planta (crescimento e preços) — código pronto, falta confirmar no navegador
-- [ ] 5. Dinheiro e loja de sementes
+- [ ] 5. Dinheiro e loja de sementes — código pronto (Loja no menu lateral), falta confirmar no navegador
 - [ ] 6. Ciclo dia/noite (tela escurece)
 - [ ] 7. Zumbis nas bordas pisoteiam plantações; clicar afasta
 - [ ] 8. Salvamento automático
 
 ## Em andamento
-Item 4. Falta o usuário testar: escolher semente (teclas 1-3 ou clique no slot), plantar, esperar crescer (tomate 10s, milho 20s, abóbora 40s) e colher.
+Item 5. Falta o usuário testar: abrir o menu lateral (🛒), comprar sementes (botão desabilitado sem dinheiro), plantar com elas; testar Dicas, Conta (Novo jogo com confirmação) e Sobre.
 
 ## Decisões
 | Data | Decisão | Motivo |
@@ -25,6 +25,8 @@ Item 4. Falta o usuário testar: escolher semente (teclas 1-3 ou clique no slot)
 | 2026-10-20 | Plantas em src/game/crops.ts: tomate (10 ticks, semente 3, venda 6), milho (20, 5, 12), abóbora (40, 10, 30) | tempos curtos para testar; quanto mais demora, mais lucra. Colher só com a planta madura; plantar gasta 1 semente da selecionada |
 | 2026-10-20 | Milho usa sprites do pacote; tomate e abóbora são desenhados com formas no canvas | o pacote isométrico só tem milho |
 | 2026-10-20 | Ação em massa: Shift+clique = linha, Ctrl+clique = coluna (`clickLine` em state.ts) | no isométrico a "linha" pode ir para dois lados na tela; só age nos tiles no mesmo estado do clicado e para quando as sementes acabam |
+| 2026-10-20 | Menu lateral discreto (Loja, Dicas, Conta, Sobre), painel sem fundo bloqueando o mapa | junta a loja e as dicas num lugar só; dá para comprar e plantar com o menu aberto. Sem seções vazias (Configurações e Missões só quando existirem) |
+| 2026-10-20 | "Novo jogo" cria jogador convidado novo e mantém o antigo no banco | mais seguro que apagar; sem rota de DELETE na API |
 | 2026-10-20 | Relógio do jogo: setInterval de 1s no App que chama `tick` (função pura) | 1 tick por segundo, como combinado; cresce até maduro e para |
 
 ## Problemas conhecidos
@@ -34,11 +36,12 @@ Item 4. Falta o usuário testar: escolher semente (teclas 1-3 ou clique no slot)
 - Falha ao salvar só mostra a mensagem de erro no HUD; sem nova tentativa.
 
 ## Próximos passos
-1. Confirmar o item 4 no navegador
-2. Loja de sementes (item 5)
-3. Ciclo dia/noite (item 6)
+1. Confirmar os itens 4 e 5 no navegador
+2. Ciclo dia/noite (item 6)
+3. Zumbis (item 7)
 
 ## Histórico
+- 2026-10-20 – Item 5 + menu lateral: buySeed (função pura), Loja/Dicas/Conta/Sobre, Novo jogo, dica de Shift/Ctrl saiu da HUD para o menu Dicas.
 - 2026-10-20 – Ação em massa por linha (Shift) e coluna (Ctrl), com destaque da linha inteira no hover e dica na HUD.
 - 2026-10-20 – Terra arada recortada no losango do topo (clip) para ficar na mesma altura da grama.
 - 2026-10-20 – Quantidade da semente movida para o canto superior direito do slot (colidia com o nome).

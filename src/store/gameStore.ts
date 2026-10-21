@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { ApiError, createPlayer, loadSave, putSave } from '../api/client'
 import type { CropId } from '../game/crops'
-import { clickLine, clickTile, migrateSave, tick, type ClickMode } from '../game/state'
+import { buySeed, clickLine, clickTile, migrateSave, tick, type ClickMode } from '../game/state'
 import type { SaveData } from '../game/types'
 
 const PLAYER_KEY = 'deadHarvestPlayerId'
@@ -18,6 +18,8 @@ type GameState = {
   clickTile: (row: number, col: number, mode: ClickMode) => void
   selectSeed: (crop: CropId) => void
   tick: () => void
+  buySeed: (crop: CropId) => void
+  newGame: () => Promise<void>
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -78,4 +80,18 @@ export const useGameStore = create<GameState>((set, get) => ({
   selectSeed: (crop) => set({ selectedSeed: crop }),
 
   tick: () => set((s) => (s.data ? { data: tick(s.data) } : s)),
+
+  buySeed: (crop) => set((s) => (s.data ? { data: buySeed(s.data, crop) } : s)),
+
+  // Cria um jogador convidado novo; o antigo continua guardado no banco
+  newGame: async () => {
+    try {
+      const playerId = await createPlayer()
+      const data = migrateSave(await loadSave(playerId))
+      localStorage.setItem(PLAYER_KEY, playerId)
+      set({ playerId, data, selectedSeed: 'corn', error: null })
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : 'Erro ao criar novo jogo' })
+    }
+  },
 }))
