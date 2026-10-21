@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useGameStore } from './store/gameStore'
+import { GameCanvas } from './ui/GameCanvas'
 import { Hud } from './ui/Hud'
 
 // Em modo dev o StrictMode roda o effect 2x; sem isso criaríamos 2 jogadores
@@ -17,5 +18,10 @@ export default function App() {
 
   if (status === 'loading') return <p>Carregando...</p>
   if (status === 'error') return <p className="error">Não foi possível conectar à API: {error}</p>
-  return <Hud />
+  return (
+    <div className="game">
+      <GameCanvas />
+      <Hud />
+    </div>
+  )
 }

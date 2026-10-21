@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { ApiError, createPlayer, loadSave, putSave } from '../api/client'
+import { clickTile } from '../game/state'
 import type { SaveData } from '../game/types'
 
 const PLAYER_KEY = 'deadHarvestPlayerId'
@@ -12,8 +13,7 @@ type GameState = {
   data: SaveData | null
   init: () => Promise<void>
   save: () => Promise<void>
-  // Provisório (item 2): serve só para provar que o save persiste. Sai no item 3.
-  addMoney: (amount: number) => void
+  clickTile: (row: number, col: number) => void
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -60,6 +60,6 @@ export const useGameStore = create<GameState>((set, get) => ({
     }
   },
 
-  addMoney: (amount) =>
-    set((s) => (s.data ? { data: { ...s.data, money: s.data.money + amount } } : s)),
+  clickTile: (row, col) =>
+    set((s) => (s.data ? { data: clickTile(s.data, row, col) } : s)),
 }))

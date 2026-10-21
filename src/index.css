@@ -1,13 +1,35 @@
 body {
   margin: 0;
-  padding: 16px;
   background: #1b1b1b;
   color: #eee;
   font-family: system-ui, sans-serif;
 }
-.hud {
+.game {
+  position: relative;
+  height: 100vh;
   display: flex;
-  gap: 16px;
+  align-items: center;
+  justify-content: center;
+}
+canvas {
+  cursor: pointer;
+  border: 4px solid #3a2a18;
+}
+.hud-box {
+  position: absolute;
+  background: rgba(30, 20, 10, 0.85);
+  border: 2px solid #6b4a2b;
+  border-radius: 6px;
+  padding: 8px 14px;
+}
+.hud-top-left { top: 12px; left: 12px; }
+.hud-top-right { top: 12px; right: 12px; }
+.hud-bottom {
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
   align-items: center;
 }
 .error {
