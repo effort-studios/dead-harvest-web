@@ -1,57 +1,129 @@
-body {
+html,
+body,
+#root {
+  height: 100%;
   margin: 0;
-  background: #1f3320;
+  overflow: hidden; /* a página nunca rola: só o mapa se move, por arrasto */
+}
+body {
+  background: #4f7f3b;
   color: #f5e9d0;
   font-family: system-ui, sans-serif;
 }
 .game {
   position: relative;
-  min-height: 100vh;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+/* O mapa ocupa a área toda; a HUD fica por cima e não se move com ele */
+.map-area {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
 }
 canvas {
   display: block;
+  cursor: grab;
+  touch-action: none; /* no celular, arrastar move o mapa em vez de rolar a página */
+}
+canvas:active {
+  cursor: grabbing;
+}
+
+/* Caixa de madeira usada em todos os elementos do HUD */
+.panel {
+  background: #3b2a18;
+  border: 3px solid #8a5a2b;
+  box-shadow: 0 0 0 2px #1d130a, inset 0 0 0 2px #5a3d1f;
+  border-radius: 8px;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+}
+button.panel {
+  padding: 8px 14px;
   cursor: pointer;
-  width: 100vw; /* largura total; a altura acompanha a proporção do mundo */
-  height: auto;
-  image-rendering: pixelated;
 }
-.sprite {
-  image-rendering: pixelated;
-  flex-shrink: 0;
+button.panel:hover:not(:disabled) {
+  background: #4d3720;
 }
-.hud-box {
+
+.hud-player {
   position: absolute;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px 8px 8px;
+}
+.portrait {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34px;
+  background: #24180d;
+  border: 2px solid #8a5a2b;
+  border-radius: 50%;
+}
+.player-name { font-size: 13px; opacity: 0.8; }
+.money { font-size: 20px; color: #ffd75e; }
+
+.hud-clock {
+  position: absolute;
+  top: 12px;
+  right: 12px;
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #3b2a18;
-  border: 3px solid #8a5a2b;
-  box-shadow: 0 0 0 2px #1d130a;
-  border-radius: 6px;
-  padding: 8px 14px;
-  font-weight: 600;
+  padding: 10px 18px;
+  font-size: 20px;
 }
-.hud-top-left { top: 12px; left: 12px; }
-.hud-top-right { top: 12px; right: 12px; }
-.hud-bottom {
+.clock-icon { font-size: 26px; }
+
+.hud-hotbar {
+  position: absolute;
   bottom: 12px;
   left: 50%;
   transform: translateX(-50%);
-  gap: 10px;
+  display: flex;
+  gap: 6px;
+  padding: 8px;
 }
 .slot {
   position: relative;
-  width: 52px;
-  height: 52px;
+  width: clamp(30px, 5vw, 56px); /* encolhe em janelas pequenas para a barra não passar da tela */
+  height: clamp(30px, 5vw, 56px);
   display: flex;
   align-items: center;
   justify-content: center;
   background: #24180d;
-  border: 2px solid #8a5a2b;
+  border: 2px solid #6b4a2b;
   border-radius: 4px;
 }
-.slot-key { position: absolute; top: 1px; left: 4px; font-size: 11px; opacity: 0.8; }
-.slot-qty { position: absolute; bottom: 1px; right: 4px; font-size: 12px; }
+.slot img { max-width: 70%; max-height: 70%; }
+.slot-key { position: absolute; top: 1px; left: 4px; font-size: 11px; opacity: 0.7; }
+.slot-qty { position: absolute; bottom: 1px; right: 5px; font-size: 13px; }
+
+.hud-save {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 .error {
   color: #ff6b6b;
+}
+
+/* Telas estreitas: barra de itens sobe para não cobrir o botão Salvar */
+@media (max-width: 700px) {
+  .hud-hotbar { bottom: 60px; }
+  .hud-player { padding-right: 10px; }
+  .portrait { width: 40px; height: 40px; font-size: 24px; }
+  .hud-clock { font-size: 16px; padding: 6px 12px; }
 }

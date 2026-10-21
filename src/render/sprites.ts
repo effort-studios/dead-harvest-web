@@ -1,50 +1,45 @@
-// Tiny Town (Kenney, CC0): imagem única com tiles 16x16, 12 por linha.
-// Um sprite é identificado pelo índice dele na imagem (esquerda->direita, cima->baixo).
-export const SRC_SIZE = 16
-export const SHEET_COLS = 12
-export const SHEET_URL = `${import.meta.env.BASE_URL}assets/tiny-town/tilemap.png`
+// Sprites isométricos do pacote "Isometric Miniature Farm" (Kenney, CC0).
+// Cada arquivo é uma imagem 256x512 com o losango do chão na parte de baixo.
+export const SPRITE_NAMES = [
+  'dirt_S',
+  'dirtFarmland_S',
+  'cornYoung_S',
+  'corn_S',
+  'fenceLow_N',
+  'fenceLow_E',
+  'fenceLow_S',
+  'fenceLow_W',
+  'hayBalesStacked_S',
+  'hayBales_S',
+  'sack_S',
+  'planks_S',
+] as const
 
-// Índices dos tiles que usamos
-export const SPRITE = {
-  grass: 0,
-  grassTufts: 1,
-  grassFlowers: 2,
-  dirt: 25,
-  sprout: 17,
-  bush: 5,
-  pine: 4,
-  tree: 16,
-  coin: 93,
-  fenceTL: 44, fenceTop: 45, fenceTR: 46,
-  fenceLeft: 56, fenceRight: 58,
-  fenceBL: 68, fenceBottom: 69, fenceBR: 70,
-  roofL: 52, roofM: 53, roofR: 54,
-  roof2L: 64, roof2M: 65, roof2R: 66,
-  window: 84, door: 85,
-} as const
+export type SpriteName = (typeof SPRITE_NAMES)[number]
+export type Sprites = Record<SpriteName, HTMLImageElement>
 
-let sheet: Promise<HTMLImageElement> | null = null
+export const SPRITE_SIZE = { width: 256, height: 512 }
+// Onde fica o centro do losango do chão dentro da imagem
+export const SPRITE_ANCHOR = { x: 128, y: 437 }
 
-export function loadSheet(): Promise<HTMLImageElement> {
-  sheet ??= new Promise((resolve, reject) => {
+const assetUrl = (file: string) => `${import.meta.env.BASE_URL}assets/iso-farm/${file}`
+export const SACK_ICON_URL = assetUrl('icon-sack.png')
+
+function loadImage(name: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
     const img = new Image()
     img.onload = () => resolve(img)
     img.onerror = reject
-    img.src = SHEET_URL
+    img.src = assetUrl(`${name}.png`)
   })
-  return sheet
 }
 
-export function drawSprite(
-  ctx: CanvasRenderingContext2D,
-  img: HTMLImageElement,
-  index: number,
-  x: number,
-  y: number,
-  size: number,
-) {
-  const sx = (index % SHEET_COLS) * SRC_SIZE
-  const sy = Math.floor(index / SHEET_COLS) * SRC_SIZE
-  ctx.imageSmoothingEnabled = false // mantém o pixel art nítido ao ampliar
-  ctx.drawImage(img, sx, sy, SRC_SIZE, SRC_SIZE, x, y, size, size)
+let cache: Promise<Sprites> | null = null
+
+// Carrega todas as imagens uma única vez
+export function loadSprites(): Promise<Sprites> {
+  cache ??= Promise.all(SPRITE_NAMES.map(loadImage)).then(
+    (images) => Object.fromEntries(SPRITE_NAMES.map((n, i) => [n, images[i]])) as Sprites,
+  )
+  return cache
 }
