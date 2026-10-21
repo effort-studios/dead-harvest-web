@@ -104,6 +104,15 @@ button.panel:hover:not(:disabled) {
   border: 2px solid #6b4a2b;
   border-radius: 4px;
 }
+.slot {
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.slot:disabled { cursor: default; }
+.slot.selected { border-color: #ffd75e; box-shadow: 0 0 0 2px #ffd75e; }
+.slot-name { position: absolute; bottom: -1px; left: 0; right: 0; text-align: center; font-size: 9px; opacity: 0.8; }
 .slot img { max-width: 70%; max-height: 70%; }
 .slot-key { position: absolute; top: 1px; left: 4px; font-size: 11px; opacity: 0.7; }
 .slot-qty { position: absolute; bottom: 1px; right: 5px; font-size: 13px; }

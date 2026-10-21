@@ -1,3 +1,4 @@
+import { CROPS, isCropId, type CropId } from '../game/crops'
 import { GRID_SIZE } from '../game/state'
 import type { Tile } from '../game/types'
 import { SPRITE_ANCHOR, SPRITE_SIZE, type SpriteName, type Sprites } from './sprites'
@@ -59,8 +60,8 @@ export function tileFromWorld(wx: number, wy: number) {
   return { row, col }
 }
 
-// Item a desenhar: um sprite numa célula
-type Item = { r: number; c: number; sprite: SpriteName }
+// Item a desenhar numa célula: um sprite do pacote, ou uma planta desenhada com formas
+type Item = { r: number; c: number; sprite?: SpriteName; shape?: { crop: CropId; progress: number } }
 
 // Objetos soltos em volta da plantação (r/c fora da grade 0..9)
 const DECOR: Item[] = [
@@ -98,6 +99,47 @@ function drawGround(ctx: CanvasRenderingContext2D, view: Rect) {
   }
 }
 
+// Planta no tile: o milho usa os sprites do pacote (jovem -> madura); as outras são desenhadas
+function cropItem(r: number, c: number, crop: CropId, growth: number): Item {
+  const progress = Math.min(growth / CROPS[crop].growTicks, 1)
+  if (crop === 'corn') return { r, c, sprite: progress >= 1 ? 'corn_S' : 'cornYoung_S' }
+  return { r, c, shape: { crop, progress } }
+}
+
+function ellipse(ctx: CanvasRenderingContext2D, x: number, y: number, rx: number, ry: number, color: string) {
+  ctx.fillStyle = color
+  ctx.beginPath()
+  ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2)
+  ctx.fill()
+}
+
+// Tomate e abóbora: formas simples que crescem com o progresso (0 a 1) e mudam de cor ao amadurecer
+function drawCropShape(ctx: CanvasRenderingContext2D, x: number, y: number, crop: CropId, progress: number) {
+  const size = 0.4 + 0.6 * progress
+  const ripe = progress >= 1
+  if (crop === 'tomato') {
+    ellipse(ctx, x, y - 11 * size, 17 * size, 13 * size, '#3f8f3a') // folhagem
+    ellipse(ctx, x - 5 * size, y - 14 * size, 9 * size, 7 * size, '#4fa54a')
+    if (progress > 0.5) {
+      const fruit = ripe ? '#d63a2f' : '#9ccc4f'
+      for (const [dx, dy] of [[-9, -12], [9, -9], [1, -20], [-3, -5]]) ellipse(ctx, x + dx, y + dy, 4.5, 4.5, fruit)
+    }
+  } else {
+    ellipse(ctx, x - 15 * size, y - 4 * size, 9 * size, 5 * size, '#3f8f3a') // folhas
+    ellipse(ctx, x + 15 * size, y - 4 * size, 9 * size, 5 * size, '#3f8f3a')
+    const color = ripe ? '#e8872a' : '#8fb84a'
+    ellipse(ctx, x, y - 10 * size, 19 * size, 14 * size, color)
+    ctx.strokeStyle = ripe ? '#b9621a' : '#6d9138' // gomos da abóbora
+    ctx.lineWidth = 1.5
+    for (const k of [-0.5, 0, 0.5]) {
+      ctx.beginPath()
+      ctx.ellipse(x, y - 10 * size, 19 * size * Math.abs(k) + 0.1, 14 * size, 0, 0, Math.PI * 2)
+      ctx.stroke()
+    }
+    if (ripe) ellipse(ctx, x, y - 24, 2.5, 4, '#4a7a2a') // cabinho
+  }
+}
+
 // Lista tudo que fica de pé sobre o mapa, na ordem em que cada sprite deve ser desenhado
 function buildItems(grid: Tile[][]): Item[] {
   const items: Item[] = [...DECOR]
@@ -109,7 +151,7 @@ function buildItems(grid: Tile[][]): Item[] {
       // cerca nas bordas da plantação; as de trás (cima/esquerda) vêm antes da planta
       if (r === 0) items.push({ r, c, sprite: 'fenceLow_S' })
       if (c === 0) items.push({ r, c, sprite: 'fenceLow_E' })
-      if (tile.state === 'planted') items.push({ r, c, sprite: 'cornYoung_S' })
+      if (tile.state === 'planted' && isCropId(tile.crop)) items.push(cropItem(r, c, tile.crop, tile.growth))
       // as da frente (baixo/direita) vêm depois, para cobrir a planta
       if (r === last) items.push({ r, c, sprite: 'fenceLow_N' })
       if (c === last) items.push({ r, c, sprite: 'fenceLow_W' })
@@ -140,8 +182,13 @@ export function drawWorld(
   const view: Rect = { left: topLeft.x, top: topLeft.y, right: bottomRight.x, bottom: bottomRight.y }
 
   drawGround(ctx, view) // a grama cobre a tela toda, então não precisa limpar antes
-  for (const { r, c, sprite } of buildItems(grid)) {
+  for (const { r, c, sprite, shape } of buildItems(grid)) {
     const { x, y } = cellToWorld(r, c)
+    if (shape) {
+      drawCropShape(ctx, x, y, shape.crop, shape.progress)
+      continue
+    }
+    if (!sprite) continue
     ctx.drawImage(
       sprites[sprite],
       x - SPRITE_ANCHOR.x * SCALE,

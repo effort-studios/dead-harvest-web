@@ -1,37 +1,62 @@
+import { CROPS, isCropId, type CropId } from './crops'
 import type { SaveData, Tile } from './types'
 
 // Funções puras: recebem o estado e devolvem um estado novo, sem mexer em canvas, React ou API.
 
 export const GRID_SIZE = 10
 
-// Provisório: o item 4 define o preço de cada planta
-const HARVEST_REWARD = 10
-const SEED = 'wheat'
-
 const SOIL: Tile = { state: 'soil', crop: null, growth: 0 }
 
-// Clique num tile: terra -> arada -> plantada -> (colhe) terra
-export function clickTile(data: SaveData, row: number, col: number): SaveData {
+// Clique num tile: terra -> arada -> plantada -> (madura) colhe e volta a ser terra
+export function clickTile(data: SaveData, row: number, col: number, seed: CropId): SaveData {
   const tile = data.grid[row]?.[col]
   if (!tile) return data
 
-  let newTile: Tile = tile
+  let newTile: Tile
   let money = data.money
   let inventory = data.inventory
 
   if (tile.state === 'soil') {
     newTile = { ...tile, state: 'tilled' }
   } else if (tile.state === 'tilled') {
-    if ((inventory[SEED] ?? 0) < 1) return data // sem semente, não planta
-    inventory = { ...inventory, [SEED]: inventory[SEED] - 1 }
-    newTile = { state: 'planted', crop: SEED, growth: 0 }
+    if ((inventory[seed] ?? 0) < 1) return data // sem semente, não planta
+    inventory = { ...inventory, [seed]: inventory[seed] - 1 }
+    newTile = { state: 'planted', crop: seed, growth: 0 }
   } else {
-    money += HARVEST_REWARD
+    if (!isCropId(tile.crop) || tile.growth < CROPS[tile.crop].growTicks) return data // ainda crescendo
+    money += CROPS[tile.crop].sellPrice
     newTile = SOIL
   }
 
-  const grid = data.grid.map((r, i) =>
-    i === row ? r.map((t, j) => (j === col ? newTile : t)) : r,
+  return { ...data, grid: replaceTile(data.grid, row, col, newTile), money, inventory }
+}
+
+// Passa 1 tick: toda planta cresce 1, até ficar madura
+export function tick(data: SaveData): SaveData {
+  let changed = false
+  const grid = data.grid.map((row) =>
+    row.map((tile) => {
+      if (tile.state !== 'planted' || !isCropId(tile.crop)) return tile
+      if (tile.growth >= CROPS[tile.crop].growTicks) return tile
+      changed = true
+      return { ...tile, growth: tile.growth + 1 }
+    }),
   )
-  return { ...data, grid, money, inventory }
+  return changed ? { ...data, grid } : data
+}
+
+// Saves antigos usavam "wheat" (trigo); hoje a planta inicial é o milho
+export function migrateSave(data: SaveData): SaveData {
+  const rename = (crop: string | null) => (crop === 'wheat' ? 'corn' : crop)
+  const inventory = { ...data.inventory }
+  if ('wheat' in inventory) {
+    inventory.corn = (inventory.corn ?? 0) + inventory.wheat
+    delete inventory.wheat
+  }
+  const grid = data.grid.map((row) => row.map((t) => ({ ...t, crop: rename(t.crop) })))
+  return { ...data, inventory, grid }
+}
+
+function replaceTile(grid: Tile[][], row: number, col: number, tile: Tile): Tile[][] {
+  return grid.map((r, i) => (i === row ? r.map((t, j) => (j === col ? tile : t)) : r))
 }

@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { ApiError, createPlayer, loadSave, putSave } from '../api/client'
-import { clickTile } from '../game/state'
+import type { CropId } from '../game/crops'
+import { clickTile, migrateSave, tick } from '../game/state'
 import type { SaveData } from '../game/types'
 
 const PLAYER_KEY = 'deadHarvestPlayerId'
@@ -11,9 +12,12 @@ type GameState = {
   saving: boolean
   playerId: string | null
   data: SaveData | null
+  selectedSeed: CropId // semente escolhida na barra de itens (não vai para o save)
   init: () => Promise<void>
   save: () => Promise<void>
   clickTile: (row: number, col: number) => void
+  selectSeed: (crop: CropId) => void
+  tick: () => void
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -22,6 +26,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   saving: false,
   playerId: null,
   data: null,
+  selectedSeed: 'corn',
 
   init: async () => {
     try {
@@ -41,7 +46,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         localStorage.setItem(PLAYER_KEY, playerId)
         data = await loadSave(playerId)
       }
-      set({ status: 'ready', playerId, data })
+      set({ status: 'ready', playerId, data: migrateSave(data) })
     } catch (err) {
       set({ status: 'error', error: err instanceof Error ? err.message : 'Erro desconhecido' })
     }
@@ -61,5 +66,9 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   clickTile: (row, col) =>
-    set((s) => (s.data ? { data: clickTile(s.data, row, col) } : s)),
+    set((s) => (s.data ? { data: clickTile(s.data, row, col, s.selectedSeed) } : s)),
+
+  selectSeed: (crop) => set({ selectedSeed: crop }),
+
+  tick: () => set((s) => (s.data ? { data: tick(s.data) } : s)),
 }))
