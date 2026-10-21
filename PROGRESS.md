@@ -31,6 +31,7 @@ Item 5. Falta o usuário testar: abrir o menu lateral (🛒), comprar sementes (
 | 2026-10-21 | Ícones desenhados em SVG por nós (src/ui/Icons.tsx): moeda, sol, lua, loja, dicas, fazendeiro, info, salvar, fechar, milho, tomate, abóbora. Kenney Game Icons e emojis removidos | usuário não gostou dos glifos do Kenney nem dos emojis; um conjunto único no estilo do UI Pack (contorno marrom grosso, cores chapadas) |
 | 2026-10-21 | Grama com textura procedural (src/render/grass.ts): fundo escuro + ~560 tufos de folhas com degradê (base escura, ponta clara), pintados de trás para frente, em padrão repetível sem emenda | a 1ª versão (base lisa com riscos finos) ficou "chapada"; a 2ª segue a técnica de uma referência do usuário (tufos sobrepostos), sem copiar a imagem. Gerada por código com semente fixa; conferida renderizada fora do navegador |
 | 2026-10-21 | Terra arada desenhada por código (src/render/soil.ts): sulcos com degradê que emendam entre tiles, torrões, pedrinhas, contorno suave e tufos de grama nas bordas expostas. Sprite 3D de terra do pacote removido | o sprite do Kenney (textura fotográfica/granulada) destoava da grama cartoon. Terra é desenhada numa 1ª passada (chão), antes das plantas e cercas |
+| 2026-10-21 | Design system do mundo (DESIGN.md + render/style.ts) e objetos redesenhados no mesmo estilo: cerca, fardos, plataforma, saco, arbusto, pedra, árvore (render/props.ts) e milho em SVG (3 estágios). Pacote Isometric Miniature Farm (Kenney) removido do projeto | cerca e objetos 3D do Kenney destoavam da grama/terra cartoon. Agora só o UI Pack do Kenney permanece (molduras da interface). Conferido numa cena de teste fora do navegador |
 | 2026-10-20 | Relógio do jogo: setInterval de 1s no App que chama `tick` (função pura) | 1 tick por segundo, como combinado; cresce até maduro e para |
 
 ## Problemas conhecidos
@@ -45,6 +46,7 @@ Item 5. Falta o usuário testar: abrir o menu lateral (🛒), comprar sementes (
 3. Zumbis (item 7)
 
 ## Histórico
+- 2026-10-21 – Design system (DESIGN.md, style.ts); props desenhados por código (isoBox, cerca, árvore...), milho em SVG, 22 objetos de cenário em volta da plantação; removido o pacote Isometric Miniature Farm (sprites.ts agora só carrega as plantas).
 - 2026-10-21 – Terra arada nova (procedural, combina com a grama), bordas com tufos; desenho em 2 passadas (chão, depois objetos). Conferida numa cena de teste fora do navegador.
 - 2026-10-21 – Grama refeita com tufos de folhas sobrepostos e degradê (referência do usuário), no lugar da textura chapada.
 - 2026-10-21 – Nova textura de grama (padrão repetido no mundo todo, acompanha o pan); removido o desenho por losangos.

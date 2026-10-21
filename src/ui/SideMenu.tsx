@@ -165,7 +165,7 @@ function AboutPanel() {
     <>
       <p>Dead Harvest: planta de dia, sobrevive à noite.</p>
       <p className="muted">
-        Sprites e interface: Isometric Miniature Farm e UI Pack Adventure, por Kenney (kenney.nl), licença CC0. Ícones desenhados para o jogo. Fonte: Fredoka (Google Fonts).
+        Interface: UI Pack Adventure, por Kenney (kenney.nl), licença CC0. A arte do mundo e os ícones foram desenhados para o jogo. Fonte: Fredoka (Google Fonts).
       </p>
     </>
   )

@@ -11,6 +11,7 @@ const DEFS = `<defs>
 
 const SHADOW = '<ellipse cx="32" cy="53" rx="17" ry="5.5" fill="#000" opacity=".2"/>'
 const LEAF_OUTLINE = '#2d6a2a'
+const OUTLINE_BROWN = '#7a4a12'
 
 // Folha apontando para cima a partir de (0,0): `path` é o contorno, o resto vira transformação
 const POINTED = 'M0 0C-6-3-8-11 0-17C8-11 6-3 0 0Z'
@@ -29,6 +30,40 @@ function svg(inner: string) {
 
 // Encolhe um desenho em volta da base da planta (32, 52)
 const shrink = (inner: string, k: number) => `<g transform="translate(32 52) scale(${k}) translate(-32 -52)">${inner}</g>`
+
+// Folha comprida e arqueada do milho: sai do caule (x, y) para o lado `dir` (1 = direita, -1 = esquerda)
+const CORN_LEAF = 'M0 0C9-9 20-8 25 5C16 0 7 1 0 3.2Z'
+function cornLeaf(x: number, y: number, dir: 1 | -1, scale: number, tilt = 0) {
+  return `<g transform="translate(${x} ${y}) rotate(${tilt * dir}) scale(${dir * scale} ${scale})">
+    <path d="${CORN_LEAF}" fill="url(#lf)" stroke="${LEAF_OUTLINE}" stroke-width="${1.2 / scale}" stroke-linejoin="round"/>
+    <path d="M1 1.5C10-3 18-1 23 4" stroke="${LEAF_OUTLINE}" stroke-width="${0.8 / scale}" fill="none" opacity=".5" stroke-linecap="round"/>
+  </g>`
+}
+
+function corn(stage: 0 | 1 | 2) {
+  if (stage === 0) {
+    return svg(`
+      <path d="M32 52V43" stroke="#4aa03a" stroke-width="2.6" stroke-linecap="round"/>
+      ${cornLeaf(32, 47, 1, 0.5, -25)}${cornLeaf(32, 47, -1, 0.5, -25)}${leaf(32, 44, 0, 0.55)}`)
+  }
+  const top = stage === 1 ? 24 : 12
+  const stalk = `<path d="M32 52V${top}" stroke="#2d6a2a" stroke-width="5" stroke-linecap="round"/>
+    <path d="M32 52V${top}" stroke="#58b042" stroke-width="3" stroke-linecap="round"/>`
+  const ys = stage === 1 ? [47, 40, 33, 27] : [48, 41, 34, 27, 20, 14]
+  const leaves = ys.map((y, i) => cornLeaf(32, y, i % 2 ? -1 : 1, 0.95 - i * 0.04, -18 + i * 3)).join('')
+  const tassel = [-22, 0, 22]
+    .map((a) => `<path d="M32 ${top} q${a * 0.25} -9 ${a * 0.5} -11" stroke="#c9a03a" stroke-width="1.6" fill="none" stroke-linecap="round"/>`)
+    .join('')
+  if (stage === 1) return svg(stalk + leaves + tassel)
+  const cob = (x: number, y: number, dir: 1 | -1) => `
+    <g transform="translate(${x} ${y}) rotate(${dir * 14})">
+      <ellipse cx="0" cy="-5" rx="4.6" ry="9.5" fill="#ffd23f" stroke="${OUTLINE_BROWN}" stroke-width="1.2"/>
+      <path d="M-2.4-12v14M0-14v17M2.4-12v14M-4-6h8M-4-1h8M-3.4-10.5h6.8" stroke="#e0a312" stroke-width=".8" fill="none"/>
+      <path d="M0 3C-8 0-8-9-4.5-13 -3-8-1-4 0 3Z" fill="url(#lf)" stroke="${LEAF_OUTLINE}" stroke-width="1" stroke-linejoin="round"/>
+      <path d="M0 3C8 0 8-9 4.5-13 3-8 1-4 0 3Z" fill="url(#lf)" stroke="${LEAF_OUTLINE}" stroke-width="1" stroke-linejoin="round"/>
+    </g>`
+  return svg(shrink(stalk + leaves + tassel + cob(38.5, 36, 1) + cob(25.5, 29, -1), 0.88))
+}
 
 function tomato(stage: 0 | 1 | 2) {
   if (stage === 0) {
@@ -93,12 +128,14 @@ function pumpkin(stage: 0 | 1 | 2) {
 }
 
 export const CROP_SPRITE_NAMES = [
+  'corn_0', 'corn_1', 'corn_2',
   'tomato_0', 'tomato_1', 'tomato_2',
   'pumpkin_0', 'pumpkin_1', 'pumpkin_2',
 ] as const
 export type CropSpriteName = (typeof CROP_SPRITE_NAMES)[number]
 
 export const CROP_SVGS: Record<CropSpriteName, string> = {
+  corn_0: corn(0), corn_1: corn(1), corn_2: corn(2),
   tomato_0: tomato(0), tomato_1: tomato(1), tomato_2: tomato(2),
   pumpkin_0: pumpkin(0), pumpkin_1: pumpkin(1), pumpkin_2: pumpkin(2),
 }

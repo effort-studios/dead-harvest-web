@@ -4,16 +4,16 @@ import type { Tile } from '../game/types'
 import { CROP_SVG_ANCHOR, CROP_SVG_SIZE } from './cropSvgs'
 import { createGrassPattern } from './grass'
 import { createSoilTiles, drawGrassFringe, drawSoilEdges, EDGE } from './soil'
-import { isCropSprite, SPRITE_ANCHOR, SPRITE_SIZE, type SpriteName, type Sprites } from './sprites'
+import { drawFence, drawProp, TILE_HALF, type PropKind } from './props'
+import type { SpriteName, Sprites } from './sprites'
 
 // Projeção isométrica: cada tile é um losango com o dobro de largura que de altura.
 // A célula (linha r, coluna c) fica no mundo em:
 //   x = ORIGIN_X + (c - r) * HALF_W
 //   y = ORIGIN_Y + (c + r) * HALF_H
 // "Mundo" é o espaço de coordenadas do jogo; a câmera decide qual parte dele aparece na tela.
-const SCALE = 0.375 // os sprites têm 256px de largura; no mundo ficam com 96px
-const HALF_W = (SPRITE_SIZE.width / 2) * SCALE // 48
-const HALF_H = (SPRITE_SIZE.width / 4) * SCALE // 24
+const HALF_W = TILE_HALF.w // 48: cada tile tem 96 de largura...
+const HALF_H = TILE_HALF.h // 24: ...e 48 de altura
 
 // Área principal do mundo (a plantação e os objetos em volta ficam dentro dela)
 const WORLD_WIDTH = 1600
@@ -64,29 +64,26 @@ export function tileFromWorld(wx: number, wy: number) {
   return { row, col }
 }
 
-// Item a desenhar numa célula: um sprite, ou (soil) um tile de terra arada com a máscara
-// dos lados que dão para a grama
-type Item = { r: number; c: number; sprite?: SpriteName; soil?: number }
+// Lado de um tile onde fica um trecho de cerca (o nome vem do ponto cardeal na grade)
+type Edge = 'N' | 'E' | 'S' | 'W'
+
+// Item a desenhar numa célula. Cada item é de um só tipo:
+// sprite (planta), soil (terra arada + máscara dos lados que dão para a grama),
+// fence (trecho de cerca) ou prop (objeto do cenário)
+type Item = { r: number; c: number; sprite?: SpriteName; soil?: number; fence?: Edge; prop?: PropKind }
 
 // Objetos soltos em volta da plantação (r/c fora da grade 0..9)
+const prop = (kind: PropKind, r: number, c: number): Item => ({ r, c, prop: kind })
 const DECOR: Item[] = [
-  { r: -2, c: 3, sprite: 'hayBalesStacked_S' },
-  { r: -2, c: 6, sprite: 'hayBales_S' },
-  { r: -3, c: 9, sprite: 'sack_S' },
-  { r: 4, c: -3, sprite: 'planks_S' },
-  { r: 11, c: 2, sprite: 'hayBales_S' },
-  { r: 12, c: 6, sprite: 'sack_S' },
-  { r: 6, c: 12, sprite: 'planks_S' },
-  { r: 3, c: 11, sprite: 'hayBalesStacked_S' },
+  prop('hayStack', -2, 3), prop('hay', -2, 6), prop('sack', -3, 9), prop('platform', 4, -3),
+  prop('hay', 11, 2), prop('sack', 12, 6), prop('platform', 6, 12), prop('hayStack', 3, 11),
+  prop('tree', -5, 2), prop('tree', -4, 11), prop('tree', 13, 3), prop('tree', 12, 13),
+  prop('tree', 8, -4), prop('tree', 2, 15),
+  prop('bush', -3, 6), prop('bush', 5, -2), prop('bush', -2, -1), prop('bush', 13, 9),
+  prop('rock', 11, 8), prop('rock', 9, 12), prop('rock', -1, 12), prop('rock', 7, -3),
 ]
 
-// Tamanho e ponto de apoio (no chão) de cada tipo de sprite, já em coordenadas do mundo
-const ISO_FRAME = {
-  w: SPRITE_SIZE.width * SCALE,
-  h: SPRITE_SIZE.height * SCALE,
-  ax: SPRITE_ANCHOR.x * SCALE,
-  ay: SPRITE_ANCHOR.y * SCALE,
-}
+// Tamanho e ponto de apoio (no chão) dos sprites das plantas, em coordenadas do mundo
 const CROP_SCALE = 1.2 // tamanho do SVG da planta em relação ao pixel do mundo
 const CROP_FRAME = {
   w: CROP_SVG_SIZE * CROP_SCALE,
@@ -122,11 +119,9 @@ function stageOf(crop: CropId, growth: number): 0 | 1 | 2 {
   return progress >= 1 ? 2 : progress >= 0.4 ? 1 : 0
 }
 
-// Sprite da planta no tile. O milho usa o pacote isométrico; tomate e abóbora, os SVGs próprios.
+// Sprite da planta no tile (SVGs de src/render/cropSvgs.ts)
 function cropItem(r: number, c: number, crop: CropId, growth: number): Item {
-  const stage = stageOf(crop, growth)
-  if (crop === 'corn') return { r, c, sprite: (['cornYoung_S', 'cornYoungDouble_S', 'corn_S'] as const)[stage] }
-  return { r, c, sprite: `${crop}_${stage}` }
+  return { r, c, sprite: `${crop}_${stageOf(crop, growth)}` }
 }
 
 const tilled = (grid: Tile[][], r: number, c: number) => (grid[r]?.[c]?.state ?? 'soil') !== 'soil'
@@ -145,7 +140,7 @@ function soilEdges(grid: Tile[][], r: number, c: number) {
 const SOIL_GEO = { halfW: HALF_W, halfH: HALF_H }
 let soilTiles: HTMLCanvasElement[] | null = null
 
-// Lista tudo que fica de pé sobre o mapa, na ordem em que cada sprite deve ser desenhado
+// Lista tudo que fica de pé sobre o mapa, na ordem em que cada item deve ser desenhado
 function buildItems(grid: Tile[][]): Item[] {
   const items: Item[] = [...DECOR]
   const last = GRID_SIZE - 1
@@ -154,12 +149,12 @@ function buildItems(grid: Tile[][]): Item[] {
       // terra sem arar continua sendo grama; só a arada (ou plantada) mostra terra
       if (tile.state !== 'soil') items.push({ r, c, soil: soilEdges(grid, r, c) })
       // cerca nas bordas da plantação; as de trás (cima/esquerda) vêm antes da planta
-      if (r === 0) items.push({ r, c, sprite: 'fenceLow_S' })
-      if (c === 0) items.push({ r, c, sprite: 'fenceLow_E' })
+      if (r === 0) items.push({ r, c, fence: 'N' })
+      if (c === 0) items.push({ r, c, fence: 'W' })
       if (tile.state === 'planted' && isCropId(tile.crop)) items.push(cropItem(r, c, tile.crop, tile.growth))
       // as da frente (baixo/direita) vêm depois, para cobrir a planta
-      if (r === last) items.push({ r, c, sprite: 'fenceLow_N' })
-      if (c === last) items.push({ r, c, sprite: 'fenceLow_W' })
+      if (r === last) items.push({ r, c, fence: 'S' })
+      if (c === last) items.push({ r, c, fence: 'E' })
     }),
   )
   // Quem está mais ao fundo (menor r + c) é desenhado primeiro. O sort é estável,
@@ -204,11 +199,21 @@ export function drawWorld(
     drawGrassFringe(ctx, x, y, SOIL_GEO, soil)
   }
   // 2ª passada: tudo que fica de pé, do fundo para a frente
-  for (const { r, c, sprite } of items) {
-    if (!sprite) continue
+  for (const { r, c, sprite, fence, prop: kind } of items) {
     const { x, y } = cellToWorld(r, c)
-    const frame = isCropSprite(sprite) ? CROP_FRAME : ISO_FRAME
-    ctx.drawImage(sprites[sprite], x - frame.ax, y - frame.ay, frame.w, frame.h)
+    if (fence) {
+      // pontas do lado do losango: N = topo->direita, E = direita->baixo, S = baixo->esquerda, W = esquerda->topo
+      const top: [number, number] = [x, y - HALF_H]
+      const right: [number, number] = [x + HALF_W, y]
+      const bottom: [number, number] = [x, y + HALF_H]
+      const left: [number, number] = [x - HALF_W, y]
+      const [a, b] = { N: [top, right], E: [right, bottom], S: [bottom, left], W: [left, top] }[fence]
+      drawFence(ctx, a[0], a[1], b[0], b[1])
+    } else if (kind) {
+      drawProp(ctx, kind, x, y)
+    } else if (sprite) {
+      ctx.drawImage(sprites[sprite], x - CROP_FRAME.ax, y - CROP_FRAME.ay, CROP_FRAME.w, CROP_FRAME.h)
+    }
   }
 
   // Contorno no tile sob o mouse (ou na linha/coluna inteira com Shift/Ctrl)
