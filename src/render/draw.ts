@@ -2,6 +2,7 @@ import { CROPS, isCropId, type CropId } from '../game/crops'
 import { GRID_SIZE, tilesInMode, type ClickMode } from '../game/state'
 import type { Tile } from '../game/types'
 import { CROP_SVG_ANCHOR, CROP_SVG_SIZE } from './cropSvgs'
+import { createGrassPattern } from './grass'
 import { isCropSprite, SPRITE_ANCHOR, SPRITE_SIZE, type SpriteName, type Sprites } from './sprites'
 
 // Projeção isométrica: cada tile é um losango com o dobro de largura que de altura.
@@ -92,8 +93,6 @@ const CROP_FRAME = {
   ay: CROP_SVG_ANCHOR.y * CROP_SCALE,
 }
 
-const GRASS = ['#6aa84f', '#65a04b', '#6fae53', '#62994a', '#6cab51']
-
 const FLAT_SPRITES = new Set<SpriteName>(['dirt_S', 'dirtFarmland_S'])
 
 function diamondPath(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) {
@@ -107,24 +106,14 @@ function diamondPath(ctx: CanvasRenderingContext2D, x: number, y: number, w: num
 
 type Rect = { left: number; top: number; right: number; bottom: number }
 
-// Grama: losangos verdes (não existe sprite de grama no pacote). Só desenha os visíveis.
+// Grama: textura repetida cobrindo a área visível. O padrão é definido em coordenadas do
+// mundo, então acompanha o mapa quando a câmera se move.
+let grassPattern: CanvasPattern | null = null
+
 function drawGround(ctx: CanvasRenderingContext2D, view: Rect) {
-  const w = HALF_W + 0.75 // um pouco maior para não aparecerem frestas entre losangos
-  const h = HALF_H + 0.4
-  for (let r = -40; r <= 60; r++) {
-    for (let c = -40; c <= 60; c++) {
-      const { x, y } = cellToWorld(r, c)
-      if (x < view.left - w || x > view.right + w || y < view.top - h || y > view.bottom + h) continue
-      ctx.fillStyle = GRASS[Math.abs(r * 7 + c * 13) % GRASS.length] // variação fixa, sem aleatório
-      ctx.beginPath()
-      ctx.moveTo(x, y - h)
-      ctx.lineTo(x + w, y)
-      ctx.lineTo(x, y + h)
-      ctx.lineTo(x - w, y)
-      ctx.closePath()
-      ctx.fill()
-    }
-  }
+  grassPattern ??= createGrassPattern(ctx)
+  ctx.fillStyle = grassPattern ?? '#69ab4d'
+  ctx.fillRect(view.left - 2, view.top - 2, view.right - view.left + 4, view.bottom - view.top + 4)
 }
 
 // Estágio de crescimento: 0 = broto, 1 = crescendo, 2 = madura
