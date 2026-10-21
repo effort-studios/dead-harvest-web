@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { ApiError, createPlayer, loadSave, putSave } from '../api/client'
 import type { CropId } from '../game/crops'
-import { clickTile, migrateSave, tick } from '../game/state'
+import { clickLine, clickTile, migrateSave, tick, type ClickMode } from '../game/state'
 import type { SaveData } from '../game/types'
 
 const PLAYER_KEY = 'deadHarvestPlayerId'
@@ -15,7 +15,7 @@ type GameState = {
   selectedSeed: CropId // semente escolhida na barra de itens (não vai para o save)
   init: () => Promise<void>
   save: () => Promise<void>
-  clickTile: (row: number, col: number) => void
+  clickTile: (row: number, col: number, mode: ClickMode) => void
   selectSeed: (crop: CropId) => void
   tick: () => void
 }
@@ -65,8 +65,15 @@ export const useGameStore = create<GameState>((set, get) => ({
     }
   },
 
-  clickTile: (row, col) =>
-    set((s) => (s.data ? { data: clickTile(s.data, row, col, s.selectedSeed) } : s)),
+  clickTile: (row, col, mode) =>
+    set((s) => {
+      if (!s.data) return s
+      const data =
+        mode === 'tile'
+          ? clickTile(s.data, row, col, s.selectedSeed)
+          : clickLine(s.data, mode, row, col, s.selectedSeed)
+      return { data }
+    }),
 
   selectSeed: (crop) => set({ selectedSeed: crop }),
 

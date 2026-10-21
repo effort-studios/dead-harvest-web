@@ -8,8 +8,14 @@ import {
   tileFromWorld,
   type Size,
 } from '../render/draw'
+import type { ClickMode } from '../game/state'
 import { loadSprites, type Sprites } from '../render/sprites'
 import { useGameStore } from '../store/gameStore'
+
+// Shift = ação na linha inteira, Ctrl = na coluna inteira, nenhum = só no tile
+function modeOf(e: { shiftKey: boolean; ctrlKey: boolean }): ClickMode {
+  return e.shiftKey ? 'row' : e.ctrlKey ? 'col' : 'tile'
+}
 
 // Movimento menor que isso (em px) conta como clique; maior, como arrasto do mapa
 const DRAG_THRESHOLD = 5
@@ -27,6 +33,8 @@ export function GameCanvas() {
   const drag = useRef<{ startX: number; startY: number; camX: number; camY: number; moved: boolean } | null>(null)
   const frame = useRef(0)
   const hover = useRef<{ row: number; col: number } | null>(null) // tile sob o mouse
+  const mode = useRef<ClickMode>('tile') // alterado por Shift/Ctrl
+  const drawRef = useRef<() => void>(() => {})
 
   useEffect(() => {
     loadSprites().then(setSprites)
@@ -53,7 +61,7 @@ export function GameCanvas() {
       canvas.height = Math.round(size.height * dpr)
     }
     const { x, y } = camera.current
-    drawWorld(ctx, sprites, currentGrid, { x, y, zoom: fitZoom(size) }, size, dpr, hover.current)
+    drawWorld(ctx, sprites, currentGrid, { x, y, zoom: fitZoom(size) }, size, dpr, hover.current && { ...hover.current, mode: mode.current })
   }, [sprites, size])
 
   // Redesenha quando a grade, as imagens ou o tamanho da janela mudam
@@ -61,11 +69,30 @@ export function GameCanvas() {
     draw()
   }, [draw, grid])
 
+  drawRef.current = draw
+
   // Durante o arrasto, no máximo um desenho por frame da tela
   function scheduleDraw() {
     cancelAnimationFrame(frame.current)
-    frame.current = requestAnimationFrame(draw)
+    frame.current = requestAnimationFrame(() => drawRef.current())
   }
+
+  // Apertar ou soltar Shift/Ctrl com o mouse parado também muda o destaque
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      const next = modeOf(e)
+      if (next === mode.current) return
+      mode.current = next
+      scheduleDraw()
+    }
+    window.addEventListener('keydown', onKey)
+    window.addEventListener('keyup', onKey)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      window.removeEventListener('keyup', onKey)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   function updateHover(e: React.PointerEvent<HTMLCanvasElement>) {
     const rect = e.currentTarget.getBoundingClientRect()
@@ -73,8 +100,10 @@ export function GameCanvas() {
     const world = screenToWorld(e.clientX - rect.left, e.clientY - rect.top, cam, size)
     const pos = tileFromWorld(world.x, world.y)
     const old = hover.current
-    if (pos?.row === old?.row && pos?.col === old?.col) return // não mudou de tile
+    const newMode = modeOf(e)
+    if (pos?.row === old?.row && pos?.col === old?.col && newMode === mode.current) return // nada mudou
     hover.current = pos
+    mode.current = newMode
     scheduleDraw()
   }
 
@@ -107,7 +136,7 @@ export function GameCanvas() {
     const cam = { ...camera.current, zoom: fitZoom(size) }
     const world = screenToWorld(e.clientX - rect.left, e.clientY - rect.top, cam, size)
     const pos = tileFromWorld(world.x, world.y)
-    if (pos) clickTile(pos.row, pos.col)
+    if (pos) clickTile(pos.row, pos.col, modeOf(e))
   }
 
   return (

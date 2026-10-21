@@ -24,6 +24,7 @@ Item 4. Falta o usuário testar: escolher semente (teclas 1-3 ou clique no slot)
 | 2026-10-20 | HUD só com o que existe no jogo (jogador, dinheiro, dia, barra de 9 slots, salvar) | vida, energia, missões e minimapa não têm dados no jogo ainda; não inventei valores falsos |
 | 2026-10-20 | Plantas em src/game/crops.ts: tomate (10 ticks, semente 3, venda 6), milho (20, 5, 12), abóbora (40, 10, 30) | tempos curtos para testar; quanto mais demora, mais lucra. Colher só com a planta madura; plantar gasta 1 semente da selecionada |
 | 2026-10-20 | Milho usa sprites do pacote; tomate e abóbora são desenhados com formas no canvas | o pacote isométrico só tem milho |
+| 2026-10-20 | Ação em massa: Shift+clique = linha, Ctrl+clique = coluna (`clickLine` em state.ts) | no isométrico a "linha" pode ir para dois lados na tela; só age nos tiles no mesmo estado do clicado e para quando as sementes acabam |
 | 2026-10-20 | Relógio do jogo: setInterval de 1s no App que chama `tick` (função pura) | 1 tick por segundo, como combinado; cresce até maduro e para |
 
 ## Problemas conhecidos
@@ -38,6 +39,7 @@ Item 4. Falta o usuário testar: escolher semente (teclas 1-3 ou clique no slot)
 3. Ciclo dia/noite (item 6)
 
 ## Histórico
+- 2026-10-20 – Ação em massa por linha (Shift) e coluna (Ctrl), com destaque da linha inteira no hover e dica na HUD.
 - 2026-10-20 – Terra arada recortada no losango do topo (clip) para ficar na mesma altura da grama.
 - 2026-10-20 – Quantidade da semente movida para o canto superior direito do slot (colidia com o nome).
 - 2026-10-20 – Item 4: 3 plantas (crops.ts), crescimento por tick, colheita só quando madura, seleção de semente na barra de itens (teclas 1-3), migração de `wheat` para `corn` ao carregar.

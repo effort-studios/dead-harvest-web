@@ -29,4 +29,6 @@ Sprites: [Isometric Miniature Farm](https://kenney.nl/assets/isometric-miniature
 
 ## Controles
 - Arrastar com o mouse (ou o dedo) move o mapa; a página nunca rola.
-- Clicar num tile da plantação: arar -> plantar -> colher.
+- Clicar num tile da plantação: arar -> plantar -> colher (só colhe se estiver madura).
+- **Shift + clique**: faz a ação em toda a linha do tile (só nos tiles no mesmo estado que o clicado). **Ctrl + clique**: o mesmo na coluna.
+- Teclas 1, 2, 3 (ou clique na barra): escolhe a semente.

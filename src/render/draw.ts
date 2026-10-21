@@ -1,5 +1,5 @@
 import { CROPS, isCropId, type CropId } from '../game/crops'
-import { GRID_SIZE } from '../game/state'
+import { GRID_SIZE, tilesInMode, type ClickMode } from '../game/state'
 import type { Tile } from '../game/types'
 import { SPRITE_ANCHOR, SPRITE_SIZE, type SpriteName, type Sprites } from './sprites'
 
@@ -20,6 +20,7 @@ const ORIGIN_Y = 254 // posição do tile (0,0)
 
 // Câmera: ponto do mundo que aparece no centro da tela, mais o zoom
 export type Camera = { x: number; y: number; zoom: number }
+export type Hover = { row: number; col: number; mode: ClickMode }
 export type Size = { width: number; height: number }
 
 export const INITIAL_CAMERA = { x: WORLD_WIDTH / 2, y: 470 }
@@ -181,7 +182,7 @@ export function drawWorld(
   cam: Camera,
   size: Size,
   pixelRatio: number,
-  hover: { row: number; col: number } | null,
+  hover: Hover | null,
 ) {
   // Transformação: mundo -> tela. Daqui em diante desenhamos em coordenadas do mundo.
   const k = cam.zoom * pixelRatio
@@ -217,12 +218,14 @@ export function drawWorld(
     if (flat) ctx.restore()
   }
 
-  // Contorno no tile sob o mouse, para mostrar onde o clique vai atuar
+  // Contorno no tile sob o mouse (ou na linha/coluna inteira com Shift/Ctrl)
   if (hover) {
-    const { x, y } = cellToWorld(hover.row, hover.col)
     ctx.strokeStyle = 'rgba(255,255,255,0.9)'
     ctx.lineWidth = 3
-    diamondPath(ctx, x, y, HALF_W, HALF_H)
-    ctx.stroke()
+    for (const t of tilesInMode(hover.mode, hover.row, hover.col)) {
+      const { x, y } = cellToWorld(t.row, t.col)
+      diamondPath(ctx, x, y, HALF_W, HALF_H)
+      ctx.stroke()
+    }
   }
 }

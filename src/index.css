@@ -84,6 +84,15 @@ button.panel:hover:not(:disabled) {
 }
 .clock-icon { font-size: 26px; }
 
+.hud-hint {
+  position: absolute;
+  top: 70px;
+  right: 12px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  opacity: 0.9;
+}
 .hud-hotbar {
   position: absolute;
   bottom: 12px;
@@ -135,4 +144,5 @@ button.panel:hover:not(:disabled) {
   .hud-player { padding-right: 10px; }
   .portrait { width: 40px; height: 40px; font-size: 24px; }
   .hud-clock { font-size: 16px; padding: 6px 12px; }
+  .hud-hint { display: none; } /* sem Shift/Ctrl no celular */
 }

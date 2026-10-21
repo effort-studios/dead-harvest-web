@@ -31,6 +31,29 @@ export function clickTile(data: SaveData, row: number, col: number, seed: CropId
   return { ...data, grid: replaceTile(data.grid, row, col, newTile), money, inventory }
 }
 
+// Como o clique age: só no tile, ou em toda a linha / coluna dele
+export type ClickMode = 'tile' | 'row' | 'col'
+
+// Ação em massa: repete o clique em todos os tiles da linha (ou coluna) que estão no
+// mesmo estado do tile clicado. Se as sementes acabam, o resto da linha fica como está.
+export function clickLine(data: SaveData, mode: 'row' | 'col', row: number, col: number, seed: CropId): SaveData {
+  const clicked = data.grid[row]?.[col]
+  if (!clicked) return data
+  let result = data
+  for (let i = 0; i < GRID_SIZE; i++) {
+    const r = mode === 'row' ? row : i
+    const c = mode === 'row' ? i : col
+    if (result.grid[r][c].state === clicked.state) result = clickTile(result, r, c, seed)
+  }
+  return result
+}
+
+// Tiles afetados por um clique (usado para destacar a linha no desenho)
+export function tilesInMode(mode: ClickMode, row: number, col: number) {
+  if (mode === 'tile') return [{ row, col }]
+  return Array.from({ length: GRID_SIZE }, (_, i) => (mode === 'row' ? { row, col: i } : { row: i, col }))
+}
+
 // Passa 1 tick: toda planta cresce 1, até ficar madura
 export function tick(data: SaveData): SaveData {
   let changed = false
