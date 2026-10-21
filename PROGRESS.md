@@ -29,7 +29,7 @@ Item 5. Falta o usuário testar: abrir o menu lateral (🛒), comprar sementes (
 | 2026-10-20 | "Novo jogo" cria jogador convidado novo e mantém o antigo no banco | mais seguro que apagar; sem rota de DELETE na API |
 | 2026-10-21 | HUD refeita com o UI Pack – Adventure (Kenney, CC0): molduras 9-patch via CSS border-image, círculos para retrato/menu, botões creme e vermelho; fonte Fredoka (Google Fonts) | usuário achou a HUD de CSS puro genérica ("cara de IA"). Fonte vem da internet: sem rede cai em system-ui |
 | 2026-10-21 | Ícones desenhados em SVG por nós (src/ui/Icons.tsx): moeda, sol, lua, loja, dicas, fazendeiro, info, salvar, fechar, milho, tomate, abóbora. Kenney Game Icons e emojis removidos | usuário não gostou dos glifos do Kenney nem dos emojis; um conjunto único no estilo do UI Pack (contorno marrom grosso, cores chapadas) |
-| 2026-10-21 | Grama com textura procedural (src/render/grass.ts): base + manchas + grão + tufos + flores/pedrinhas, em padrão repetível sem emenda; substitui os losangos verdes chapados | o xadrez de losangos cansava o olho. Gerada por código com semente fixa (sempre igual), sem imagem. Textura conferida renderizada fora do navegador |
+| 2026-10-21 | Grama com textura procedural (src/render/grass.ts): fundo escuro + ~560 tufos de folhas com degradê (base escura, ponta clara), pintados de trás para frente, em padrão repetível sem emenda | a 1ª versão (base lisa com riscos finos) ficou "chapada"; a 2ª segue a técnica de uma referência do usuário (tufos sobrepostos), sem copiar a imagem. Gerada por código com semente fixa; conferida renderizada fora do navegador |
 | 2026-10-20 | Relógio do jogo: setInterval de 1s no App que chama `tick` (função pura) | 1 tick por segundo, como combinado; cresce até maduro e para |
 
 ## Problemas conhecidos
@@ -44,6 +44,7 @@ Item 5. Falta o usuário testar: abrir o menu lateral (🛒), comprar sementes (
 3. Zumbis (item 7)
 
 ## Histórico
+- 2026-10-21 – Grama refeita com tufos de folhas sobrepostos e degradê (referência do usuário), no lugar da textura chapada.
 - 2026-10-21 – Nova textura de grama (padrão repetido no mundo todo, acompanha o pan); removido o desenho por losangos.
 - 2026-10-21 – Plantas redesenhadas: sprites SVG de tomate e abóbora em 3 estágios, milho com estágio intermediário; removido o desenho por elipses do canvas (drawCropShape).
 - 2026-10-21 – HUD: painel do jogador e menu lateral numa coluna só (flex, com espaço), painel aberto ao lado do 1º botão; breakpoints 900px (largura) e 640px (altura) para não sobrepor Salvar/barra de itens.

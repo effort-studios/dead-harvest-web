@@ -1,5 +1,9 @@
 // Textura da grama, gerada por código (sem imagem). Ela é desenhada uma vez numa tela
 // pequena e depois repetida pelo mapa inteiro, então precisa "emendar" nas bordas.
+//
+// A técnica: fundo escuro + centenas de tufos de folhas sobrepostas. Cada folha tem um
+// degradê (escuro na base, claro na ponta) e os tufos são pintados de trás para frente,
+// então os de baixo cobrem os de cima e a grama ganha profundidade.
 export const GRASS_TEXTURE_SIZE = 512
 
 // Gerador de números pseudo-aleatórios com semente: o resultado é sempre o mesmo
@@ -11,6 +15,16 @@ function seededRandom(seed: number) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296
   }
 }
+
+type Rgb = [number, number, number]
+const mix = (a: Rgb, b: Rgb, t: number): string =>
+  `rgb(${Math.round(a[0] + (b[0] - a[0]) * t)},${Math.round(a[1] + (b[1] - a[1]) * t)},${Math.round(a[2] + (b[2] - a[2]) * t)})`
+
+// Paleta: de tufos "no fundo" (escuros) até tufos "na frente" (claros)
+const BASE_DARK: Rgb = [28, 104, 48]
+const BASE_LIGHT: Rgb = [52, 150, 62]
+const TIP_DARK: Rgb = [70, 168, 70]
+const TIP_LIGHT: Rgb = [150, 222, 92]
 
 export function paintGrassTexture(ctx: CanvasRenderingContext2D, size = GRASS_TEXTURE_SIZE) {
   const rand = seededRandom(20261021)
@@ -28,61 +42,57 @@ export function paintGrassTexture(ctx: CanvasRenderingContext2D, size = GRASS_TE
     }
   }
 
-  // 1. Base
-  ctx.fillStyle = '#69ab4d'
+  // 1. Fundo escuro (o que se vê entre os tufos)
+  ctx.fillStyle = '#1f6a34'
   ctx.fillRect(0, 0, size, size)
 
-  // 2. Manchas grandes e suaves, mais claras e mais escuras: quebram a uniformidade
-  for (let i = 0; i < 48; i++) {
-    const x = rand() * size
-    const y = rand() * size
-    const r = 45 + rand() * 70
-    const light = rand() < 0.5
-    const rgb = light ? '150,215,100' : '38,105,52'
-    const alpha = 0.1 + rand() * 0.1
-    wrap(x, y, r, (px, py) => {
-      const g = ctx.createRadialGradient(px, py, 0, px, py, r)
-      g.addColorStop(0, `rgba(${rgb},${alpha})`)
-      g.addColorStop(1, `rgba(${rgb},0)`)
-      ctx.fillStyle = g
-      ctx.fillRect(px - r, py - r, r * 2, r * 2)
-    })
+  // 2. Uma folha: curva, com ponta fina, e degradê da base até a ponta
+  function blade(px: number, py: number, h: number, w: number, lean: number, base: string, tip: string) {
+    const tx = px + lean
+    const ty = py - h
+    ctx.beginPath()
+    ctx.moveTo(px - w / 2, py)
+    ctx.quadraticCurveTo(px - w * 0.6 + lean * 0.1, py - h * 0.55, tx, ty)
+    ctx.quadraticCurveTo(px + w * 0.5 + lean * 0.6, py - h * 0.5, px + w / 2, py)
+    ctx.closePath()
+    const g = ctx.createLinearGradient(px, py, tx, ty)
+    g.addColorStop(0, base)
+    g.addColorStop(1, tip)
+    ctx.fillStyle = g
+    ctx.fill()
   }
 
-  // 3. Grão fino: varia um pouco o brilho de cada pixel
-  const img = ctx.getImageData(0, 0, size, size)
-  for (let i = 0; i < img.data.length; i += 4) {
-    const n = (rand() - 0.5) * 14
-    img.data[i] += n
-    img.data[i + 1] += n
-    img.data[i + 2] += n
-  }
-  ctx.putImageData(img, 0, 0)
+  // 3. Tufos, sorteados e pintados de cima para baixo (os de baixo ficam por cima)
+  const clumps = Array.from({ length: 560 }, () => ({
+    x: rand() * size,
+    y: rand() * size,
+    h: 34 + rand() * 26,
+    tone: rand(), // 0 = escuro, 1 = claro
+    blades: 3 + Math.floor(rand() * 3),
+    seed: rand(),
+  })).sort((a, b) => a.y - b.y)
 
-  // 4. Tufos de capim: grupos de 3 lâminas inclinadas, escuras e claras
-  ctx.lineCap = 'round'
-  ctx.lineWidth = 1.6
-  for (let i = 0; i < 1250; i++) {
-    const x = rand() * size
-    const y = rand() * size
-    const dark = rand() < 0.55
-    const len = 6 + rand() * 6
-    const color = dark ? 'rgba(52,118,52,0.5)' : 'rgba(165,226,110,0.55)'
-    wrap(x, y, len + 4, (px, py) => {
-      ctx.strokeStyle = color
-      ctx.beginPath()
-      for (let b = -1; b <= 1; b++) {
-        const angle = -Math.PI / 2 + b * 0.5 + (rand() - 0.5) * 0.3
-        ctx.moveTo(px, py)
-        ctx.lineTo(px + Math.cos(angle) * len, py + Math.sin(angle) * len * (b === 0 ? 1 : 0.8))
+  for (const c of clumps) {
+    const base = mix(BASE_DARK, BASE_LIGHT, c.tone)
+    const tip = mix(TIP_DARK, TIP_LIGHT, c.tone)
+    wrap(c.x, c.y, c.h + 6, (px, py) => {
+      const local = seededRandom(Math.floor(c.seed * 1e9))
+      // folhas de fora primeiro, a do meio (mais alta) por último
+      const order = Array.from({ length: c.blades }, (_, i) => i).sort(
+        (a, b) => Math.abs(b - (c.blades - 1) / 2) - Math.abs(a - (c.blades - 1) / 2),
+      )
+      for (const i of order) {
+        const t = c.blades === 1 ? 0 : i / (c.blades - 1) - 0.5 // -0.5 .. 0.5
+        const h = c.h * (1 - Math.abs(t) * 0.55) * (0.9 + local() * 0.2)
+        const lean = t * c.h * 0.95 + (local() - 0.5) * 5
+        blade(px + t * 7, py, h, 9 + local() * 4, lean, base, tip)
       }
-      ctx.stroke()
     })
   }
 
-  // 5. Algumas florzinhas e pedrinhas espalhadas
-  const flowerColors = ['#ffffff', '#ffe36a', '#ff9fc0', '#c9a6ff']
-  for (let i = 0; i < 22; i++) {
+  // 4. Alguns detalhes: florzinhas espalhadas
+  const flowerColors = ['#fff6d8', '#ffe36a', '#ff9fc0']
+  for (let i = 0; i < 12; i++) {
     const x = rand() * size
     const y = rand() * size
     const color = flowerColors[Math.floor(rand() * flowerColors.length)]
@@ -91,33 +101,19 @@ export function paintGrassTexture(ctx: CanvasRenderingContext2D, size = GRASS_TE
       for (let p = 0; p < 5; p++) {
         const a = (p / 5) * Math.PI * 2
         ctx.beginPath()
-        ctx.arc(px + Math.cos(a) * 2.4, py + Math.sin(a) * 2.4, 1.7, 0, Math.PI * 2)
+        ctx.arc(px + Math.cos(a) * 2.6, py + Math.sin(a) * 2.6, 1.9, 0, Math.PI * 2)
         ctx.fill()
       }
       ctx.fillStyle = '#e6a516'
       ctx.beginPath()
-      ctx.arc(px, py, 1.4, 0, Math.PI * 2)
-      ctx.fill()
-    })
-  }
-  for (let i = 0; i < 10; i++) {
-    const x = rand() * size
-    const y = rand() * size
-    wrap(x, y, 5, (px, py) => {
-      ctx.fillStyle = 'rgba(120,128,120,0.75)'
-      ctx.beginPath()
-      ctx.ellipse(px, py, 3.2, 2.1, 0, 0, Math.PI * 2)
-      ctx.fill()
-      ctx.fillStyle = 'rgba(200,206,196,0.7)'
-      ctx.beginPath()
-      ctx.ellipse(px - 0.8, py - 0.7, 1.4, 0.8, 0, 0, Math.PI * 2)
+      ctx.arc(px, py, 1.5, 0, Math.PI * 2)
       ctx.fill()
     })
   }
 }
 
-// Cria o padrão repetível a partir da textura. O texture é desenhado com o dobro de pixels
-// e reduzido pela metade, para ficar nítido em telas de alta resolução.
+// Cria o padrão repetível a partir da textura. A textura tem o dobro de pixels e é reduzida
+// pela metade, para ficar nítida em telas de alta resolução.
 export function createGrassPattern(ctx: CanvasRenderingContext2D): CanvasPattern | null {
   const tex = document.createElement('canvas')
   tex.width = GRASS_TEXTURE_SIZE
