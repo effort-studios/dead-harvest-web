@@ -77,6 +77,17 @@ const DECOR: Item[] = [
 
 const GRASS = ['#6aa84f', '#65a04b', '#6fae53', '#62994a', '#6cab51']
 
+const FLAT_SPRITES = new Set<SpriteName>(['dirt_S', 'dirtFarmland_S'])
+
+function diamondPath(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) {
+  ctx.beginPath()
+  ctx.moveTo(x, y - h)
+  ctx.lineTo(x + w, y)
+  ctx.lineTo(x, y + h)
+  ctx.lineTo(x - w, y)
+  ctx.closePath()
+}
+
 type Rect = { left: number; top: number; right: number; bottom: number }
 
 // Grama: losangos verdes (não existe sprite de grama no pacote). Só desenha os visíveis.
@@ -189,6 +200,13 @@ export function drawWorld(
       continue
     }
     if (!sprite) continue
+    // Terra é uma laje com espessura; recortamos só o topo (losango) para ficar rente à grama
+    const flat = FLAT_SPRITES.has(sprite)
+    if (flat) {
+      ctx.save()
+      diamondPath(ctx, x, y, HALF_W + 0.5, HALF_H + 0.25)
+      ctx.clip()
+    }
     ctx.drawImage(
       sprites[sprite],
       x - SPRITE_ANCHOR.x * SCALE,
@@ -196,6 +214,7 @@ export function drawWorld(
       SPRITE_SIZE.width * SCALE,
       SPRITE_SIZE.height * SCALE,
     )
+    if (flat) ctx.restore()
   }
 
   // Contorno no tile sob o mouse, para mostrar onde o clique vai atuar
@@ -203,12 +222,7 @@ export function drawWorld(
     const { x, y } = cellToWorld(hover.row, hover.col)
     ctx.strokeStyle = 'rgba(255,255,255,0.9)'
     ctx.lineWidth = 3
-    ctx.beginPath()
-    ctx.moveTo(x, y - HALF_H)
-    ctx.lineTo(x + HALF_W, y)
-    ctx.lineTo(x, y + HALF_H)
-    ctx.lineTo(x - HALF_W, y)
-    ctx.closePath()
+    diamondPath(ctx, x, y, HALF_W, HALF_H)
     ctx.stroke()
   }
 }

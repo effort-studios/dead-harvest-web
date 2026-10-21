@@ -38,6 +38,7 @@ Item 4. Falta o usuário testar: escolher semente (teclas 1-3 ou clique no slot)
 3. Ciclo dia/noite (item 6)
 
 ## Histórico
+- 2026-10-20 – Terra arada recortada no losango do topo (clip) para ficar na mesma altura da grama.
 - 2026-10-20 – Quantidade da semente movida para o canto superior direito do slot (colidia com o nome).
 - 2026-10-20 – Item 4: 3 plantas (crops.ts), crescimento por tick, colheita só quando madura, seleção de semente na barra de itens (teclas 1-3), migração de `wheat` para `corn` ao carregar.
 - 2026-10-20 – Terra sem arar volta a ser grama (antes ficava igual à arada) e contorno branco no tile sob o mouse.
