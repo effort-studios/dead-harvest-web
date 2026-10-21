@@ -68,31 +68,18 @@ canvas:active {
   padding: 2px 14px 2px 4px;
 }
 .portrait {
-  color: #6b4a2b;
-  width: 60px;
-  height: 60px;
+  width: 68px;
+  height: 68px;
   flex-shrink: 0;
-  border-width: 14px;
-  border-image: url('/assets/ui/round_brown.png') 40 fill / 14px stretch;
+  border-width: 12px;
+  border-image: url('/assets/ui/round_brown.png') 40 fill / 12px stretch;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 26px;
   line-height: 1;
 }
-.icon {
-  display: inline-block;
-  vertical-align: middle;
-  background-color: currentColor; /* a cor do ícone é a cor do texto */
-  -webkit-mask-size: contain;
-  mask-size: contain;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  mask-position: center;
-}
-.game-icon,
-.crop-icon { vertical-align: middle; flex-shrink: 0; }
+.svg-icon { vertical-align: middle; flex-shrink: 0; }
 .money, .hud-clock, .btn { display: inline-flex; align-items: center; gap: 6px; }
 .panel-title { display: inline-flex; align-items: center; gap: 8px; }
 .player-name { font-size: 13px; opacity: 0.8; }
@@ -183,8 +170,8 @@ canvas:active {
 .side-rail:hover,
 .side-rail.has-open { opacity: 1; }
 .rail-btn {
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   border-width: 11px;
   border-image: url('/assets/ui/round_brown_dark.png') 40 fill / 11px stretch;
   padding: 0;

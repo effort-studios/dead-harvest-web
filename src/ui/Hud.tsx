@@ -1,9 +1,7 @@
 import { useEffect } from 'react'
 import { CROP_ORDER, CROPS } from '../game/crops'
 import { useGameStore } from '../store/gameStore'
-import { CoinIcon, SunIcon } from './GameIcons'
-import { CropIcon } from './CropIcon'
-import { Icon } from './Icon'
+import { CoinIcon, CropIcon, FarmerIcon, SaveIcon, SunIcon } from './Icons'
 
 const HOTBAR_SLOTS = 9
 
@@ -29,7 +27,7 @@ export function Hud() {
     <>
       <div className="panel hud-player">
         <div className="portrait">
-          <Icon name="singleplayer" size={26} />
+          <FarmerIcon size={40} />
         </div>
         <div>
           <div className="player-name">Convidado</div>
@@ -66,7 +64,7 @@ export function Hud() {
 
       <div className="hud-save">
         <button className="btn" onClick={save} disabled={saving}>
-          <Icon name="save" size={16} /> {saving ? 'Salvando...' : 'Salvar'}
+          <SaveIcon size={18} /> {saving ? 'Salvando...' : 'Salvar'}
         </button>
         {error && <span className="error">{error}</span>}
       </div>

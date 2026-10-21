@@ -28,7 +28,7 @@ Item 5. Falta o usuário testar: abrir o menu lateral (🛒), comprar sementes (
 | 2026-10-20 | Menu lateral discreto (Loja, Dicas, Conta, Sobre), painel sem fundo bloqueando o mapa | junta a loja e as dicas num lugar só; dá para comprar e plantar com o menu aberto. Sem seções vazias (Configurações e Missões só quando existirem) |
 | 2026-10-20 | "Novo jogo" cria jogador convidado novo e mantém o antigo no banco | mais seguro que apagar; sem rota de DELETE na API |
 | 2026-10-21 | HUD refeita com o UI Pack – Adventure (Kenney, CC0): molduras 9-patch via CSS border-image, círculos para retrato/menu, botões creme e vermelho; fonte Fredoka (Google Fonts) | usuário achou a HUD de CSS puro genérica ("cara de IA"). Fonte vem da internet: sem rede cai em system-ui |
-| 2026-10-21 | Ícones: Game Icons (Kenney, CC0) em máscara CSS para menu/salvar/fechar/retrato; moeda e sol em SVG próprio; ícone de cada planta gerado pelo mesmo código de desenho do mapa (CropIcon) | emojis destoavam. Kenney não tem moeda/sol/lua; descartamos Tiny Farm (pixel art brigaria com o estilo) |
+| 2026-10-21 | Ícones desenhados em SVG por nós (src/ui/Icons.tsx): moeda, sol, lua, loja, dicas, fazendeiro, info, salvar, fechar, milho, tomate, abóbora. Kenney Game Icons e emojis removidos | usuário não gostou dos glifos do Kenney nem dos emojis; um conjunto único no estilo do UI Pack (contorno marrom grosso, cores chapadas) |
 | 2026-10-20 | Relógio do jogo: setInterval de 1s no App que chama `tick` (função pura) | 1 tick por segundo, como combinado; cresce até maduro e para |
 
 ## Problemas conhecidos
@@ -43,6 +43,7 @@ Item 5. Falta o usuário testar: abrir o menu lateral (🛒), comprar sementes (
 3. Zumbis (item 7)
 
 ## Histórico
+- 2026-10-21 – Conjunto próprio de 12 ícones SVG no lugar de emojis/Game Icons; ícones das plantas nos slots e na loja agora são SVG (CropIcon do canvas removido); retrato maior com o fazendeiro.
 - 2026-10-21 – Emojis trocados por ícones: Icon (máscara), CoinIcon/SunIcon (SVG), CropIcon (canvas) nos slots e na loja. Removido o sprite do saco.
 - 2026-10-21 – HUD e menu com molduras do UI Pack Adventure e fonte Fredoka; faixa do menu lateral sem moldura.
 - 2026-10-20 – Item 5 + menu lateral: buySeed (função pura), Loja/Dicas/Conta/Sobre, Novo jogo, dica de Shift/Ctrl saiu da HUD para o menu Dicas.

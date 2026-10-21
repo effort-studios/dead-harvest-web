@@ -1,17 +1,15 @@
 import { useEffect, useState } from 'react'
 import { CROP_ORDER, CROPS } from '../game/crops'
 import { useGameStore } from '../store/gameStore'
-import { CoinIcon } from './GameIcons'
-import { CropIcon } from './CropIcon'
-import { Icon, type IconName } from './Icon'
+import { BulbIcon, CloseIcon, CoinIcon, CropIcon, FarmerIcon, InfoIcon, ShopIcon } from './Icons'
 
 type Section = 'shop' | 'tips' | 'account' | 'about'
 
-const SECTIONS: { id: Section; icon: IconName; title: string }[] = [
-  { id: 'shop', icon: 'cart', title: 'Loja' },
-  { id: 'tips', icon: 'question', title: 'Dicas' },
-  { id: 'account', icon: 'singleplayer', title: 'Conta' },
-  { id: 'about', icon: 'information', title: 'Sobre' },
+const SECTIONS: { id: Section; Icon: (props: { size?: number }) => React.JSX.Element; title: string }[] = [
+  { id: 'shop', Icon: ShopIcon, title: 'Loja' },
+  { id: 'tips', Icon: BulbIcon, title: 'Dicas' },
+  { id: 'account', Icon: FarmerIcon, title: 'Conta' },
+  { id: 'about', Icon: InfoIcon, title: 'Sobre' },
 ]
 
 // Menu lateral: uma faixa de ícones que abre um painel por cima do mapa.
@@ -40,7 +38,7 @@ export function SideMenu() {
             aria-label={s.title}
             onClick={() => setOpen(open === s.id ? null : s.id)}
           >
-            <Icon name={s.icon} size={22} />
+            <s.Icon size={30} />
           </button>
         ))}
       </nav>
@@ -49,10 +47,10 @@ export function SideMenu() {
         <section className="panel-light side-panel">
           <h2>
             <span className="panel-title">
-              <Icon name={current.icon} size={20} /> {current.title}
+              <current.Icon size={26} /> {current.title}
             </span>
             <button className="panel-close" aria-label="Fechar" onClick={() => setOpen(null)}>
-              <Icon name="cross" size={16} />
+              <CloseIcon size={20} />
             </button>
           </h2>
           {open === 'shop' && <ShopPanel />}
@@ -167,7 +165,7 @@ function AboutPanel() {
     <>
       <p>Dead Harvest: planta de dia, sobrevive à noite.</p>
       <p className="muted">
-        Sprites e interface: Isometric Miniature Farm, UI Pack Adventure e Game Icons, por Kenney (kenney.nl), licença CC0. Fonte: Fredoka (Google Fonts).
+        Sprites e interface: Isometric Miniature Farm e UI Pack Adventure, por Kenney (kenney.nl), licença CC0. Ícones desenhados para o jogo. Fonte: Fredoka (Google Fonts).
       </p>
     </>
   )
