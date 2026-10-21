@@ -5,10 +5,10 @@ import { drawSprite, SPRITE } from './sprites'
 export const TILE_SIZE = 48 // 16px do sprite ampliado 3x
 
 // O mundo é maior que a plantação: tem casa, cerca e árvores em volta
-const WORLD_COLS = 14
+const WORLD_COLS = 28 // 28x16 = formato widescreen, para ocupar a largura da janela
 const WORLD_ROWS = 16
-// Posição (em tiles) do canto da plantação dentro do mundo
-const FIELD_COL = 2
+// Posição (em tiles) do canto da plantação dentro do mundo (centralizada)
+const FIELD_COL = 9
 const FIELD_ROW = 4
 
 export const CANVAS_WIDTH = WORLD_COLS * TILE_SIZE
@@ -52,17 +52,21 @@ function drawScenery(ctx: CanvasRenderingContext2D, img: HTMLImageElement) {
     [SPRITE.roof2L, SPRITE.roof2M, SPRITE.roof2R],
     [SPRITE.window, SPRITE.door, SPRITE.window],
   ]
-  house.forEach((row, r) => row.forEach((s, c) => put(ctx, img, s, 5 + c, r)))
+  const houseCol = FIELD_COL + 4
+  house.forEach((row, r) => row.forEach((s, c) => put(ctx, img, s, houseCol + c, r)))
 
-  // Árvores nas laterais e embaixo
+  // Árvores e arbustos: floresta nas laterais, só alguns na borda de cima e de baixo
+  const plants = [SPRITE.pine, SPRITE.tree, SPRITE.bush, SPRITE.pine]
   for (let r = 0; r < WORLD_ROWS; r++) {
-    put(ctx, img, r % 2 ? SPRITE.pine : SPRITE.tree, 0, r)
-    put(ctx, img, r % 2 ? SPRITE.tree : SPRITE.pine, WORLD_COLS - 1, r)
+    for (let c = 0; c < WORLD_COLS; c++) {
+      const besideField = c >= left - 1 && c <= right + 1
+      const inHouse = r < 3 && c >= houseCol - 1 && c <= houseCol + 3
+      if (inHouse) continue
+      if (besideField && r !== 0 && r !== WORLD_ROWS - 1) continue // deixa a grama perto da cerca
+      const n = (r * 3 + c * 5) % 7
+      if (n < 4) put(ctx, img, plants[(r + c) % plants.length], c, r) // posições fixas, sem aleatório
+    }
   }
-  for (let c = 1; c < WORLD_COLS - 1; c += 2) {
-    put(ctx, img, c % 4 === 1 ? SPRITE.bush : SPRITE.pine, c, WORLD_ROWS - 1)
-  }
-  for (const c of [1, 2, 3, 10, 11, 12]) put(ctx, img, c % 2 ? SPRITE.tree : SPRITE.bush, c, 0)
 }
 
 function drawTile(ctx: CanvasRenderingContext2D, img: HTMLImageElement, tile: Tile, col: number, row: number) {
