@@ -126,7 +126,7 @@ function ellipse(ctx: CanvasRenderingContext2D, x: number, y: number, rx: number
 }
 
 // Tomate e abóbora: formas simples que crescem com o progresso (0 a 1) e mudam de cor ao amadurecer
-function drawCropShape(ctx: CanvasRenderingContext2D, x: number, y: number, crop: CropId, progress: number) {
+export function drawCropShape(ctx: CanvasRenderingContext2D, x: number, y: number, crop: CropId, progress: number) {
   const size = 0.4 + 0.6 * progress
   const ripe = progress >= 1
   if (crop === 'tomato') {

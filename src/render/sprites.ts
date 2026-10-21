@@ -23,7 +23,6 @@ export const SPRITE_SIZE = { width: 256, height: 512 }
 export const SPRITE_ANCHOR = { x: 128, y: 437 }
 
 const assetUrl = (file: string) => `${import.meta.env.BASE_URL}assets/iso-farm/${file}`
-export const SACK_ICON_URL = assetUrl('icon-sack.png')
 
 function loadImage(name: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {

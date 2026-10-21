@@ -25,6 +25,7 @@ A `WEB_URL` do `.env` da API precisa ser `http://localhost:5173` (senão o CORS 
 Ao abrir, o jogo lê o `deadHarvestPlayerId` do localStorage. Se não existe (ou a API responde 404), cria um jogador convidado via `POST /players` e guarda o id. Depois carrega o save com `GET /saves/:id`. O formato (`SaveData`) está em `src/game/types.ts` e deve ser igual ao da API.
 
 ## Créditos
+Ícones: [Game Icons](https://kenney.nl/assets/game-icons) por Kenney, CC0 (`public/assets/icons/License.txt`). Moeda e sol são SVGs próprios; os ícones das plantas são desenhados pelo próprio jogo.
 Interface: [UI Pack – Adventure](https://kenney.nl/assets/ui-pack-adventure) por Kenney, CC0 (`public/assets/ui/License.txt`). Fonte: Fredoka (Google Fonts, carregada pela internet).
 Sprites: [Isometric Miniature Farm](https://kenney.nl/assets/isometric-miniature-farm) por Kenney, licença CC0 (veja `public/assets/iso-farm/License.txt`).
 

@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react'
 import { CROP_ORDER, CROPS } from '../game/crops'
 import { useGameStore } from '../store/gameStore'
+import { CoinIcon } from './GameIcons'
+import { CropIcon } from './CropIcon'
+import { Icon, type IconName } from './Icon'
 
 type Section = 'shop' | 'tips' | 'account' | 'about'
 
-const SECTIONS: { id: Section; icon: string; title: string }[] = [
-  { id: 'shop', icon: '🛒', title: 'Loja' },
-  { id: 'tips', icon: '💡', title: 'Dicas' },
-  { id: 'account', icon: '👤', title: 'Conta' },
-  { id: 'about', icon: 'ℹ️', title: 'Sobre' },
+const SECTIONS: { id: Section; icon: IconName; title: string }[] = [
+  { id: 'shop', icon: 'cart', title: 'Loja' },
+  { id: 'tips', icon: 'question', title: 'Dicas' },
+  { id: 'account', icon: 'singleplayer', title: 'Conta' },
+  { id: 'about', icon: 'information', title: 'Sobre' },
 ]
 
 // Menu lateral: uma faixa de ícones que abre um painel por cima do mapa.
@@ -37,7 +40,7 @@ export function SideMenu() {
             aria-label={s.title}
             onClick={() => setOpen(open === s.id ? null : s.id)}
           >
-            {s.icon}
+            <Icon name={s.icon} size={22} />
           </button>
         ))}
       </nav>
@@ -45,8 +48,12 @@ export function SideMenu() {
       {current && (
         <section className="panel-light side-panel">
           <h2>
-            <span>{current.icon} {current.title}</span>
-            <button className="panel-close" aria-label="Fechar" onClick={() => setOpen(null)}>✕</button>
+            <span className="panel-title">
+              <Icon name={current.icon} size={20} /> {current.title}
+            </span>
+            <button className="panel-close" aria-label="Fechar" onClick={() => setOpen(null)}>
+              <Icon name="cross" size={16} />
+            </button>
           </h2>
           {open === 'shop' && <ShopPanel />}
           {open === 'tips' && <TipsPanel />}
@@ -65,17 +72,22 @@ function ShopPanel() {
 
   return (
     <>
-      <p className="muted">Seu dinheiro: 🪙 {money}</p>
+      <p className="muted">
+        Seu dinheiro: <CoinIcon size={16} /> {money}
+      </p>
       {CROP_ORDER.map((id) => {
         const crop = CROPS[id]
         return (
           <div className="shop-row" key={id}>
+            <CropIcon crop={id} size={44} />
             <div className="shop-info">
               <b>{crop.name}</b> <span className="muted">(você tem {inventory[id] ?? 0})</span>
-              <small>Cresce em {crop.growTicks}s · vende por 🪙 {crop.sellPrice}</small>
+              <small>
+                Cresce em {crop.growTicks}s · vende por <CoinIcon size={13} /> {crop.sellPrice}
+              </small>
             </div>
             <button className="btn" disabled={money < crop.seedPrice} onClick={() => buySeed(id)}>
-              🪙 {crop.seedPrice}
+              <CoinIcon size={16} /> {crop.seedPrice}
             </button>
           </div>
         )
@@ -155,7 +167,7 @@ function AboutPanel() {
     <>
       <p>Dead Harvest: planta de dia, sobrevive à noite.</p>
       <p className="muted">
-        Sprites e interface: Isometric Miniature Farm e UI Pack Adventure, por Kenney (kenney.nl), licença CC0. Fonte: Fredoka (Google Fonts).
+        Sprites e interface: Isometric Miniature Farm, UI Pack Adventure e Game Icons, por Kenney (kenney.nl), licença CC0. Fonte: Fredoka (Google Fonts).
       </p>
     </>
   )

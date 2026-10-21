@@ -1,7 +1,9 @@
 import { useEffect } from 'react'
 import { CROP_ORDER, CROPS } from '../game/crops'
-import { SACK_ICON_URL } from '../render/sprites'
 import { useGameStore } from '../store/gameStore'
+import { CoinIcon, SunIcon } from './GameIcons'
+import { CropIcon } from './CropIcon'
+import { Icon } from './Icon'
 
 const HOTBAR_SLOTS = 9
 
@@ -26,15 +28,19 @@ export function Hud() {
   return (
     <>
       <div className="panel hud-player">
-        <div className="portrait">🧑‍🌾</div>
+        <div className="portrait">
+          <Icon name="singleplayer" size={26} />
+        </div>
         <div>
           <div className="player-name">Convidado</div>
-          <div className="money">🪙 {data.money}</div>
+          <div className="money">
+            <CoinIcon size={22} /> {data.money}
+          </div>
         </div>
       </div>
 
       <div className="panel hud-clock">
-        <span className="clock-icon">☀️</span>
+        <SunIcon size={28} />
         <span>Dia {data.day}</span>
       </div>
 
@@ -51,8 +57,7 @@ export function Hud() {
               title={info ? `Semente de ${info.name.toLowerCase()} — amadurece em ${info.growTicks}s, vende por ${info.sellPrice}` : undefined}
             >
               <span className="slot-key">{i + 1}</span>
-              {info && <img src={SACK_ICON_URL} alt={info.name} />}
-              {info && <span className="slot-name">{info.name}</span>}
+              {crop && <CropIcon crop={crop} size={34} />}
               {crop && <span className="slot-qty">{data.inventory[crop] ?? 0}</span>}
             </button>
           )
@@ -61,7 +66,7 @@ export function Hud() {
 
       <div className="hud-save">
         <button className="btn" onClick={save} disabled={saving}>
-          {saving ? 'Salvando...' : '💾 Salvar'}
+          <Icon name="save" size={16} /> {saving ? 'Salvando...' : 'Salvar'}
         </button>
         {error && <span className="error">{error}</span>}
       </div>
