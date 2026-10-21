@@ -27,6 +27,7 @@ Item 5. Falta o usuário testar: abrir o menu lateral (🛒), comprar sementes (
 | 2026-10-20 | Ação em massa: Shift+clique = linha, Ctrl+clique = coluna (`clickLine` em state.ts) | no isométrico a "linha" pode ir para dois lados na tela; só age nos tiles no mesmo estado do clicado e para quando as sementes acabam |
 | 2026-10-20 | Menu lateral discreto (Loja, Dicas, Conta, Sobre), painel sem fundo bloqueando o mapa | junta a loja e as dicas num lugar só; dá para comprar e plantar com o menu aberto. Sem seções vazias (Configurações e Missões só quando existirem) |
 | 2026-10-20 | "Novo jogo" cria jogador convidado novo e mantém o antigo no banco | mais seguro que apagar; sem rota de DELETE na API |
+| 2026-10-21 | HUD refeita com o UI Pack – Adventure (Kenney, CC0): molduras 9-patch via CSS border-image, círculos para retrato/menu, botões creme e vermelho; fonte Fredoka (Google Fonts) | usuário achou a HUD de CSS puro genérica ("cara de IA"). Fonte vem da internet: sem rede cai em system-ui |
 | 2026-10-20 | Relógio do jogo: setInterval de 1s no App que chama `tick` (função pura) | 1 tick por segundo, como combinado; cresce até maduro e para |
 
 ## Problemas conhecidos
@@ -41,6 +42,7 @@ Item 5. Falta o usuário testar: abrir o menu lateral (🛒), comprar sementes (
 3. Zumbis (item 7)
 
 ## Histórico
+- 2026-10-21 – HUD e menu com molduras do UI Pack Adventure e fonte Fredoka; faixa do menu lateral sem moldura.
 - 2026-10-20 – Item 5 + menu lateral: buySeed (função pura), Loja/Dicas/Conta/Sobre, Novo jogo, dica de Shift/Ctrl saiu da HUD para o menu Dicas.
 - 2026-10-20 – Ação em massa por linha (Shift) e coluna (Ctrl), com destaque da linha inteira no hover e dica na HUD.
 - 2026-10-20 – Terra arada recortada no losango do topo (clip) para ficar na mesma altura da grama.

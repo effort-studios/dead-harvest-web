@@ -60,7 +60,7 @@ export function Hud() {
       </div>
 
       <div className="hud-save">
-        <button className="panel" onClick={save} disabled={saving}>
+        <button className="btn" onClick={save} disabled={saving}>
           {saving ? 'Salvando...' : '💾 Salvar'}
         </button>
         {error && <span className="error">{error}</span>}

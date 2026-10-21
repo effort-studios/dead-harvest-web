@@ -28,7 +28,7 @@ export function SideMenu() {
 
   return (
     <>
-      <nav className={`panel side-rail ${open ? 'has-open' : ''}`}>
+      <nav className={`side-rail ${open ? 'has-open' : ''}`}>
         {SECTIONS.map((s) => (
           <button
             key={s.id}
@@ -43,7 +43,7 @@ export function SideMenu() {
       </nav>
 
       {current && (
-        <section className="panel side-panel">
+        <section className="panel-light side-panel">
           <h2>
             <span>{current.icon} {current.title}</span>
             <button className="panel-close" aria-label="Fechar" onClick={() => setOpen(null)}>✕</button>
@@ -155,7 +155,7 @@ function AboutPanel() {
     <>
       <p>Dead Harvest: planta de dia, sobrevive à noite.</p>
       <p className="muted">
-        Sprites: Isometric Miniature Farm, por Kenney (kenney.nl), licença CC0.
+        Sprites e interface: Isometric Miniature Farm e UI Pack Adventure, por Kenney (kenney.nl), licença CC0. Fonte: Fredoka (Google Fonts).
       </p>
     </>
   )
