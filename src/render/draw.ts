@@ -3,6 +3,7 @@ import { GRID_SIZE, tilesInMode, type ClickMode } from '../game/state'
 import type { Tile } from '../game/types'
 import { CROP_SVG_ANCHOR, CROP_SVG_SIZE } from './cropSvgs'
 import { createGrassPattern } from './grass'
+import { createSoilTiles, drawGrassFringe, drawSoilEdges, EDGE } from './soil'
 import { isCropSprite, SPRITE_ANCHOR, SPRITE_SIZE, type SpriteName, type Sprites } from './sprites'
 
 // Projeção isométrica: cada tile é um losango com o dobro de largura que de altura.
@@ -63,8 +64,9 @@ export function tileFromWorld(wx: number, wy: number) {
   return { row, col }
 }
 
-// Item a desenhar: um sprite numa célula
-type Item = { r: number; c: number; sprite: SpriteName }
+// Item a desenhar numa célula: um sprite, ou (soil) um tile de terra arada com a máscara
+// dos lados que dão para a grama
+type Item = { r: number; c: number; sprite?: SpriteName; soil?: number }
 
 // Objetos soltos em volta da plantação (r/c fora da grade 0..9)
 const DECOR: Item[] = [
@@ -92,8 +94,6 @@ const CROP_FRAME = {
   ax: CROP_SVG_ANCHOR.x * CROP_SCALE,
   ay: CROP_SVG_ANCHOR.y * CROP_SCALE,
 }
-
-const FLAT_SPRITES = new Set<SpriteName>(['dirt_S', 'dirtFarmland_S'])
 
 function diamondPath(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) {
   ctx.beginPath()
@@ -129,14 +129,30 @@ function cropItem(r: number, c: number, crop: CropId, growth: number): Item {
   return { r, c, sprite: `${crop}_${stage}` }
 }
 
+const tilled = (grid: Tile[][], r: number, c: number) => (grid[r]?.[c]?.state ?? 'soil') !== 'soil'
+
+// Quais lados do tile não têm terra arada ao lado (viram borda com a grama)
+function soilEdges(grid: Tile[][], r: number, c: number) {
+  let mask = 0
+  if (!tilled(grid, r - 1, c)) mask |= EDGE.north
+  if (!tilled(grid, r, c + 1)) mask |= EDGE.east
+  if (!tilled(grid, r + 1, c)) mask |= EDGE.south
+  if (!tilled(grid, r, c - 1)) mask |= EDGE.west
+  return mask
+}
+
+// Terra arada: desenhada por código (soil.ts) uma vez, em alta resolução
+const SOIL_GEO = { halfW: HALF_W, halfH: HALF_H }
+let soilTiles: HTMLCanvasElement[] | null = null
+
 // Lista tudo que fica de pé sobre o mapa, na ordem em que cada sprite deve ser desenhado
 function buildItems(grid: Tile[][]): Item[] {
   const items: Item[] = [...DECOR]
   const last = GRID_SIZE - 1
   grid.forEach((row, r) =>
     row.forEach((tile, c) => {
-      // terra sem arar continua sendo grama; só a arada mostra o sprite de terra
-      if (tile.state !== 'soil') items.push({ r, c, sprite: 'dirtFarmland_S' })
+      // terra sem arar continua sendo grama; só a arada (ou plantada) mostra terra
+      if (tile.state !== 'soil') items.push({ r, c, soil: soilEdges(grid, r, c) })
       // cerca nas bordas da plantação; as de trás (cima/esquerda) vêm antes da planta
       if (r === 0) items.push({ r, c, sprite: 'fenceLow_S' })
       if (c === 0) items.push({ r, c, sprite: 'fenceLow_E' })
@@ -171,18 +187,28 @@ export function drawWorld(
   const view: Rect = { left: topLeft.x, top: topLeft.y, right: bottomRight.x, bottom: bottomRight.y }
 
   drawGround(ctx, view) // a grama cobre a tela toda, então não precisa limpar antes
-  for (const { r, c, sprite } of buildItems(grid)) {
+
+  const items = buildItems(grid)
+  // 1ª passada: a terra, que é chão. Assim ela nunca cobre plantas ou cercas de outros tiles.
+  soilTiles ??= createSoilTiles(SOIL_GEO, 3, (w, h) => {
+    const canvas = document.createElement('canvas')
+    canvas.width = w
+    canvas.height = h
+    return canvas
+  })
+  for (const { r, c, soil } of items) {
+    if (soil === undefined) continue
+    const { x, y } = cellToWorld(r, c)
+    ctx.drawImage(soilTiles[(r * 7 + c * 13) % soilTiles.length], x - HALF_W, y - HALF_H, HALF_W * 2, HALF_H * 2)
+    drawSoilEdges(ctx, x, y, SOIL_GEO, soil)
+    drawGrassFringe(ctx, x, y, SOIL_GEO, soil)
+  }
+  // 2ª passada: tudo que fica de pé, do fundo para a frente
+  for (const { r, c, sprite } of items) {
+    if (!sprite) continue
     const { x, y } = cellToWorld(r, c)
     const frame = isCropSprite(sprite) ? CROP_FRAME : ISO_FRAME
-    // Terra é uma laje com espessura; recortamos só o topo (losango) para ficar rente à grama
-    const flat = FLAT_SPRITES.has(sprite)
-    if (flat) {
-      ctx.save()
-      diamondPath(ctx, x, y, HALF_W + 0.5, HALF_H + 0.25)
-      ctx.clip()
-    }
     ctx.drawImage(sprites[sprite], x - frame.ax, y - frame.ay, frame.w, frame.h)
-    if (flat) ctx.restore()
   }
 
   // Contorno no tile sob o mouse (ou na linha/coluna inteira com Shift/Ctrl)

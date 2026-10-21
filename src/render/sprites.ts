@@ -3,8 +3,6 @@ import { CROP_SPRITE_NAMES, CROP_SVGS, type CropSpriteName } from './cropSvgs'
 // Sprites isométricos do pacote "Isometric Miniature Farm" (Kenney, CC0).
 // Cada arquivo é uma imagem 256x512 com o losango do chão na parte de baixo.
 export const SPRITE_NAMES = [
-  'dirt_S',
-  'dirtFarmland_S',
   'cornYoung_S',
   'cornYoungDouble_S',
   'corn_S',
