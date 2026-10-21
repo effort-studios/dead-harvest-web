@@ -1,7 +1,8 @@
 import { CROPS, isCropId, type CropId } from '../game/crops'
 import { GRID_SIZE, tilesInMode, type ClickMode } from '../game/state'
 import type { Tile } from '../game/types'
-import { SPRITE_ANCHOR, SPRITE_SIZE, type SpriteName, type Sprites } from './sprites'
+import { CROP_SVG_ANCHOR, CROP_SVG_SIZE } from './cropSvgs'
+import { isCropSprite, SPRITE_ANCHOR, SPRITE_SIZE, type SpriteName, type Sprites } from './sprites'
 
 // Projeção isométrica: cada tile é um losango com o dobro de largura que de altura.
 // A célula (linha r, coluna c) fica no mundo em:
@@ -61,8 +62,8 @@ export function tileFromWorld(wx: number, wy: number) {
   return { row, col }
 }
 
-// Item a desenhar numa célula: um sprite do pacote, ou uma planta desenhada com formas
-type Item = { r: number; c: number; sprite?: SpriteName; shape?: { crop: CropId; progress: number } }
+// Item a desenhar: um sprite numa célula
+type Item = { r: number; c: number; sprite: SpriteName }
 
 // Objetos soltos em volta da plantação (r/c fora da grade 0..9)
 const DECOR: Item[] = [
@@ -75,6 +76,21 @@ const DECOR: Item[] = [
   { r: 6, c: 12, sprite: 'planks_S' },
   { r: 3, c: 11, sprite: 'hayBalesStacked_S' },
 ]
+
+// Tamanho e ponto de apoio (no chão) de cada tipo de sprite, já em coordenadas do mundo
+const ISO_FRAME = {
+  w: SPRITE_SIZE.width * SCALE,
+  h: SPRITE_SIZE.height * SCALE,
+  ax: SPRITE_ANCHOR.x * SCALE,
+  ay: SPRITE_ANCHOR.y * SCALE,
+}
+const CROP_SCALE = 1.2 // tamanho do SVG da planta em relação ao pixel do mundo
+const CROP_FRAME = {
+  w: CROP_SVG_SIZE * CROP_SCALE,
+  h: CROP_SVG_SIZE * CROP_SCALE,
+  ax: CROP_SVG_ANCHOR.x * CROP_SCALE,
+  ay: CROP_SVG_ANCHOR.y * CROP_SCALE,
+}
 
 const GRASS = ['#6aa84f', '#65a04b', '#6fae53', '#62994a', '#6cab51']
 
@@ -111,45 +127,17 @@ function drawGround(ctx: CanvasRenderingContext2D, view: Rect) {
   }
 }
 
-// Planta no tile: o milho usa os sprites do pacote (jovem -> madura); as outras são desenhadas
+// Estágio de crescimento: 0 = broto, 1 = crescendo, 2 = madura
+function stageOf(crop: CropId, growth: number): 0 | 1 | 2 {
+  const progress = growth / CROPS[crop].growTicks
+  return progress >= 1 ? 2 : progress >= 0.4 ? 1 : 0
+}
+
+// Sprite da planta no tile. O milho usa o pacote isométrico; tomate e abóbora, os SVGs próprios.
 function cropItem(r: number, c: number, crop: CropId, growth: number): Item {
-  const progress = Math.min(growth / CROPS[crop].growTicks, 1)
-  if (crop === 'corn') return { r, c, sprite: progress >= 1 ? 'corn_S' : 'cornYoung_S' }
-  return { r, c, shape: { crop, progress } }
-}
-
-function ellipse(ctx: CanvasRenderingContext2D, x: number, y: number, rx: number, ry: number, color: string) {
-  ctx.fillStyle = color
-  ctx.beginPath()
-  ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2)
-  ctx.fill()
-}
-
-// Tomate e abóbora: formas simples que crescem com o progresso (0 a 1) e mudam de cor ao amadurecer
-export function drawCropShape(ctx: CanvasRenderingContext2D, x: number, y: number, crop: CropId, progress: number) {
-  const size = 0.4 + 0.6 * progress
-  const ripe = progress >= 1
-  if (crop === 'tomato') {
-    ellipse(ctx, x, y - 11 * size, 17 * size, 13 * size, '#3f8f3a') // folhagem
-    ellipse(ctx, x - 5 * size, y - 14 * size, 9 * size, 7 * size, '#4fa54a')
-    if (progress > 0.5) {
-      const fruit = ripe ? '#d63a2f' : '#9ccc4f'
-      for (const [dx, dy] of [[-9, -12], [9, -9], [1, -20], [-3, -5]]) ellipse(ctx, x + dx, y + dy, 4.5, 4.5, fruit)
-    }
-  } else {
-    ellipse(ctx, x - 15 * size, y - 4 * size, 9 * size, 5 * size, '#3f8f3a') // folhas
-    ellipse(ctx, x + 15 * size, y - 4 * size, 9 * size, 5 * size, '#3f8f3a')
-    const color = ripe ? '#e8872a' : '#8fb84a'
-    ellipse(ctx, x, y - 10 * size, 19 * size, 14 * size, color)
-    ctx.strokeStyle = ripe ? '#b9621a' : '#6d9138' // gomos da abóbora
-    ctx.lineWidth = 1.5
-    for (const k of [-0.5, 0, 0.5]) {
-      ctx.beginPath()
-      ctx.ellipse(x, y - 10 * size, 19 * size * Math.abs(k) + 0.1, 14 * size, 0, 0, Math.PI * 2)
-      ctx.stroke()
-    }
-    if (ripe) ellipse(ctx, x, y - 24, 2.5, 4, '#4a7a2a') // cabinho
-  }
+  const stage = stageOf(crop, growth)
+  if (crop === 'corn') return { r, c, sprite: (['cornYoung_S', 'cornYoungDouble_S', 'corn_S'] as const)[stage] }
+  return { r, c, sprite: `${crop}_${stage}` }
 }
 
 // Lista tudo que fica de pé sobre o mapa, na ordem em que cada sprite deve ser desenhado
@@ -194,13 +182,9 @@ export function drawWorld(
   const view: Rect = { left: topLeft.x, top: topLeft.y, right: bottomRight.x, bottom: bottomRight.y }
 
   drawGround(ctx, view) // a grama cobre a tela toda, então não precisa limpar antes
-  for (const { r, c, sprite, shape } of buildItems(grid)) {
+  for (const { r, c, sprite } of buildItems(grid)) {
     const { x, y } = cellToWorld(r, c)
-    if (shape) {
-      drawCropShape(ctx, x, y, shape.crop, shape.progress)
-      continue
-    }
-    if (!sprite) continue
+    const frame = isCropSprite(sprite) ? CROP_FRAME : ISO_FRAME
     // Terra é uma laje com espessura; recortamos só o topo (losango) para ficar rente à grama
     const flat = FLAT_SPRITES.has(sprite)
     if (flat) {
@@ -208,13 +192,7 @@ export function drawWorld(
       diamondPath(ctx, x, y, HALF_W + 0.5, HALF_H + 0.25)
       ctx.clip()
     }
-    ctx.drawImage(
-      sprites[sprite],
-      x - SPRITE_ANCHOR.x * SCALE,
-      y - SPRITE_ANCHOR.y * SCALE,
-      SPRITE_SIZE.width * SCALE,
-      SPRITE_SIZE.height * SCALE,
-    )
+    ctx.drawImage(sprites[sprite], x - frame.ax, y - frame.ay, frame.w, frame.h)
     if (flat) ctx.restore()
   }
 

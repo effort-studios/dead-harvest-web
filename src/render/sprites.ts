@@ -1,9 +1,12 @@
+import { CROP_SPRITE_NAMES, CROP_SVGS, type CropSpriteName } from './cropSvgs'
+
 // Sprites isométricos do pacote "Isometric Miniature Farm" (Kenney, CC0).
 // Cada arquivo é uma imagem 256x512 com o losango do chão na parte de baixo.
 export const SPRITE_NAMES = [
   'dirt_S',
   'dirtFarmland_S',
   'cornYoung_S',
+  'cornYoungDouble_S',
   'corn_S',
   'fenceLow_N',
   'fenceLow_E',
@@ -15,7 +18,9 @@ export const SPRITE_NAMES = [
   'planks_S',
 ] as const
 
-export type SpriteName = (typeof SPRITE_NAMES)[number]
+type IsoSpriteName = (typeof SPRITE_NAMES)[number]
+// Os sprites do pacote (PNG) e as plantas de tomate/abóbora (SVG feito por nós)
+export type SpriteName = IsoSpriteName | CropSpriteName
 export type Sprites = Record<SpriteName, HTMLImageElement>
 
 export const SPRITE_SIZE = { width: 256, height: 512 }
@@ -24,21 +29,31 @@ export const SPRITE_ANCHOR = { x: 128, y: 437 }
 
 const assetUrl = (file: string) => `${import.meta.env.BASE_URL}assets/iso-farm/${file}`
 
-function loadImage(name: string): Promise<HTMLImageElement> {
+export function isCropSprite(name: SpriteName): name is CropSpriteName {
+  return (CROP_SPRITE_NAMES as readonly string[]).includes(name)
+}
+
+function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image()
     img.onload = () => resolve(img)
     img.onerror = reject
-    img.src = assetUrl(`${name}.png`)
+    img.src = src
   })
 }
+
+const svgUrl = (svg: string) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
 
 let cache: Promise<Sprites> | null = null
 
 // Carrega todas as imagens uma única vez
 export function loadSprites(): Promise<Sprites> {
-  cache ??= Promise.all(SPRITE_NAMES.map(loadImage)).then(
-    (images) => Object.fromEntries(SPRITE_NAMES.map((n, i) => [n, images[i]])) as Sprites,
+  const sources: [SpriteName, string][] = [
+    ...SPRITE_NAMES.map((n): [SpriteName, string] => [n, assetUrl(`${n}.png`)]),
+    ...CROP_SPRITE_NAMES.map((n): [SpriteName, string] => [n, svgUrl(CROP_SVGS[n])]),
+  ]
+  cache ??= Promise.all(sources.map(([, src]) => loadImage(src))).then(
+    (images) => Object.fromEntries(sources.map(([n], i) => [n, images[i]])) as Sprites,
   )
   return cache
 }

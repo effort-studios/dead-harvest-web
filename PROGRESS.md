@@ -23,7 +23,7 @@ Item 5. Falta o usuário testar: abrir o menu lateral (🛒), comprar sementes (
 | 2026-10-20 | Canvas com o tamanho da janela + câmera (pan por arrasto) + zoom automático; HUD em HTML por cima | requisito: sem barras de rolagem, 100% da janela, HUD fixa. Câmera num ref para o arrasto não re-renderizar o React; clique vs arrasto separados por limiar de 5px |
 | 2026-10-20 | HUD só com o que existe no jogo (jogador, dinheiro, dia, barra de 9 slots, salvar) | vida, energia, missões e minimapa não têm dados no jogo ainda; não inventei valores falsos |
 | 2026-10-20 | Plantas em src/game/crops.ts: tomate (10 ticks, semente 3, venda 6), milho (20, 5, 12), abóbora (40, 10, 30) | tempos curtos para testar; quanto mais demora, mais lucra. Colher só com a planta madura; plantar gasta 1 semente da selecionada |
-| 2026-10-20 | Milho usa sprites do pacote; tomate e abóbora são desenhados com formas no canvas | o pacote isométrico só tem milho |
+| 2026-10-21 | Plantas do mapa: 3 estágios (broto, crescendo, madura). Milho = sprites do pacote (cornYoung, cornYoungDouble, corn); tomate e abóbora = SVG próprio (src/render/cropSvgs.ts) com gradientes, sombra e folhas | as elipses do canvas pareciam "feitas no Paint". Os SVGs foram renderizados e conferidos numa folha antes de integrar |
 | 2026-10-20 | Ação em massa: Shift+clique = linha, Ctrl+clique = coluna (`clickLine` em state.ts) | no isométrico a "linha" pode ir para dois lados na tela; só age nos tiles no mesmo estado do clicado e para quando as sementes acabam |
 | 2026-10-20 | Menu lateral discreto (Loja, Dicas, Conta, Sobre), painel sem fundo bloqueando o mapa | junta a loja e as dicas num lugar só; dá para comprar e plantar com o menu aberto. Sem seções vazias (Configurações e Missões só quando existirem) |
 | 2026-10-20 | "Novo jogo" cria jogador convidado novo e mantém o antigo no banco | mais seguro que apagar; sem rota de DELETE na API |
@@ -43,6 +43,7 @@ Item 5. Falta o usuário testar: abrir o menu lateral (🛒), comprar sementes (
 3. Zumbis (item 7)
 
 ## Histórico
+- 2026-10-21 – Plantas redesenhadas: sprites SVG de tomate e abóbora em 3 estágios, milho com estágio intermediário; removido o desenho por elipses do canvas (drawCropShape).
 - 2026-10-21 – HUD: painel do jogador e menu lateral numa coluna só (flex, com espaço), painel aberto ao lado do 1º botão; breakpoints 900px (largura) e 640px (altura) para não sobrepor Salvar/barra de itens.
 - 2026-10-21 – Enquadramento dos ícones: centralizados como bloco nas molduras (menu 54px, slots a 90%, retrato e fechar).
 - 2026-10-21 – Conjunto próprio de 12 ícones SVG no lugar de emojis/Game Icons; ícones das plantas nos slots e na loja agora são SVG (CropIcon do canvas removido); retrato maior com o fazendeiro.
