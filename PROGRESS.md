@@ -2,7 +2,7 @@
 
 ## Status do MVP
 - [x] 2. Projeto Vite conectado à API (criar convidado, carregar e salvar) — confirmado pelo usuário
-- [ ] 3. Grade 10x10; clicar num tile alterna arar/plantar/colher — código pronto, falta confirmar no navegador
+- [x] 3. Grade 10x10; clicar num tile alterna arar/plantar/colher (confirmado pelo print do usuário: dinheiro e sementes mudaram)
 - [ ] 4. 2 ou 3 tipos de planta (crescimento e preços)
 - [ ] 5. Dinheiro e loja de sementes
 - [ ] 6. Ciclo dia/noite (tela escurece)
@@ -10,7 +10,7 @@
 - [ ] 8. Salvamento automático
 
 ## Em andamento
-Item 3. Falta o usuário testar: clicar na grama ara, na terra arada planta (gasta 1 semente), na planta colhe (+10 provisório).
+Nada em andamento; item 3 concluído. Próximo: item 4 (plantas).
 
 ## Decisões
 | Data | Decisão | Motivo |
@@ -35,6 +35,7 @@ Item 3. Falta o usuário testar: clicar na grama ara, na terra arada planta (gas
 3. Loja de sementes (item 5)
 
 ## Histórico
+- 2026-10-20 – Terra sem arar volta a ser grama (antes ficava igual à arada) e contorno branco no tile sob o mouse.
 - 2026-10-20 – Migração para isométrico (sprites Kenney Isometric Miniature Farm, projeção 2:1, clique com conta inversa), HUD nova com molduras de madeira e 9 slots, pan por arrasto sem barras de rolagem, layout responsivo.
 - 2026-10-20 – Mundo widescreen 28x16 e canvas em largura total da janela (floresta nas laterais).
 - 2026-10-20 – Visual com sprites Kenney Tiny Town: cenário (grama, casa, cerca, árvores), terra e brotinho, HUD com moldura de madeira, moeda e slots. Mundo 14x16 tiles com a plantação 10x10 dentro.

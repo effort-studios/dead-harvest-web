@@ -26,6 +26,7 @@ export function GameCanvas() {
   const camera = useRef({ ...INITIAL_CAMERA })
   const drag = useRef<{ startX: number; startY: number; camX: number; camY: number; moved: boolean } | null>(null)
   const frame = useRef(0)
+  const hover = useRef<{ row: number; col: number } | null>(null) // tile sob o mouse
 
   useEffect(() => {
     loadSprites().then(setSprites)
@@ -52,7 +53,7 @@ export function GameCanvas() {
       canvas.height = Math.round(size.height * dpr)
     }
     const { x, y } = camera.current
-    drawWorld(ctx, sprites, currentGrid, { x, y, zoom: fitZoom(size) }, size, dpr)
+    drawWorld(ctx, sprites, currentGrid, { x, y, zoom: fitZoom(size) }, size, dpr, hover.current)
   }, [sprites, size])
 
   // Redesenha quando a grade, as imagens ou o tamanho da janela mudam
@@ -66,6 +67,17 @@ export function GameCanvas() {
     frame.current = requestAnimationFrame(draw)
   }
 
+  function updateHover(e: React.PointerEvent<HTMLCanvasElement>) {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const cam = { ...camera.current, zoom: fitZoom(size) }
+    const world = screenToWorld(e.clientX - rect.left, e.clientY - rect.top, cam, size)
+    const pos = tileFromWorld(world.x, world.y)
+    const old = hover.current
+    if (pos?.row === old?.row && pos?.col === old?.col) return // não mudou de tile
+    hover.current = pos
+    scheduleDraw()
+  }
+
   function onPointerDown(e: React.PointerEvent<HTMLCanvasElement>) {
     e.currentTarget.setPointerCapture(e.pointerId) // continua recebendo o mouse mesmo fora do canvas
     drag.current = { startX: e.clientX, startY: e.clientY, camX: camera.current.x, camY: camera.current.y, moved: false }
@@ -73,7 +85,10 @@ export function GameCanvas() {
 
   function onPointerMove(e: React.PointerEvent<HTMLCanvasElement>) {
     const d = drag.current
-    if (!d) return
+    if (!d) {
+      updateHover(e) // mouse solto: só atualiza o contorno do tile
+      return
+    }
     const dx = e.clientX - d.startX
     const dy = e.clientY - d.startY
     if (!d.moved && Math.hypot(dx, dy) < DRAG_THRESHOLD) return
@@ -104,6 +119,10 @@ export function GameCanvas() {
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={() => (drag.current = null)}
+        onPointerLeave={() => {
+          hover.current = null
+          scheduleDraw()
+        }}
       />
     </div>
   )

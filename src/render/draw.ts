@@ -104,7 +104,8 @@ function buildItems(grid: Tile[][]): Item[] {
   const last = GRID_SIZE - 1
   grid.forEach((row, r) =>
     row.forEach((tile, c) => {
-      items.push({ r, c, sprite: tile.state === 'soil' ? 'dirt_S' : 'dirtFarmland_S' })
+      // terra sem arar continua sendo grama; só a arada mostra o sprite de terra
+      if (tile.state !== 'soil') items.push({ r, c, sprite: 'dirtFarmland_S' })
       // cerca nas bordas da plantação; as de trás (cima/esquerda) vêm antes da planta
       if (r === 0) items.push({ r, c, sprite: 'fenceLow_S' })
       if (c === 0) items.push({ r, c, sprite: 'fenceLow_E' })
@@ -127,6 +128,7 @@ export function drawWorld(
   cam: Camera,
   size: Size,
   pixelRatio: number,
+  hover: { row: number; col: number } | null,
 ) {
   // Transformação: mundo -> tela. Daqui em diante desenhamos em coordenadas do mundo.
   const k = cam.zoom * pixelRatio
@@ -147,5 +149,19 @@ export function drawWorld(
       SPRITE_SIZE.width * SCALE,
       SPRITE_SIZE.height * SCALE,
     )
+  }
+
+  // Contorno no tile sob o mouse, para mostrar onde o clique vai atuar
+  if (hover) {
+    const { x, y } = cellToWorld(hover.row, hover.col)
+    ctx.strokeStyle = 'rgba(255,255,255,0.9)'
+    ctx.lineWidth = 3
+    ctx.beginPath()
+    ctx.moveTo(x, y - HALF_H)
+    ctx.lineTo(x + HALF_W, y)
+    ctx.lineTo(x, y + HALF_H)
+    ctx.lineTo(x - HALF_W, y)
+    ctx.closePath()
+    ctx.stroke()
   }
 }
