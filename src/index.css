@@ -80,6 +80,13 @@ canvas:active {
   line-height: 1;
 }
 .svg-icon { vertical-align: middle; flex-shrink: 0; }
+/* Dentro das molduras o ícone vira bloco centralizado (sem o respiro de linha de texto) */
+.rail-btn .svg-icon,
+.slot .svg-icon,
+.portrait .svg-icon,
+.panel-close .svg-icon { display: block; }
+.slot .svg-icon { width: 90%; height: 90%; } /* acompanha o tamanho do slot, que muda com a janela */
+.panel-close { display: flex; align-items: center; justify-content: center; padding: 2px; }
 .money, .hud-clock, .btn { display: inline-flex; align-items: center; gap: 6px; }
 .panel-title { display: inline-flex; align-items: center; gap: 8px; }
 .player-name { font-size: 13px; opacity: 0.8; }
@@ -170,10 +177,13 @@ canvas:active {
 .side-rail:hover,
 .side-rail.has-open { opacity: 1; }
 .rail-btn {
-  width: 48px;
-  height: 48px;
-  border-width: 11px;
-  border-image: url('/assets/ui/round_brown_dark.png') 40 fill / 11px stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  border-width: 10px;
+  border-image: url('/assets/ui/round_brown_dark.png') 40 fill / 10px stretch;
   padding: 0;
   font-size: 18px;
   line-height: 1;

@@ -38,7 +38,7 @@ export function SideMenu() {
             aria-label={s.title}
             onClick={() => setOpen(open === s.id ? null : s.id)}
           >
-            <s.Icon size={30} />
+            <s.Icon size={34} />
           </button>
         ))}
       </nav>
