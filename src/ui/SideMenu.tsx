@@ -28,7 +28,7 @@ export function SideMenu() {
   const current = SECTIONS.find((s) => s.id === open)
 
   return (
-    <>
+    <div className="side-menu">
       <nav className={`side-rail ${open ? 'has-open' : ''}`}>
         {SECTIONS.map((s) => (
           <button
@@ -59,7 +59,7 @@ export function SideMenu() {
           {open === 'about' && <AboutPanel />}
         </section>
       )}
-    </>
+    </div>
   )
 }
 

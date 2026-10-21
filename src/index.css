@@ -58,10 +58,16 @@ canvas:active {
 }
 
 /* ---------- HUD ---------- */
-.hud-player {
+.hud-left {
   position: absolute;
   top: 12px;
   left: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.hud-player {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -85,6 +91,7 @@ canvas:active {
 .slot .svg-icon,
 .portrait .svg-icon,
 .panel-close .svg-icon { display: block; }
+.rail-btn .svg-icon { width: 100%; height: 100%; } /* preenche a área interna da moldura */
 .slot .svg-icon { width: 90%; height: 90%; } /* acompanha o tamanho do slot, que muda com a janela */
 .panel-close { display: flex; align-items: center; justify-content: center; padding: 2px; }
 .money, .hud-clock, .btn { display: inline-flex; align-items: center; gap: 6px; }
@@ -163,10 +170,8 @@ canvas:active {
 .hud-save .btn { font-size: 15px; }
 
 /* ---------- Menu lateral ---------- */
+.side-menu { position: relative; } /* o painel aberto se posiciona em relação à faixa de ícones */
 .side-rail {
-  position: absolute;
-  top: 104px;
-  left: 12px;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -195,11 +200,11 @@ canvas:active {
 
 .side-panel {
   position: absolute;
-  top: 104px;
-  left: 76px;
+  top: 0;
+  left: calc(100% + 10px);
   width: 330px;
-  max-width: calc(100vw - 92px);
-  max-height: calc(100% - 230px); /* não passa da barra de itens; rola por dentro se precisar */
+  max-width: calc(100vw - 100px);
+  max-height: calc(100vh - 250px); /* não passa da barra de itens; rola por dentro se precisar */
   overflow-y: auto;
   padding: 0 4px 4px;
   font-size: 15px;
@@ -238,7 +243,13 @@ table.crops th, table.crops td { text-align: left; padding: 3px 4px; border-bott
 .muted { opacity: 0.75; font-size: 13px; }
 
 /* Telas estreitas: barra de itens sobe para não cobrir o botão Salvar */
-@media (max-width: 700px) {
+@media (max-width: 900px) {
   .hud-hotbar { bottom: 60px; }
   .hud-clock { font-size: 16px; padding: 2px 8px; }
+}
+
+/* Janelas baixas: botões do menu menores para a coluna da esquerda não bater no botão Salvar */
+@media (max-height: 640px) {
+  .rail-btn { width: 44px; height: 44px; border-width: 8px; border-image-width: 8px; }
+  .side-panel { max-height: calc(100vh - 210px); }
 }

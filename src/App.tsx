@@ -2,7 +2,6 @@ import { useEffect } from 'react'
 import { useGameStore } from './store/gameStore'
 import { GameCanvas } from './ui/GameCanvas'
 import { Hud } from './ui/Hud'
-import { SideMenu } from './ui/SideMenu'
 
 // Em modo dev o StrictMode roda o effect 2x; sem isso criaríamos 2 jogadores
 let started = false
@@ -30,7 +29,6 @@ export default function App() {
     <div className="game">
       <GameCanvas />
       <Hud />
-      <SideMenu />
     </div>
   )
 }

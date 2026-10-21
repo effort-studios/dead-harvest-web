@@ -43,6 +43,7 @@ Item 5. Falta o usuário testar: abrir o menu lateral (🛒), comprar sementes (
 3. Zumbis (item 7)
 
 ## Histórico
+- 2026-10-21 – HUD: painel do jogador e menu lateral numa coluna só (flex, com espaço), painel aberto ao lado do 1º botão; breakpoints 900px (largura) e 640px (altura) para não sobrepor Salvar/barra de itens.
 - 2026-10-21 – Enquadramento dos ícones: centralizados como bloco nas molduras (menu 54px, slots a 90%, retrato e fechar).
 - 2026-10-21 – Conjunto próprio de 12 ícones SVG no lugar de emojis/Game Icons; ícones das plantas nos slots e na loja agora são SVG (CropIcon do canvas removido); retrato maior com o fazendeiro.
 - 2026-10-21 – Emojis trocados por ícones: Icon (máscara), CoinIcon/SunIcon (SVG), CropIcon (canvas) nos slots e na loja. Removido o sprite do saco.

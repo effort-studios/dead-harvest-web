@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { CROP_ORDER, CROPS } from '../game/crops'
 import { useGameStore } from '../store/gameStore'
 import { CoinIcon, CropIcon, FarmerIcon, SaveIcon, SunIcon } from './Icons'
+import { SideMenu } from './SideMenu'
 
 const HOTBAR_SLOTS = 9
 
@@ -25,16 +26,20 @@ export function Hud() {
 
   return (
     <>
-      <div className="panel hud-player">
-        <div className="portrait">
-          <FarmerIcon size={40} />
-        </div>
-        <div>
-          <div className="player-name">Convidado</div>
-          <div className="money">
-            <CoinIcon size={22} /> {data.money}
+      {/* Coluna da esquerda: jogador em cima e menu logo abaixo, sem sobrepor */}
+      <div className="hud-left">
+        <div className="panel hud-player">
+          <div className="portrait">
+            <FarmerIcon size={40} />
+          </div>
+          <div>
+            <div className="player-name">Convidado</div>
+            <div className="money">
+              <CoinIcon size={22} /> {data.money}
+            </div>
           </div>
         </div>
+        <SideMenu />
       </div>
 
       <div className="panel hud-clock">
