@@ -23,3 +23,6 @@ A `WEB_URL` do `.env` da API precisa ser `http://localhost:5173` (senão o CORS 
 
 ## Como funciona o save
 Ao abrir, o jogo lê o `deadHarvestPlayerId` do localStorage. Se não existe (ou a API responde 404), cria um jogador convidado via `POST /players` e guarda o id. Depois carrega o save com `GET /saves/:id`. O formato (`SaveData`) está em `src/game/types.ts` e deve ser igual ao da API.
+
+## Créditos
+Sprites: [Tiny Town](https://kenney.nl/assets/tiny-town) por Kenney, licença CC0 (veja `public/assets/tiny-town/License.txt`).

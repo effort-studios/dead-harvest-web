@@ -19,6 +19,7 @@ Item 3. Falta o usuário testar: clicar na grama ara, na terra arada planta (gas
 | 2026-10-20 | Estado do jogo (`SaveData`) dentro do store Zustand | um só lugar para a UI, o canvas e o save lerem |
 | 2026-10-20 | Guard `started` no App | StrictMode roda o effect 2x em dev e criaria 2 jogadores |
 | 2026-10-20 | Prévia visual do usuário usada só como referência de layout do HUD | MVP continua visão de cima, formas simples, sem sprites/personagem; vida, energia, missões, minimapa e isométrico ficam para depois do MVP |
+| 2026-10-20 | Sprites do pacote Tiny Town (Kenney, CC0) em public/assets/tiny-town | usuário achou o visual de formas simples longe da prévia; pacote top-down 16x16 ampliado 3x. Não tem plantas maduras nem zumbis: esses serão desenhados com formas ou outro pacote |
 | 2026-10-20 | Colheita dá +10 fixo; plantar gasta 1 semente | provisório até o item 4 (preços por planta) e item 5 (loja); sem sementes não dá para plantar |
 
 ## Problemas conhecidos
@@ -32,5 +33,6 @@ Item 3. Falta o usuário testar: clicar na grama ara, na terra arada planta (gas
 3. Loja de sementes (item 5)
 
 ## Histórico
+- 2026-10-20 – Visual com sprites Kenney Tiny Town: cenário (grama, casa, cerca, árvores), terra e brotinho, HUD com moldura de madeira, moeda e slots. Mundo 14x16 tiles com a plantação 10x10 dentro.
 - 2026-10-20 – Item 3: lógica pura `clickTile` (game/state.ts), desenho da grade no canvas (render/draw.ts), GameCanvas, HUD reorganizado (dinheiro, dia, barra de itens). Removido botão de teste.
 - 2026-10-20 – Criado o projeto Vite + React + TS + Zustand; api client, store (init/save), HUD mínimo. CORS verificado por curl.

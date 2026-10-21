@@ -1,17 +1,23 @@
-import { useEffect, useRef } from 'react'
-import { CANVAS_SIZE, drawWorld, tileFromPoint } from '../render/draw'
+import { useEffect, useRef, useState } from 'react'
+import { CANVAS_HEIGHT, CANVAS_WIDTH, drawWorld, tileFromPoint } from '../render/draw'
+import { loadSheet } from '../render/sprites'
 import { useGameStore } from '../store/gameStore'
 
 export function GameCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const grid = useGameStore((s) => s.data?.grid)
   const clickTile = useGameStore((s) => s.clickTile)
+  const [sheet, setSheet] = useState<HTMLImageElement | null>(null)
 
-  // Redesenha sempre que a grade muda
+  useEffect(() => {
+    loadSheet().then(setSheet)
+  }, [])
+
+  // Redesenha quando a imagem carrega ou a grade muda
   useEffect(() => {
     const ctx = canvasRef.current?.getContext('2d')
-    if (ctx && grid) drawWorld(ctx, grid)
-  }, [grid])
+    if (ctx && grid && sheet) drawWorld(ctx, sheet, grid)
+  }, [grid, sheet])
 
   function handleClick(e: React.MouseEvent<HTMLCanvasElement>) {
     const canvas = e.currentTarget
@@ -23,5 +29,5 @@ export function GameCanvas() {
     if (pos) clickTile(pos.row, pos.col)
   }
 
-  return <canvas ref={canvasRef} width={CANVAS_SIZE} height={CANVAS_SIZE} onClick={handleClick} />
+  return <canvas ref={canvasRef} width={CANVAS_WIDTH} height={CANVAS_HEIGHT} onClick={handleClick} />
 }
