@@ -40,8 +40,8 @@ export function ProfileMenu() {
           <Avatar avatar={user.avatar} size={80} />
         </div>
         <div className="player-info">
-          <div className="player-name">{user.displayName}</div>
-          <div className="money">
+          <div className="plate player-name">{user.displayName}</div>
+          <div className="plate money">
             <CoinIcon size={22} /> {money}
           </div>
         </div>
