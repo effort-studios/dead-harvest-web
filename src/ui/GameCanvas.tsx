@@ -7,9 +7,10 @@ import {
   screenToWorld,
   tileFromWorld,
   treeAt,
+  type Hover,
   type Size,
 } from '../render/draw'
-import type { ClickMode } from '../game/state'
+import { freeSlots, plotCell, type ClickMode } from '../game/state'
 import { skyTint } from '../game/daycycle'
 import { loadSprites, type Sprites } from '../render/sprites'
 import { useGameStore } from '../store/gameStore'
@@ -25,9 +26,9 @@ const DRAG_THRESHOLD = 5
 export function GameCanvas() {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const grid = useGameStore((s) => s.data?.grid)
+  const plots = useGameStore((s) => s.data?.plots)
+  const buyingPlot = useGameStore((s) => s.buyingPlot)
   const readyTrees = useGameStore((s) => s.readyTrees)
-  const clickTile = useGameStore((s) => s.clickTile)
   const harvestTree = useGameStore((s) => s.harvestTree)
   const time = useGameStore((s) => s.data?.time ?? 0)
   const [sprites, setSprites] = useState<Sprites | null>(null)
@@ -37,7 +38,7 @@ export function GameCanvas() {
   const camera = useRef({ ...INITIAL_CAMERA })
   const drag = useRef<{ startX: number; startY: number; camX: number; camY: number; moved: boolean } | null>(null)
   const frame = useRef(0)
-  const hover = useRef<{ row: number; col: number } | null>(null) // tile sob o mouse
+  const hover = useRef<Hover | null>(null) // o que está sob o mouse
   const treeHover = useRef<string | null>(null) // árvore com frutas sob o mouse (vira cursor de mãozinha)
   const mode = useRef<ClickMode>('tile') // alterado por Shift/Ctrl
   const drawRef = useRef<() => void>(() => {})
@@ -58,8 +59,8 @@ export function GameCanvas() {
   const draw = useCallback(() => {
     const canvas = canvasRef.current
     const ctx = canvas?.getContext('2d')
-    const currentGrid = useGameStore.getState().data?.grid
-    if (!canvas || !ctx || !sprites || !currentGrid || size.width === 0) return
+    const { data, buyingPlot } = useGameStore.getState()
+    if (!canvas || !ctx || !sprites || !data || size.width === 0) return
     const dpr = window.devicePixelRatio || 1
     // só mexe no tamanho se mudou (mexer apaga o desenho)
     if (canvas.width !== Math.round(size.width * dpr) || canvas.height !== Math.round(size.height * dpr)) {
@@ -67,13 +68,15 @@ export function GameCanvas() {
       canvas.height = Math.round(size.height * dpr)
     }
     const { x, y } = camera.current
-    drawWorld(ctx, sprites, currentGrid, new Set(readyTrees ? readyTrees.split(',') : []), { x, y, zoom: fitZoom(size) }, size, dpr, hover.current && { ...hover.current, mode: mode.current })
+    const ready = new Set(readyTrees ? readyTrees.split(',') : [])
+    drawWorld(ctx, sprites, data.plots, ready, { x, y, zoom: fitZoom(size) }, size, dpr, hover.current, buyingPlot ? freeSlots(data) : [])
   }, [sprites, size, readyTrees])
 
-  // Redesenha quando a grade, as imagens ou o tamanho da janela mudam
+  // Redesenha quando os terrenos, as imagens ou o tamanho da janela mudam
   useEffect(() => {
+    hover.current = null
     draw()
-  }, [draw, grid])
+  }, [draw, plots, buyingPlot])
 
   drawRef.current = draw
 
@@ -86,9 +89,11 @@ export function GameCanvas() {
   // Apertar ou soltar Shift/Ctrl com o mouse parado também muda o destaque
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') useGameStore.getState().setBuyingPlot(false)
       const next = modeOf(e)
       if (next === mode.current) return
       mode.current = next
+      if (hover.current?.kind === 'tile') hover.current = { ...hover.current, mode: next }
       scheduleDraw()
     }
     window.addEventListener('keydown', onKey)
@@ -100,21 +105,52 @@ export function GameCanvas() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  function updateHover(e: React.PointerEvent<HTMLCanvasElement>) {
+  // Ponto do mundo sob o mouse
+  function worldAt(e: React.PointerEvent<HTMLCanvasElement>) {
     const rect = e.currentTarget.getBoundingClientRect()
     const cam = { ...camera.current, zoom: fitZoom(size) }
-    const world = screenToWorld(e.clientX - rect.left, e.clientY - rect.top, cam, size)
-    const tree = treeAt(world.x, world.y)
-    const ready = tree && useGameStore.getState().readyTrees.split(',').includes(tree) ? tree : null
+    return screenToWorld(e.clientX - rect.left, e.clientY - rect.top, cam, size)
+  }
+
+  // Árvore com frutas sob o ponto (fora do modo de compra de terreno)
+  function readyTreeAt(wx: number, wy: number): string | null {
+    const { data, readyTrees, buyingPlot } = useGameStore.getState()
+    if (!data || buyingPlot) return null
+    const tree = treeAt(wx, wy, data.plots)
+    return tree && readyTrees.split(',').includes(tree) ? tree : null
+  }
+
+  // O que está sob o ponto: um terreno livre (na compra) ou um tile de um terreno
+  function targetAt(wx: number, wy: number, newMode: ClickMode): Hover | null {
+    const { data, buyingPlot } = useGameStore.getState()
+    if (!data) return null
+    const t = tileFromWorld(wx, wy)
+    const cell = plotCell(t.row, t.col)
+    if (buyingPlot) {
+      return freeSlots(data).some((s) => s.x === cell.x && s.y === cell.y) ? { kind: 'slot', x: cell.x, y: cell.y } : null
+    }
+    const plot = data.plots.findIndex((p) => p.x === cell.x && p.y === cell.y)
+    return plot < 0 ? null : { kind: 'tile', plot, row: cell.row, col: cell.col, mode: newMode }
+  }
+
+  function updateHover(e: React.PointerEvent<HTMLCanvasElement>) {
+    const world = worldAt(e)
+    const ready = readyTreeAt(world.x, world.y)
     if (ready !== treeHover.current) {
       treeHover.current = ready
       e.currentTarget.style.cursor = ready ? 'pointer' : ''
     }
-    const pos = ready ? null : tileFromWorld(world.x, world.y) // sobre a árvore não destaca tile
-    const old = hover.current
     const newMode = modeOf(e)
-    if (pos?.row === old?.row && pos?.col === old?.col && newMode === mode.current) return // nada mudou
-    hover.current = pos
+    const next = ready ? null : targetAt(world.x, world.y, newMode) // sobre a árvore não destaca tile
+    const old = hover.current
+    const same =
+      next?.kind === 'slot'
+        ? old?.kind === 'slot' && old.x === next.x && old.y === next.y
+        : next?.kind === 'tile'
+          ? old?.kind === 'tile' && old.plot === next.plot && old.row === next.row && old.col === next.col && newMode === mode.current
+          : old === null
+    if (same) return // nada mudou
+    hover.current = next
     mode.current = newMode
     scheduleDraw()
   }
@@ -136,7 +172,7 @@ export function GameCanvas() {
     d.moved = true
     // arrastar o mapa para a direita = câmera vai para a esquerda
     const zoom = fitZoom(size)
-    camera.current = { ...clampCamera(d.camX - dx / zoom, d.camY - dy / zoom) }
+    camera.current = { ...clampCamera(d.camX - dx / zoom, d.camY - dy / zoom, useGameStore.getState().data?.plots ?? []) }
     scheduleDraw()
   }
 
@@ -144,16 +180,15 @@ export function GameCanvas() {
     const d = drag.current
     drag.current = null
     if (!d || d.moved) return // foi um arrasto, não um clique
-    const rect = e.currentTarget.getBoundingClientRect()
-    const cam = { ...camera.current, zoom: fitZoom(size) }
-    const world = screenToWorld(e.clientX - rect.left, e.clientY - rect.top, cam, size)
-    const tree = treeAt(world.x, world.y)
-    if (tree && useGameStore.getState().readyTrees.split(',').includes(tree)) {
+    const world = worldAt(e)
+    const tree = readyTreeAt(world.x, world.y)
+    if (tree) {
       harvestTree(tree)
       return
     }
-    const pos = tileFromWorld(world.x, world.y)
-    if (pos) clickTile(pos.row, pos.col, modeOf(e))
+    const target = targetAt(world.x, world.y, modeOf(e))
+    if (target?.kind === 'slot') useGameStore.getState().buyPlot(target.x, target.y)
+    else if (target) useGameStore.getState().clickTile(target.plot, target.row, target.col, target.mode)
   }
 
   return (

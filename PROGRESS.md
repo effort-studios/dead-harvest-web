@@ -37,6 +37,10 @@ Item 5. Falta o usuário testar: abrir o menu lateral (🛒), comprar sementes (
 | 2026-10-22 | Dia de 5 min, 4 fases de 75s: amanhecer, manhã, tarde, noite (game/daycycle.ts), `time` no save (coluna nova na API). Overlay `.sky-tint` (multiply) só sobre o mapa, cor interpolada por keyframes; HUD mostra a fase | pedido: noite escura, entardecer e amanhecer graduais. Dia sobe quando o tempo passa de 300 |
 | 2026-10-22 | Select de sementes próprio (SeedSelect), lista no fluxo da página, sem rolagem interna | a versão flutuante era cortada pelo painel e tinha 2 barras de rolagem |
 | 2026-10-20 | Relógio do jogo: setInterval de 1s no App que chama `tick` (função pura) | 1 tick por segundo, como combinado; cresce até maduro e para |
+| 2026-10-22 | Compra de terreno: item "Terreno" na Loja liga o modo de compra (`buyingPlot` no store), o mapa destaca as posições livres ao lado dos terrenos que o jogador já tem e ele escolhe onde comprar | jogador escolhe a posição; Esc ou "Cancelar" sai do modo. Funções puras `freeSlots` e `buyPlot` em state.ts |
+| 2026-10-22 | Preço do terreno: 1000 no primeiro, +50% a cada compra, arredondado (`plotPrice`) | escalonado para o dinheiro continuar importando. Calculado só no front; a API não valida |
+| 2026-10-22 | Terrenos 10x10 colados (`PLOT_STEP` = `GRID_SIZE`); cerca só no lado sem terreno vizinho; terra arada emenda entre terrenos | a cerca estende o terreno em vez de separar. Cenário (árvore, fardo, pedra) que cairia em cima de um terreno novo some |
+| 2026-10-22 | Save usa `plots: [{ x, y, grid }]` no lugar de `grid`; (x, y) é a posição do terreno na malha e pode ser negativo | formato definido na API (PR de mesmo nome). Câmera, hit-test e textura da terra aceitam coordenadas globais negativas |
 
 ## Problemas conhecidos
 - Sem sementes não dá para plantar até a loja (item 5); jogadores antigos só têm milho (o save inicial novo traz as 3 sementes: limpe `deadHarvestPlayerId` do localStorage para criar jogador novo).
@@ -50,6 +54,7 @@ Item 5. Falta o usuário testar: abrir o menu lateral (🛒), comprar sementes (
 3. Zumbis (item 7)
 
 ## Histórico
+- 2026-10-22 – Compra de terreno: `plots` no `SaveData`, Loja > Terreno com escolha da posição no mapa, preço +50% por compra, terrenos colados com cerca só no perímetro. Corrigido índice negativo da textura de terra em terrenos comprados para cima/esquerda. Depende da API (migration `plots`).
 - 2026-10-22 – Relógio do dia em SVG (ui/DayClock.tsx): aro dentado, mostrador com 4 fases que gira sob um ponteiro fixo.
 - 2026-10-22 – Loja com select, compra x1/x5/x10 e aba de venda; 4 plantas novas; tempos maiores; frutas nas árvores; ciclo dia/noite.
 - 2026-10-21 – Design system (DESIGN.md, style.ts); props desenhados por código (isoBox, cerca, árvore...), milho em SVG, 22 objetos de cenário em volta da plantação; removido o pacote Isometric Miniature Farm (sprites.ts agora só carrega as plantas).

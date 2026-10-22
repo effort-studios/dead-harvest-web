@@ -1,6 +1,6 @@
 import { CROPS, isCropId, type CropId } from '../game/crops'
-import { GRID_SIZE, tilesInMode, type ClickMode } from '../game/state'
-import type { Tile } from '../game/types'
+import { GRID_SIZE, PLOT_STEP, tilesInMode, type ClickMode } from '../game/state'
+import type { Plot, Tile } from '../game/types'
 import { CROP_SVG_ANCHOR, CROP_SVG_SIZE } from './cropSvgs'
 import { createGrassPattern } from './grass'
 import { createSoilTiles, drawGrassFringe, drawSoilEdges, EDGE } from './soil'
@@ -24,7 +24,9 @@ const ORIGIN_Y = 254 // posição do tile (0,0)
 
 // Câmera: ponto do mundo que aparece no centro da tela, mais o zoom
 export type Camera = { x: number; y: number; zoom: number }
-export type Hover = { row: number; col: number; mode: ClickMode }
+// Sob o mouse: um tile de um terreno (plot = índice em plots) ou, na compra, um terreno livre
+export type Hover = { kind: 'tile'; plot: number; row: number; col: number; mode: ClickMode } | { kind: 'slot'; x: number; y: number }
+export type Slot = { x: number; y: number }
 export type Size = { width: number; height: number }
 
 export const INITIAL_CAMERA = { x: WORLD_WIDTH / 2, y: 470 }
@@ -34,11 +36,27 @@ export function fitZoom({ width, height }: Size) {
   return Math.min(Math.max(Math.min(width / 1500, height / 850), 0.4), 1.6)
 }
 
+// Área do jogo: a área principal mais os terrenos (e uma fileira de posições livres em volta)
+function worldBounds(plots: Plot[]) {
+  let left = 0, top = 0, right = WORLD_WIDTH, bottom = WORLD_HEIGHT
+  for (const { x, y } of plots) {
+    for (const [dx, dy] of [[-1, -1], [2, -1], [-1, 2], [2, 2]]) {
+      const p = cellToWorld((y + dy) * PLOT_STEP, (x + dx) * PLOT_STEP)
+      left = Math.min(left, p.x - HALF_W)
+      right = Math.max(right, p.x + HALF_W)
+      top = Math.min(top, p.y - HALF_H)
+      bottom = Math.max(bottom, p.y + HALF_H)
+    }
+  }
+  return { left, top, right, bottom }
+}
+
 // Impede o centro da câmera de sair da área do jogo (o mapa não "foge" da tela)
-export function clampCamera(x: number, y: number) {
+export function clampCamera(x: number, y: number, plots: Plot[]) {
+  const b = worldBounds(plots)
   return {
-    x: Math.min(Math.max(x, 200), WORLD_WIDTH - 200),
-    y: Math.min(Math.max(y, 150), WORLD_HEIGHT - 150),
+    x: Math.min(Math.max(x, b.left + 200), b.right - 200),
+    y: Math.min(Math.max(y, b.top + 150), b.bottom - 150),
   }
 }
 
@@ -54,22 +72,20 @@ function cellToWorld(r: number, c: number) {
   return { x: ORIGIN_X + (c - r) * HALF_W, y: ORIGIN_Y + (c + r) * HALF_H }
 }
 
-// Converte um ponto do mundo na célula da plantação (ou null se fora dela).
+// Converte um ponto do mundo na célula global do mapa (contando todos os terrenos).
 // É a conta inversa da fórmula acima.
 export function tileFromWorld(wx: number, wy: number) {
   const a = (wx - ORIGIN_X) / HALF_W // = c - r
   const b = (wy - ORIGIN_Y) / HALF_H // = c + r
-  const col = Math.round((a + b) / 2)
-  const row = Math.round((b - a) / 2)
-  if (row < 0 || col < 0 || row >= GRID_SIZE || col >= GRID_SIZE) return null
-  return { row, col }
+  return { row: Math.round((b - a) / 2), col: Math.round((a + b) / 2) }
 }
 
 // Id da árvore sob o ponto (coordenadas do mundo), se houver; a mais da frente ganha
-export function treeAt(wx: number, wy: number): string | null {
+export function treeAt(wx: number, wy: number, plots: Plot[]): string | null {
   const k = 1.5 // mesma escala de PROP_SCALE.tree
   let found: { id: string; depth: number } | null = null
   for (const t of TREES) {
+    if (onPlot(t, plots)) continue // árvore coberta por um terreno comprado não existe mais
     const { x, y } = cellToWorld(t.r, t.c)
     const nx = (wx - (x + TREE_HIT.dx * k)) / (TREE_HIT.rx * k)
     const ny = (wy - (y + TREE_HIT.dy * k)) / (TREE_HIT.ry * k)
@@ -94,6 +110,15 @@ const DECOR: Item[] = [
   prop('bush', -3, 6), prop('bush', 5, -2), prop('bush', -2, -1), prop('bush', 13, 9),
   prop('rock', 11, 8), prop('rock', 9, 12), prop('rock', -1, 12), prop('rock', 7, -3),
 ]
+
+// Objeto de cenário que cairia em cima de um terreno (ou da cerca dele) some
+function onPlot(item: { r: number; c: number }, plots: Plot[]) {
+  return plots.some((p) => {
+    const r = item.r - p.y * PLOT_STEP
+    const c = item.c - p.x * PLOT_STEP
+    return r >= -1 && r <= GRID_SIZE && c >= -1 && c <= GRID_SIZE
+  })
+}
 
 // Tamanho e ponto de apoio (no chão) dos sprites das plantas, em coordenadas do mundo
 const CROP_SCALE = 1.2 // tamanho do SVG da planta em relação ao pixel do mundo
@@ -136,15 +161,25 @@ function cropItem(r: number, c: number, crop: CropId, growth: number): Item {
   return { r, c, sprite: `${crop}_${stageOf(crop, growth)}` }
 }
 
-const tilled = (grid: Tile[][], r: number, c: number) => (grid[r]?.[c]?.state ?? 'soil') !== 'soil'
+// Terrenos por posição ("x,y"), para olhar o tile vizinho mesmo que seja de outro terreno
+type PlotMap = Map<string, Tile[][]>
+
+// Tile na posição global (r, c) do mapa, ou undefined se não há terreno ali
+function tileAt(plotMap: PlotMap, r: number, c: number) {
+  const x = Math.floor(c / PLOT_STEP)
+  const y = Math.floor(r / PLOT_STEP)
+  return plotMap.get(`${x},${y}`)?.[r - y * PLOT_STEP][c - x * PLOT_STEP]
+}
+
+const tilled = (plotMap: PlotMap, r: number, c: number) => (tileAt(plotMap, r, c)?.state ?? 'soil') !== 'soil'
 
 // Quais lados do tile não têm terra arada ao lado (viram borda com a grama)
-function soilEdges(grid: Tile[][], r: number, c: number) {
+function soilEdges(plotMap: PlotMap, r: number, c: number) {
   let mask = 0
-  if (!tilled(grid, r - 1, c)) mask |= EDGE.north
-  if (!tilled(grid, r, c + 1)) mask |= EDGE.east
-  if (!tilled(grid, r + 1, c)) mask |= EDGE.south
-  if (!tilled(grid, r, c - 1)) mask |= EDGE.west
+  if (!tilled(plotMap, r - 1, c)) mask |= EDGE.north
+  if (!tilled(plotMap, r, c + 1)) mask |= EDGE.east
+  if (!tilled(plotMap, r + 1, c)) mask |= EDGE.south
+  if (!tilled(plotMap, r, c - 1)) mask |= EDGE.west
   return mask
 }
 
@@ -153,26 +188,38 @@ const SOIL_GEO = { halfW: HALF_W, halfH: HALF_H }
 let soilTiles: HTMLCanvasElement[] | null = null
 
 // Lista tudo que fica de pé sobre o mapa, na ordem em que cada item deve ser desenhado
-function buildItems(grid: Tile[][], readyTrees: ReadonlySet<string>): Item[] {
-  const items: Item[] = [...DECOR]
+function buildItems(plots: Plot[], readyTrees: ReadonlySet<string>): Item[] {
+  const items: Item[] = DECOR.filter((item) => !onPlot(item, plots))
   // árvores frutíferas: mostram as frutas só quando há o que colher
   for (const t of TREES) {
+    if (onPlot(t, plots)) continue
     items.push({ r: t.r, c: t.c, prop: 'tree', fruitColor: readyTrees.has(t.id) ? FRUITS[t.fruit].color : undefined })
   }
   const last = GRID_SIZE - 1
-  grid.forEach((row, r) =>
-    row.forEach((tile, c) => {
-      // terra sem arar continua sendo grama; só a arada (ou plantada) mostra terra
-      if (tile.state !== 'soil') items.push({ r, c, soil: soilEdges(grid, r, c) })
-      // cerca nas bordas da plantação; as de trás (cima/esquerda) vêm antes da planta
-      if (r === 0) items.push({ r, c, fence: 'N' })
-      if (c === 0) items.push({ r, c, fence: 'W' })
-      if (tile.state === 'planted' && isCropId(tile.crop)) items.push(cropItem(r, c, tile.crop, tile.growth))
-      // as da frente (baixo/direita) vêm depois, para cobrir a planta
-      if (r === last) items.push({ r, c, fence: 'S' })
-      if (c === last) items.push({ r, c, fence: 'E' })
-    }),
-  )
+  const plotMap: PlotMap = new Map(plots.map((p) => [`${p.x},${p.y}`, p.grid]))
+  for (const { x, y, grid } of plots) {
+    // só há cerca no lado que não tem outro terreno colado
+    const fenceN = !plotMap.has(`${x},${y - 1}`)
+    const fenceW = !plotMap.has(`${x - 1},${y}`)
+    const fenceS = !plotMap.has(`${x},${y + 1}`)
+    const fenceE = !plotMap.has(`${x + 1},${y}`)
+    grid.forEach((row, lr) =>
+      row.forEach((tile, lc) => {
+        // r/c: posição global no mapa; lr/lc: posição dentro do terreno
+        const r = y * PLOT_STEP + lr
+        const c = x * PLOT_STEP + lc
+        // terra sem arar continua sendo grama; só a arada (ou plantada) mostra terra
+        if (tile.state !== 'soil') items.push({ r, c, soil: soilEdges(plotMap, r, c) })
+        // cerca nas bordas da plantação; as de trás (cima/esquerda) vêm antes da planta
+        if (fenceN && lr === 0) items.push({ r, c, fence: 'N' })
+        if (fenceW && lc === 0) items.push({ r, c, fence: 'W' })
+        if (tile.state === 'planted' && isCropId(tile.crop)) items.push(cropItem(r, c, tile.crop, tile.growth))
+        // as da frente (baixo/direita) vêm depois, para cobrir a planta
+        if (fenceS && lr === last) items.push({ r, c, fence: 'S' })
+        if (fenceE && lc === last) items.push({ r, c, fence: 'E' })
+      }),
+    )
+  }
   // Quem está mais ao fundo (menor r + c) é desenhado primeiro. O sort é estável,
   // então itens da mesma célula mantêm a ordem em que foram inseridos acima.
   return items.sort((a, b) => a.r + a.c - (b.r + b.c))
@@ -182,12 +229,13 @@ function buildItems(grid: Tile[][], readyTrees: ReadonlySet<string>): Item[] {
 export function drawWorld(
   ctx: CanvasRenderingContext2D,
   sprites: Sprites,
-  grid: Tile[][],
+  plots: Plot[],
   readyTrees: ReadonlySet<string>,
   cam: Camera,
   size: Size,
   pixelRatio: number,
   hover: Hover | null,
+  slots: Slot[], // posições livres, desenhadas só durante a compra de terreno
 ) {
   // Transformação: mundo -> tela. Daqui em diante desenhamos em coordenadas do mundo.
   const k = cam.zoom * pixelRatio
@@ -200,7 +248,7 @@ export function drawWorld(
 
   drawGround(ctx, view) // a grama cobre a tela toda, então não precisa limpar antes
 
-  const items = buildItems(grid, readyTrees)
+  const items = buildItems(plots, readyTrees)
   // 1ª passada: a terra, que é chão. Assim ela nunca cobre plantas ou cercas de outros tiles.
   soilTiles ??= createSoilTiles(SOIL_GEO, 3, (w, h) => {
     const canvas = document.createElement('canvas')
@@ -211,7 +259,7 @@ export function drawWorld(
   for (const { r, c, soil } of items) {
     if (soil === undefined) continue
     const { x, y } = cellToWorld(r, c)
-    ctx.drawImage(soilTiles[(r * 7 + c * 13) % soilTiles.length], x - HALF_W, y - HALF_H, HALF_W * 2, HALF_H * 2)
+    ctx.drawImage(soilTiles[(((r * 7 + c * 13) % soilTiles.length) + soilTiles.length) % soilTiles.length], x - HALF_W, y - HALF_H, HALF_W * 2, HALF_H * 2)
     drawSoilEdges(ctx, x, y, SOIL_GEO, soil)
     drawGrassFringe(ctx, x, y, SOIL_GEO, soil)
   }
@@ -233,12 +281,37 @@ export function drawWorld(
     }
   }
 
+  // Posições livres para comprar terreno: losango do tamanho do terreno
+  for (const slot of slots) {
+    const on = hover?.kind === 'slot' && hover.x === slot.x && hover.y === slot.y
+    const r0 = slot.y * PLOT_STEP
+    const c0 = slot.x * PLOT_STEP
+    const top = cellToWorld(r0, c0)
+    const right = cellToWorld(r0, c0 + GRID_SIZE - 1)
+    const bottom = cellToWorld(r0 + GRID_SIZE - 1, c0 + GRID_SIZE - 1)
+    const left = cellToWorld(r0 + GRID_SIZE - 1, c0)
+    ctx.beginPath()
+    ctx.moveTo(top.x, top.y - HALF_H)
+    ctx.lineTo(right.x + HALF_W, right.y)
+    ctx.lineTo(bottom.x, bottom.y + HALF_H)
+    ctx.lineTo(left.x - HALF_W, left.y)
+    ctx.closePath()
+    ctx.fillStyle = on ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.15)'
+    ctx.fill()
+    ctx.strokeStyle = 'rgba(255,255,255,0.9)'
+    ctx.lineWidth = 4
+    ctx.setLineDash(on ? [] : [18, 12])
+    ctx.stroke()
+    ctx.setLineDash([])
+  }
+
   // Contorno no tile sob o mouse (ou na linha/coluna inteira com Shift/Ctrl)
-  if (hover) {
+  if (hover?.kind === 'tile') {
     ctx.strokeStyle = 'rgba(255,255,255,0.9)'
     ctx.lineWidth = 3
+    const { x: px, y: py } = plots[hover.plot]
     for (const t of tilesInMode(hover.mode, hover.row, hover.col)) {
-      const { x, y } = cellToWorld(t.row, t.col)
+      const { x, y } = cellToWorld(py * PLOT_STEP + t.row, px * PLOT_STEP + t.col)
       diamondPath(ctx, x, y, HALF_W, HALF_H)
       ctx.stroke()
     }
