@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { ApiError, createPlayer, loadSave, putSave } from '../api/client'
 import type { CropId } from '../game/crops'
-import { buyPlot, buySeed, clickLine, clickTile, harvestTree, migrateSave, readyTreeIds, sellFruit, tick, type ClickMode } from '../game/state'
+import { buyPlot, buySeed, clickLine, clickTile, harvestTree, migrateSave, pickSeed, readyTreeIds, sellFruit, tick, type ClickMode } from '../game/state'
 import type { FruitId } from '../game/trees'
 import type { SaveData } from '../game/types'
 
@@ -58,7 +58,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         data = await loadSave(playerId)
       }
       const migrated = migrateSave(data)
-      set({ status: 'ready', playerId, data: migrated, readyTrees: readyTreeIds(migrated, Date.now()).join() })
+      set({ status: 'ready', playerId, data: migrated, selectedSeed: pickSeed(migrated.inventory, 'corn'), readyTrees: readyTreeIds(migrated, Date.now()).join() })
     } catch (err) {
       set({ status: 'error', error: err instanceof Error ? err.message : 'Erro desconhecido' })
     }
@@ -84,7 +84,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         mode === 'tile'
           ? clickTile(s.data, plot, row, col, s.selectedSeed)
           : clickLine(s.data, mode, plot, row, col, s.selectedSeed)
-      return { data }
+      return { data, selectedSeed: pickSeed(data.inventory, s.selectedSeed) } // a semente pode ter acabado
     }),
 
   selectSeed: (crop) => set({ selectedSeed: crop }),
@@ -97,7 +97,14 @@ export const useGameStore = create<GameState>((set, get) => ({
       return { data: tick(s.data), readyTrees }
     }),
 
-  buySeed: (crop, qty) => set((s) => (s.data ? { data: buySeed(s.data, crop, qty) } : s)),
+  buySeed: (crop, qty) =>
+    set((s) => {
+      if (!s.data) return s
+      const data = buySeed(s.data, crop, qty)
+      // sem semente escolhida (inventário vazio), a recém-comprada já fica na mão
+      const selectedSeed = (s.data.inventory[s.selectedSeed] ?? 0) > 0 ? s.selectedSeed : crop
+      return { data, selectedSeed: data === s.data ? s.selectedSeed : selectedSeed }
+    }),
 
   sellFruit: (fruit, qty) => set((s) => (s.data ? { data: sellFruit(s.data, fruit, qty) } : s)),
 
@@ -118,7 +125,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       const playerId = await createPlayer()
       const data = migrateSave(await loadSave(playerId))
       localStorage.setItem(PLAYER_KEY, playerId)
-      set({ playerId, data, readyTrees: readyTreeIds(data, Date.now()).join(), selectedSeed: 'corn', buyingPlot: false, error: null })
+      set({ playerId, data, readyTrees: readyTreeIds(data, Date.now()).join(), selectedSeed: pickSeed(data.inventory, 'corn'), buyingPlot: false, error: null })
     } catch (err) {
       set({ error: err instanceof Error ? err.message : 'Erro ao criar novo jogo' })
     }

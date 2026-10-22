@@ -1,5 +1,5 @@
 import { DAY_LENGTH, DAY_START } from './daycycle'
-import { CROPS, isCropId, type CropId } from './crops'
+import { CROP_ORDER, CROPS, isCropId, type CropId } from './crops'
 import { FRUIT_REGROW_MS, FRUITS, FRUITS_PER_HARVEST, TREES, type FruitId } from './trees'
 import type { Plot, SaveData, Tile } from './types'
 
@@ -35,6 +35,16 @@ export function clickTile(data: SaveData, plot: number, row: number, col: number
   }
 
   return { ...data, plots: replacePlotGrid(data.plots, plot, replaceTile(data.plots[plot].grid, row, col, newTile)), money, inventory }
+}
+
+// Sementes que o jogador tem (quantidade > 0), na ordem da loja: são as que aparecem na barra de itens
+export function ownedSeeds(inventory: Record<string, number>): CropId[] {
+  return CROP_ORDER.filter((id) => (inventory[id] ?? 0) > 0)
+}
+
+// Mantém a semente escolhida se ainda houver dela; senão passa para a primeira que o jogador tem
+export function pickSeed(inventory: Record<string, number>, current: CropId): CropId {
+  return (inventory[current] ?? 0) > 0 ? current : (ownedSeeds(inventory)[0] ?? current)
 }
 
 // Loja: compra `qty` sementes; se o dinheiro não dá para tudo, compra só as que dá

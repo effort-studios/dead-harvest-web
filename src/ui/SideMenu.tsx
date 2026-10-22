@@ -243,7 +243,7 @@ function TipsPanel() {
         <li>Clique num tile: arar, plantar e colher.</li>
         <li><b>Shift</b> + clique: ação na linha inteira.</li>
         <li><b>Ctrl</b> + clique: ação na coluna inteira.</li>
-        <li>Teclas <b>1</b> a <b>7</b>: escolhe a semente.</li>
+        <li>Teclas <b>1</b> a <b>9</b>: escolhem o item da barra (só aparece o que você tem).</li>
         <li>Clique numa árvore com frutas para colher; venda na Loja.</li>
         <li><b>Esc</b> fecha este menu.</li>
       </ul>

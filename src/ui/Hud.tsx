@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
-import { CROP_ORDER, CROPS, formatDuration } from '../game/crops'
+import { CROPS, formatDuration } from '../game/crops'
+import { ownedSeeds } from '../game/state'
 import { useGameStore } from '../store/gameStore'
 import { CoinIcon, CropIcon, FarmerIcon } from './Icons'
 import { DayClock } from './DayClock'
@@ -13,17 +14,19 @@ const HOTBAR_SLOTS = 9
 export function Hud() {
   const { data, error, selectedSeed, selectSeed } = useGameStore()
 
-  // Teclas 1, 2, 3... escolhem a semente do slot correspondente
+  // Teclas 1 a 9 escolhem o item do slot correspondente (só existem slots para o que o jogador tem)
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      const crop = CROP_ORDER[Number(e.key) - 1]
-      if (crop) useGameStore.getState().selectSeed(crop)
+      const { data, selectSeed } = useGameStore.getState()
+      const crop = data && ownedSeeds(data.inventory)[Number(e.key) - 1]
+      if (crop) selectSeed(crop)
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
   if (!data) return null
+  const owned = ownedSeeds(data.inventory)
 
   return (
     <>
@@ -47,7 +50,7 @@ export function Hud() {
 
       <div className="panel hud-hotbar">
         {Array.from({ length: HOTBAR_SLOTS }, (_, i) => {
-          const crop = CROP_ORDER[i]
+          const crop = owned[i]
           const info = crop && CROPS[crop]
           return (
             <button
