@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import type { CropId } from '../game/crops'
+import type { FruitId } from '../game/trees'
 
 // Ícones do jogo desenhados em SVG, no mesmo estilo do UI Pack: contorno marrom grosso,
 // cores chapadas e um brilho simples. Todos usam a caixa 32x32 e escalam pelo `size`.
@@ -185,9 +186,98 @@ export function PumpkinIcon({ size }: IconProps) {
   )
 }
 
+export function CarrotIcon({ size }: IconProps) {
+  return (
+    <Svg size={size}>
+      <path d="M16 11c-2-4-5-6-8-6 1 4 4 6 8 6zM16 11c2-4 5-6 8-6-1 4-4 6-8 6zM16 11c0-3 0-5 0-7 1.6 2 1.6 4.6 0 7z" fill="#58b042" stroke={OUTLINE} strokeWidth="1.6" />
+      <g transform="rotate(-28 16 18)">
+        <path d="M10.6 11.5C13 10 19 10 21.4 11.5L17.6 29c-.5 1.6-2.7 1.6-3.2 0z" fill="#f4892a" stroke={OUTLINE} strokeWidth="2" />
+        <path d="M12.4 15.5h3.2M16.4 19h3M13.6 22.5h2.6" stroke="#b85f12" strokeWidth="1.4" fill="none" />
+      </g>
+    </Svg>
+  )
+}
+
+export function PotatoIcon({ size }: IconProps) {
+  return (
+    <Svg size={size}>
+      <path d="M6 18C5 11 11 7 18 8c7 1 10 6 8 12-2 6-8 8-13 7-4-.6-6.4-4-7-9z" fill="#d1a265" stroke={OUTLINE} strokeWidth="2" />
+      <path d="M9 14c1.5-2.4 4-3.6 6.6-3.6" stroke="#f1d8aa" strokeWidth="2.2" fill="none" />
+      <circle cx="12" cy="19" r="1.2" fill="#8a5f2c" />
+      <circle cx="19.5" cy="15.5" r="1.2" fill="#8a5f2c" />
+      <circle cx="20.5" cy="22" r="1.2" fill="#8a5f2c" />
+    </Svg>
+  )
+}
+
+export function StrawberryIcon({ size }: IconProps) {
+  return (
+    <Svg size={size}>
+      <path d="M16 8C8 8 4.5 14 8.6 21c2 3.4 4.6 7.5 7.4 7.5s5.4-4.1 7.4-7.5C27.5 14 24 8 16 8z" fill="#e5384a" stroke={OUTLINE} strokeWidth="2" />
+      <path d="M12 15v.1M17 13.5v.1M21 17v.1M14.5 20v.1M19 22.5v.1M16 26v.1M10.5 19.5v.1" stroke="#ffe27a" strokeWidth="2" />
+      <path d="M8.5 12.5c1.6-1.6 3.4-2.2 5.2-2.2" stroke="#ff9aa0" strokeWidth="2" fill="none" />
+      <path d="M16 9.2l-3.6-3 1.2 3.6-4.2.2 3.6 2.4L16 12.4l3.4 0 3.6-2.4-4.2-.2 1.2-3.6z" fill="#58b042" stroke={OUTLINE} strokeWidth="1.6" />
+    </Svg>
+  )
+}
+
+export function WatermelonIcon({ size }: IconProps) {
+  return (
+    <Svg size={size}>
+      <path d="M3.5 12h25a12.5 12.5 0 0 1-25 0z" fill="#4aa844" stroke={OUTLINE} strokeWidth="2" />
+      <path d="M6 12h20a10 10 0 0 1-20 0z" fill="#ee4a5a" />
+      <path d="M5.4 14.5C6.5 20 11 23.5 16 23.5s9.5-3.5 10.6-9" stroke="#f6f0d4" strokeWidth="1.6" fill="none" />
+      <path d="M11 15.5v.1M16 17v.1M21 15.5v.1M13.5 19.5v.1M18.5 19.5v.1" stroke={OUTLINE} strokeWidth="2" />
+    </Svg>
+  )
+}
+
 // Ícone da planta pelo id (usado nos slots da barra e na loja)
 export function CropIcon({ crop, size }: { crop: CropId; size?: number }) {
   if (crop === 'corn') return <CornIcon size={size} />
   if (crop === 'tomato') return <TomatoIcon size={size} />
+  if (crop === 'carrot') return <CarrotIcon size={size} />
+  if (crop === 'potato') return <PotatoIcon size={size} />
+  if (crop === 'strawberry') return <StrawberryIcon size={size} />
+  if (crop === 'watermelon') return <WatermelonIcon size={size} />
   return <PumpkinIcon size={size} />
+}
+
+export function AppleIcon({ size }: IconProps) {
+  return (
+    <Svg size={size}>
+      <path d="M16 10c-3-2.6-10-1.6-10 6 0 6 4 12 7.5 12 1.2 0 1.8-.6 2.5-.6s1.3.6 2.5.6C22 28 26 22 26 16c0-7.6-7-8.6-10-6z" fill="#e5483b" stroke={OUTLINE} strokeWidth="2" />
+      <path d="M9.5 14.5c1-2 2.6-3 4.5-3.2" stroke="#ff9f92" strokeWidth="2.2" fill="none" />
+      <path d="M16 10c0-2.5.8-4.5 2.8-6" stroke={OUTLINE} strokeWidth="2.2" fill="none" />
+      <path d="M17.5 8c1.5-2.5 4-3 6-2.5-1 2.5-3.5 3.5-6 2.5z" fill="#58b042" stroke={OUTLINE} strokeWidth="1.6" />
+    </Svg>
+  )
+}
+
+export function OrangeIcon({ size }: IconProps) {
+  return (
+    <Svg size={size}>
+      <circle cx="16" cy="18" r="11.5" fill="#f59a23" stroke={OUTLINE} strokeWidth="2" />
+      <path d="M8.5 15.5a8.5 8.5 0 0 1 5-4.8" stroke="#ffd08a" strokeWidth="2.2" fill="none" />
+      <circle cx="16" cy="7.2" r="1.4" fill="#c2600f" />
+      <path d="M16.5 7c1.5-2.5 4-3 6-2.5-1 2.5-3.5 3.5-6 2.5z" fill="#58b042" stroke={OUTLINE} strokeWidth="1.6" />
+    </Svg>
+  )
+}
+
+export function LemonIcon({ size }: IconProps) {
+  return (
+    <Svg size={size}>
+      <path d="M3.5 17.5c0-1.8 1-2.8 2.4-3.2 1.6-6 7-8.6 12.5-7 5.2 1.5 8 6 6.6 11.5 1.2.6 1.8 1.6 1.6 2.8-.4 2.2-3 2.8-5 3.6C16 28.5 7 27.5 6 22c-1.5-1-2.5-2.5-2.5-4.5z" fill="#f2dc3a" stroke={OUTLINE} strokeWidth="2" />
+      <path d="M8.5 14.5c1.5-2.5 4-4 7-4" stroke="#fff6a8" strokeWidth="2.2" fill="none" />
+      <path d="M21 8.5c1.8-2.2 4-2.8 6-2.2-.8 2.6-3.2 3.8-6 2.2z" fill="#58b042" stroke={OUTLINE} strokeWidth="1.6" />
+    </Svg>
+  )
+}
+
+// Ícone da fruta pelo id (inventário e venda)
+export function FruitIcon({ fruit, size }: { fruit: FruitId; size?: number }) {
+  if (fruit === 'apple') return <AppleIcon size={size} />
+  if (fruit === 'orange') return <OrangeIcon size={size} />
+  return <LemonIcon size={size} />
 }

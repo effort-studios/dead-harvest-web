@@ -6,6 +6,10 @@ const DEFS = `<defs>
   <linearGradient id="lf" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#3f9a3a"/><stop offset="1" stop-color="#8fd95f"/></linearGradient>
   <radialGradient id="tm" cx=".35" cy=".3" r=".85"><stop offset="0" stop-color="#ff9a86"/><stop offset=".5" stop-color="#e5483b"/><stop offset="1" stop-color="#b02419"/></radialGradient>
   <radialGradient id="pk" cx=".35" cy=".28" r=".9"><stop offset="0" stop-color="#ffc678"/><stop offset=".5" stop-color="#f08a24"/><stop offset="1" stop-color="#c2600f"/></radialGradient>
+  <linearGradient id="cr" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffb04a"/><stop offset="1" stop-color="#e06a14"/></linearGradient>
+  <radialGradient id="pt" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#e6c08a"/><stop offset="1" stop-color="#a87a44"/></radialGradient>
+  <radialGradient id="sb" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#ff7a7a"/><stop offset=".6" stop-color="#e02b3a"/><stop offset="1" stop-color="#a81426"/></radialGradient>
+  <radialGradient id="wm" cx=".35" cy=".28" r=".95"><stop offset="0" stop-color="#7fd06a"/><stop offset=".6" stop-color="#3f9a3a"/><stop offset="1" stop-color="#256b28"/></radialGradient>
   <radialGradient id="gr" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#b5e07a"/><stop offset="1" stop-color="#5f9a2c"/></radialGradient>
 </defs>`
 
@@ -127,10 +131,107 @@ function pumpkin(stage: 0 | 1 | 2) {
   return svg(vines + back + body + front)
 }
 
+function carrot(stage: 0 | 1 | 2) {
+  if (stage === 0) {
+    return svg(leaf(32, 51, -28, 0.55) + leaf(32, 51, 28, 0.55) + leaf(32, 51, 0, 0.7))
+  }
+  const k = stage === 1 ? 1.1 : 1.3
+  const tops = [-52, -30, -12, 10, 30, 52]
+    .map((a, i) => leaf(32 + (i - 2.5) * 1.4, 50, a, k * (0.95 + (i % 2) * 0.18)))
+    .join('')
+  if (stage === 1) return svg(tops + leaf(32, 50, 0, k * 1.2))
+  const crown = (x: number, w: number) => `
+     <ellipse cx="${x}" cy="51" rx="${w}" ry="${w * 0.6}" fill="url(#cr)" stroke="#9a4a0a" stroke-width="1.2"/>
+    <path d="M${x - w * 0.6} 50.8h${w * 0.8}" stroke="#b85f12" stroke-width=".9" stroke-linecap="round"/>`
+  return svg(tops + leaf(32, 49, 0, 1.5) + crown(32, 8.5) + crown(20.5, 6.5) + crown(43.5, 6.5))
+}
+
+function potato(stage: 0 | 1 | 2) {
+  if (stage === 0) {
+    return svg(`<path d="M32 52V45" stroke="#3f8f3a" stroke-width="2.4" stroke-linecap="round"/>
+      ${leaf(32, 47, -60, 0.6, BROAD)}${leaf(32, 47, 60, 0.6, BROAD)}${leaf(32, 45, 0, 0.55, BROAD)}`)
+  }
+  const k = stage === 1 ? 0.8 : 0.95
+  const bush = [
+    leaf(32, 51, -78, k * 0.9, BROAD), leaf(32, 51, 78, k * 0.9, BROAD),
+    leaf(32, 48, -50, k, BROAD), leaf(32, 48, 50, k, BROAD),
+    leaf(32, 45, -24, k * 1.05, BROAD), leaf(32, 45, 26, k * 1.05, BROAD),
+    leaf(32, 42, 0, k * 1.1, BROAD),
+  ].join('')
+  if (stage === 1) return svg(bush)
+  const flower = (x: number, y: number) =>
+    [0, 72, 144, 216, 288]
+      .map((d) => `<circle cx="${x + 2.8 * Math.cos((d * Math.PI) / 180)}" cy="${y + 2.8 * Math.sin((d * Math.PI) / 180)}" r="2.3" fill="#fff" stroke="#b9a7d6" stroke-width=".7"/>`)
+      .join('') + `<circle cx="${x}" cy="${y}" r="1.7" fill="#f5c542"/>`
+  const spud = (x: number, y: number, rx: number, rot: number) => `
+    <g transform="translate(${x} ${y}) rotate(${rot})">
+      <ellipse rx="${rx}" ry="${rx * 0.7}" fill="url(#pt)" stroke="#5a3a14" stroke-width="1.1"/>
+      <circle cx="${-rx * 0.35}" cy="${-rx * 0.15}" r=".9" fill="#7a5426"/><circle cx="${rx * 0.3}" cy="${rx * 0.2}" r=".9" fill="#7a5426"/>
+      <path d="M${-rx * 0.6} ${-rx * 0.35}a${rx * 0.7} ${rx * 0.5} 0 0 1 ${rx * 0.5}-${rx * 0.2}" stroke="#fff" stroke-width="1" fill="none" opacity=".55" stroke-linecap="round"/>
+    </g>`
+  return svg(bush + flower(24, 33) + flower(41, 31) + spud(21, 52.5, 6, -12) + spud(33, 54, 6.6, 6) + spud(44, 52, 5.4, 14))
+}
+
+function strawberry(stage: 0 | 1 | 2) {
+  if (stage === 0) {
+    return svg(leaf(32, 51, -45, 0.6, BROAD) + leaf(32, 51, 45, 0.6, BROAD) + leaf(32, 51, 0, 0.65, BROAD))
+  }
+  const k = stage === 1 ? 0.8 : 0.95
+  const bush = [
+    leaf(32, 51, -80, k, BROAD), leaf(32, 51, 80, k, BROAD),
+    leaf(32, 50, -52, k * 1.05, BROAD), leaf(32, 50, 52, k * 1.05, BROAD),
+    leaf(32, 49, -22, k * 1.1, BROAD), leaf(32, 49, 24, k * 1.1, BROAD),
+  ].join('')
+  if (stage === 1) {
+    const petals = [0, 72, 144, 216, 288]
+      .map((d) => `<circle cx="${32 + 3.4 * Math.cos((d * Math.PI) / 180)}" cy="${37 + 3.4 * Math.sin((d * Math.PI) / 180)}" r="2.8" fill="#fff" stroke="#c9b9a0" stroke-width=".7"/>`)
+      .join('')
+    return svg(bush + `<path d="M32 49V40" stroke="#3f8f3a" stroke-width="1.6" stroke-linecap="round"/>` + petals + `<circle cx="32" cy="37" r="2" fill="#f5c542"/>`)
+  }
+  const berry = (x: number, y: number, sc: number) => `
+    <g transform="translate(${x} ${y}) scale(${sc})">
+      <path d="M0-6C-6-6-8.5-.5-4.6 5.4C-2.6 8.2 2.6 8.2 4.6 5.4C8.5-.5 6-6 0-6Z" fill="url(#sb)" stroke="#6e0f1c" stroke-width="1.1" stroke-linejoin="round"/>
+      <path d="M-3 0v.1M0-2v.1M3 0v.1M-1.6 3v.1M1.6 3v.1M0 5.2v.1" stroke="#ffe27a" stroke-width="1.4" stroke-linecap="round"/>
+      <path d="M-4.6-2.4a4.4 3.4 0 0 1 3-2.4" stroke="#fff" stroke-width="1.2" fill="none" stroke-linecap="round" opacity=".6"/>
+      <path d="M0-6.6l2.4 1.6 2.6-.4-1.6 2.2L0-4.4l-3.4 1.4-1.6-2.2 2.6.4z" fill="#58b042" stroke="#2d6a2a" stroke-width=".9" stroke-linejoin="round"/>
+    </g>`
+  return svg(bush + berry(22, 47, 1.05) + berry(42, 46, 1.1) + berry(32, 41, 1.15) + berry(29, 52, 0.9) + berry(37, 52, 0.85))
+}
+
+function watermelon(stage: 0 | 1 | 2) {
+  const vines = `
+    <path d="M32 52C22 50 14 53 8 48" stroke="#4a9a38" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    <path d="M32 52C42 50 50 53 57 48" stroke="#4a9a38" stroke-width="2.2" fill="none" stroke-linecap="round"/>`
+  if (stage === 0) {
+    return svg(`<path d="M32 52V47" stroke="#3f8f3a" stroke-width="2.4" stroke-linecap="round"/>
+      ${leaf(32, 48, -55, 0.4, BROAD)}${leaf(32, 48, 55, 0.4, BROAD)}`)
+  }
+  const stripes = (cx: number, cy: number, rx: number, ry: number) =>
+    [0.78, 0.45, 0.12]
+      .map((f) => `<ellipse cx="${cx}" cy="${cy}" rx="${rx * f}" ry="${ry}" fill="none" stroke="#1f5a22" stroke-width="1.7" opacity=".75"/>`)
+      .join('')
+  if (stage === 1) {
+    const leaves = [leaf(14, 49, -70, 0.62, BROAD), leaf(51, 49, 70, 0.62, BROAD), leaf(22, 49, -30, 0.7, BROAD), leaf(43, 49, 32, 0.7, BROAD), leaf(32, 47, 0, 0.7, BROAD)].join('')
+    const mini = `<ellipse cx="32" cy="49" rx="7" ry="5" fill="url(#wm)" stroke="#1f5a22" stroke-width="1.1"/>${stripes(32, 49, 7, 5)}`
+    return svg(vines + leaves + mini)
+  }
+  const back = [leaf(13, 49, -72, 0.6, BROAD), leaf(51, 49, 72, 0.6, BROAD), leaf(20, 40, -40, 0.6, BROAD), leaf(45, 40, 40, 0.6, BROAD)].join('')
+  const body = `
+    <ellipse cx="32" cy="42" rx="17" ry="12.5" fill="url(#wm)" stroke="#1f5a22" stroke-width="1.5"/>
+    ${stripes(32, 42, 17, 12.5)}
+    <path d="M20 36a14 9 0 0 1 9-5" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" opacity=".5"/>
+    <path d="M31.5 30c0-3 1-4.6 3.4-5.4l1.4 2.2c-1.4.6-2 1.4-2 3.2z" fill="#6b8f2e" stroke="#3d5a18" stroke-width="1.2" stroke-linejoin="round"/>`
+  return svg(vines + back + body + leaf(18, 52, -50, 0.5, BROAD) + leaf(46, 52, 50, 0.5, BROAD))
+}
+
 export const CROP_SPRITE_NAMES = [
   'corn_0', 'corn_1', 'corn_2',
   'tomato_0', 'tomato_1', 'tomato_2',
   'pumpkin_0', 'pumpkin_1', 'pumpkin_2',
+  'carrot_0', 'carrot_1', 'carrot_2',
+  'potato_0', 'potato_1', 'potato_2',
+  'strawberry_0', 'strawberry_1', 'strawberry_2',
+  'watermelon_0', 'watermelon_1', 'watermelon_2',
 ] as const
 export type CropSpriteName = (typeof CROP_SPRITE_NAMES)[number]
 
@@ -138,6 +239,10 @@ export const CROP_SVGS: Record<CropSpriteName, string> = {
   corn_0: corn(0), corn_1: corn(1), corn_2: corn(2),
   tomato_0: tomato(0), tomato_1: tomato(1), tomato_2: tomato(2),
   pumpkin_0: pumpkin(0), pumpkin_1: pumpkin(1), pumpkin_2: pumpkin(2),
+  carrot_0: carrot(0), carrot_1: carrot(1), carrot_2: carrot(2),
+  potato_0: potato(0), potato_1: potato(1), potato_2: potato(2),
+  strawberry_0: strawberry(0), strawberry_1: strawberry(1), strawberry_2: strawberry(2),
+  watermelon_0: watermelon(0), watermelon_1: watermelon(1), watermelon_2: watermelon(2),
 }
 
 export const CROP_SVG_SIZE = 64

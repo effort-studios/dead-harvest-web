@@ -1,7 +1,8 @@
 import { useEffect } from 'react'
-import { CROP_ORDER, CROPS } from '../game/crops'
+import { CROP_ORDER, CROPS, formatDuration } from '../game/crops'
 import { useGameStore } from '../store/gameStore'
-import { CoinIcon, CropIcon, FarmerIcon, SunIcon } from './Icons'
+import { dayPhase, PHASE_LABEL } from '../game/daycycle'
+import { CoinIcon, CropIcon, FarmerIcon, MoonIcon, SunIcon } from './Icons'
 import { SideMenu } from './SideMenu'
 
 const HOTBAR_SLOTS = 9
@@ -23,6 +24,7 @@ export function Hud() {
   }, [])
 
   if (!data) return null
+  const phase = dayPhase(data.time)
 
   return (
     <>
@@ -43,8 +45,10 @@ export function Hud() {
       </div>
 
       <div className="panel hud-clock">
-        <SunIcon size={28} />
-        <span>Dia {data.day}</span>
+        {phase === 'night' ? <MoonIcon size={28} /> : <SunIcon size={28} />}
+        <span>
+          Dia {data.day} <small className="phase">{PHASE_LABEL[phase]}</small>
+        </span>
       </div>
 
       <div className="panel hud-hotbar">
@@ -57,7 +61,7 @@ export function Hud() {
               className={`slot ${crop && crop === selectedSeed ? 'selected' : ''}`}
               disabled={!crop}
               onClick={() => crop && selectSeed(crop)}
-              title={info ? `Semente de ${info.name.toLowerCase()} — amadurece em ${info.growTicks}s, vende por ${info.sellPrice}` : undefined}
+              title={info ? `Semente de ${info.name.toLowerCase()} — amadurece em ${formatDuration(info.growTicks)}, vende por ${info.sellPrice}` : undefined}
             >
               <span className="slot-key">{i + 1}</span>
               {crop && <CropIcon crop={crop} size={34} />}

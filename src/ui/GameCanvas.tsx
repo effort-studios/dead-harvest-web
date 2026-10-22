@@ -6,9 +6,11 @@ import {
   INITIAL_CAMERA,
   screenToWorld,
   tileFromWorld,
+  treeAt,
   type Size,
 } from '../render/draw'
 import type { ClickMode } from '../game/state'
+import { skyTint } from '../game/daycycle'
 import { loadSprites, type Sprites } from '../render/sprites'
 import { useGameStore } from '../store/gameStore'
 
@@ -24,7 +26,10 @@ export function GameCanvas() {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const grid = useGameStore((s) => s.data?.grid)
+  const readyTrees = useGameStore((s) => s.readyTrees)
   const clickTile = useGameStore((s) => s.clickTile)
+  const harvestTree = useGameStore((s) => s.harvestTree)
+  const time = useGameStore((s) => s.data?.time ?? 0)
   const [sprites, setSprites] = useState<Sprites | null>(null)
   const [size, setSize] = useState<Size>({ width: 0, height: 0 })
 
@@ -33,6 +38,7 @@ export function GameCanvas() {
   const drag = useRef<{ startX: number; startY: number; camX: number; camY: number; moved: boolean } | null>(null)
   const frame = useRef(0)
   const hover = useRef<{ row: number; col: number } | null>(null) // tile sob o mouse
+  const treeHover = useRef<string | null>(null) // árvore com frutas sob o mouse (vira cursor de mãozinha)
   const mode = useRef<ClickMode>('tile') // alterado por Shift/Ctrl
   const drawRef = useRef<() => void>(() => {})
 
@@ -61,8 +67,8 @@ export function GameCanvas() {
       canvas.height = Math.round(size.height * dpr)
     }
     const { x, y } = camera.current
-    drawWorld(ctx, sprites, currentGrid, { x, y, zoom: fitZoom(size) }, size, dpr, hover.current && { ...hover.current, mode: mode.current })
-  }, [sprites, size])
+    drawWorld(ctx, sprites, currentGrid, new Set(readyTrees ? readyTrees.split(',') : []), { x, y, zoom: fitZoom(size) }, size, dpr, hover.current && { ...hover.current, mode: mode.current })
+  }, [sprites, size, readyTrees])
 
   // Redesenha quando a grade, as imagens ou o tamanho da janela mudam
   useEffect(() => {
@@ -98,7 +104,13 @@ export function GameCanvas() {
     const rect = e.currentTarget.getBoundingClientRect()
     const cam = { ...camera.current, zoom: fitZoom(size) }
     const world = screenToWorld(e.clientX - rect.left, e.clientY - rect.top, cam, size)
-    const pos = tileFromWorld(world.x, world.y)
+    const tree = treeAt(world.x, world.y)
+    const ready = tree && useGameStore.getState().readyTrees.split(',').includes(tree) ? tree : null
+    if (ready !== treeHover.current) {
+      treeHover.current = ready
+      e.currentTarget.style.cursor = ready ? 'pointer' : ''
+    }
+    const pos = ready ? null : tileFromWorld(world.x, world.y) // sobre a árvore não destaca tile
     const old = hover.current
     const newMode = modeOf(e)
     if (pos?.row === old?.row && pos?.col === old?.col && newMode === mode.current) return // nada mudou
@@ -135,6 +147,11 @@ export function GameCanvas() {
     const rect = e.currentTarget.getBoundingClientRect()
     const cam = { ...camera.current, zoom: fitZoom(size) }
     const world = screenToWorld(e.clientX - rect.left, e.clientY - rect.top, cam, size)
+    const tree = treeAt(world.x, world.y)
+    if (tree && useGameStore.getState().readyTrees.split(',').includes(tree)) {
+      harvestTree(tree)
+      return
+    }
     const pos = tileFromWorld(world.x, world.y)
     if (pos) clickTile(pos.row, pos.col, modeOf(e))
   }
@@ -153,6 +170,8 @@ export function GameCanvas() {
           scheduleDraw()
         }}
       />
+      {/* Luz do dia: cobre só o mapa (a HUD fica de fora) e muda aos poucos com a hora */}
+      <div className="sky-tint" style={{ backgroundColor: skyTint(time) }} />
     </div>
   )
 }

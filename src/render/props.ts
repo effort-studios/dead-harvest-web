@@ -199,7 +199,7 @@ function rock(ctx: CanvasRenderingContext2D, x: number, y: number) {
 }
 
 // ---------- Árvore ----------
-function tree(ctx: CanvasRenderingContext2D, x: number, y: number) {
+function tree(ctx: CanvasRenderingContext2D, x: number, y: number, fruitColor?: string) {
   shadow(ctx, x, y, 24, 8)
   // tronco
   ctx.beginPath()
@@ -223,13 +223,26 @@ function tree(ctx: CanvasRenderingContext2D, x: number, y: number) {
     ctx.fillStyle = g
     ctx.fill(); outline(ctx)
   }
+  if (fruitColor) {
+    const spots: [number, number][] = [[-18, -28], [-5, -37], [12, -30], [20, -42], [-12, -50], [5, -56], [-1, -24], [-22, -41]]
+    for (const [dx, dy] of spots) {
+      ctx.beginPath()
+      ctx.arc(x + dx, y + dy, 4.2, 0, Math.PI * 2)
+      ctx.fillStyle = fruitColor
+      ctx.fill(); outline(ctx)
+      line(ctx, [x + dx - 2, y + dy - 1.5], [x + dx - 0.8, y + dy - 2.8], '#ffffff', 1.1, 0.7)
+    }
+  }
 }
+
+// Área clicável da copa (em coordenadas do mundo), relativa à base da árvore já com a escala
+export const TREE_HIT = { dx: 0, dy: -42, rx: 34, ry: 36 }
 
 // Escala de cada objeto (árvores e arbustos são maiores que o desenho-base)
 const PROP_SCALE: Partial<Record<PropKind, number>> = { tree: 1.5, bush: 1.3, rock: 1.45, sack: 1.3 }
 
 // Desenha um objeto com a base centrada em (x, y) — o centro do tile no mundo
-export function drawProp(ctx: CanvasRenderingContext2D, kind: PropKind, x: number, y: number) {
+export function drawProp(ctx: CanvasRenderingContext2D, kind: PropKind, x: number, y: number, fruitColor?: string) {
   const k = PROP_SCALE[kind] ?? 1
   ctx.save()
   ctx.translate(x, y)
@@ -247,7 +260,7 @@ export function drawProp(ctx: CanvasRenderingContext2D, kind: PropKind, x: numbe
   else if (kind === 'sack') sack(ctx, ox, oy)
   else if (kind === 'bush') bush(ctx, ox, oy)
   else if (kind === 'rock') rock(ctx, ox, oy)
-  else tree(ctx, ox, oy)
+  else tree(ctx, ox, oy, fruitColor)
   ctx.restore()
 }
 

@@ -4,7 +4,8 @@ import type { Tile } from '../game/types'
 import { CROP_SVG_ANCHOR, CROP_SVG_SIZE } from './cropSvgs'
 import { createGrassPattern } from './grass'
 import { createSoilTiles, drawGrassFringe, drawSoilEdges, EDGE } from './soil'
-import { drawFence, drawProp, TILE_HALF, type PropKind } from './props'
+import { FRUITS, TREES } from '../game/trees'
+import { drawFence, drawProp, TILE_HALF, TREE_HIT, type PropKind } from './props'
 import type { SpriteName, Sprites } from './sprites'
 
 // Projeção isométrica: cada tile é um losango com o dobro de largura que de altura.
@@ -64,21 +65,32 @@ export function tileFromWorld(wx: number, wy: number) {
   return { row, col }
 }
 
+// Id da árvore sob o ponto (coordenadas do mundo), se houver; a mais da frente ganha
+export function treeAt(wx: number, wy: number): string | null {
+  const k = 1.5 // mesma escala de PROP_SCALE.tree
+  let found: { id: string; depth: number } | null = null
+  for (const t of TREES) {
+    const { x, y } = cellToWorld(t.r, t.c)
+    const nx = (wx - (x + TREE_HIT.dx * k)) / (TREE_HIT.rx * k)
+    const ny = (wy - (y + TREE_HIT.dy * k)) / (TREE_HIT.ry * k)
+    if (nx * nx + ny * ny <= 1 && (!found || t.r + t.c > found.depth)) found = { id: t.id, depth: t.r + t.c }
+  }
+  return found?.id ?? null
+}
+
 // Lado de um tile onde fica um trecho de cerca (o nome vem do ponto cardeal na grade)
 type Edge = 'N' | 'E' | 'S' | 'W'
 
 // Item a desenhar numa célula. Cada item é de um só tipo:
 // sprite (planta), soil (terra arada + máscara dos lados que dão para a grama),
 // fence (trecho de cerca) ou prop (objeto do cenário)
-type Item = { r: number; c: number; sprite?: SpriteName; soil?: number; fence?: Edge; prop?: PropKind }
+type Item = { r: number; c: number; sprite?: SpriteName; soil?: number; fence?: Edge; prop?: PropKind; fruitColor?: string }
 
 // Objetos soltos em volta da plantação (r/c fora da grade 0..9)
 const prop = (kind: PropKind, r: number, c: number): Item => ({ r, c, prop: kind })
 const DECOR: Item[] = [
   prop('hayStack', -2, 3), prop('hay', -2, 6), prop('sack', -3, 9), prop('platform', 4, -3),
   prop('hay', 11, 2), prop('sack', 12, 6), prop('platform', 6, 12), prop('hayStack', 3, 11),
-  prop('tree', -5, 2), prop('tree', -4, 11), prop('tree', 13, 3), prop('tree', 12, 13),
-  prop('tree', 8, -4), prop('tree', 2, 15),
   prop('bush', -3, 6), prop('bush', 5, -2), prop('bush', -2, -1), prop('bush', 13, 9),
   prop('rock', 11, 8), prop('rock', 9, 12), prop('rock', -1, 12), prop('rock', 7, -3),
 ]
@@ -141,8 +153,12 @@ const SOIL_GEO = { halfW: HALF_W, halfH: HALF_H }
 let soilTiles: HTMLCanvasElement[] | null = null
 
 // Lista tudo que fica de pé sobre o mapa, na ordem em que cada item deve ser desenhado
-function buildItems(grid: Tile[][]): Item[] {
+function buildItems(grid: Tile[][], readyTrees: ReadonlySet<string>): Item[] {
   const items: Item[] = [...DECOR]
+  // árvores frutíferas: mostram as frutas só quando há o que colher
+  for (const t of TREES) {
+    items.push({ r: t.r, c: t.c, prop: 'tree', fruitColor: readyTrees.has(t.id) ? FRUITS[t.fruit].color : undefined })
+  }
   const last = GRID_SIZE - 1
   grid.forEach((row, r) =>
     row.forEach((tile, c) => {
@@ -167,6 +183,7 @@ export function drawWorld(
   ctx: CanvasRenderingContext2D,
   sprites: Sprites,
   grid: Tile[][],
+  readyTrees: ReadonlySet<string>,
   cam: Camera,
   size: Size,
   pixelRatio: number,
@@ -183,7 +200,7 @@ export function drawWorld(
 
   drawGround(ctx, view) // a grama cobre a tela toda, então não precisa limpar antes
 
-  const items = buildItems(grid)
+  const items = buildItems(grid, readyTrees)
   // 1ª passada: a terra, que é chão. Assim ela nunca cobre plantas ou cercas de outros tiles.
   soilTiles ??= createSoilTiles(SOIL_GEO, 3, (w, h) => {
     const canvas = document.createElement('canvas')
@@ -199,7 +216,7 @@ export function drawWorld(
     drawGrassFringe(ctx, x, y, SOIL_GEO, soil)
   }
   // 2ª passada: tudo que fica de pé, do fundo para a frente
-  for (const { r, c, sprite, fence, prop: kind } of items) {
+  for (const { r, c, sprite, fence, prop: kind, fruitColor } of items) {
     const { x, y } = cellToWorld(r, c)
     if (fence) {
       // pontas do lado do losango: N = topo->direita, E = direita->baixo, S = baixo->esquerda, W = esquerda->topo
@@ -210,7 +227,7 @@ export function drawWorld(
       const [a, b] = { N: [top, right], E: [right, bottom], S: [bottom, left], W: [left, top] }[fence]
       drawFence(ctx, a[0], a[1], b[0], b[1])
     } else if (kind) {
-      drawProp(ctx, kind, x, y)
+      drawProp(ctx, kind, x, y, fruitColor)
     } else if (sprite) {
       ctx.drawImage(sprites[sprite], x - CROP_FRAME.ax, y - CROP_FRAME.ay, CROP_FRAME.w, CROP_FRAME.h)
     }
