@@ -52,3 +52,25 @@ export const PHASE_LABEL: Record<DayPhase, string> = {
   afternoon: 'Tarde',
   night: 'Noite',
 }
+
+// Hora "de relógio" para mostrar: cada fase do dia cobre um trecho de horas (o amanhecer começa às 5h)
+const CLOCK_KNOTS: [number, number][] = [
+  [0, 5],
+  [0.25, 8],
+  [0.5, 13],
+  [0.75, 19],
+  [1, 29], // 29h = 5h do dia seguinte
+]
+
+// Ex.: "06:50". Os minutos andam de 10 em 10, como num relógio de jogo.
+export function clockTime(time: number): string {
+  const f = dayFraction(time)
+  const i = CLOCK_KNOTS.findIndex(([at]) => at > f)
+  const [a0, h0] = CLOCK_KNOTS[i - 1]
+  const [a1, h1] = CLOCK_KNOTS[i]
+  const hours = h0 + ((f - a0) / (a1 - a0)) * (h1 - h0)
+  const total = Math.floor((hours * 60) / 10) * 10 // minutos desde 0h, em passos de 10
+  const h = Math.floor(total / 60) % 24
+  const m = total % 60
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+}

@@ -108,11 +108,40 @@ canvas:active {
 
 .day-clock {
   position: absolute;
-  top: 6px;
-  right: 6px;
-  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
+  top: 8px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.35));
   pointer-events: none;
 }
+.clock-dome { position: relative; z-index: 1; margin-right: -10px; flex: none; }
+.clock-frame {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 124px;
+  padding: 5px 5px 5px 14px;
+  background: linear-gradient(#f6c04a, #c67d1c);
+  border: 3px solid #4a2a12;
+  border-radius: 10px;
+}
+.clock-plate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 26px;
+  color: #5a3414;
+  font-weight: 600;
+  background: #f8dfa8;
+  border: 2px solid #7a4416;
+  border-radius: 6px;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.5);
+}
+.clock-day { font-size: 19px; }
+.clock-phase { font-size: 14px; }
+.clock-time { font-size: 19px; letter-spacing: 1px; }
 
 .hud-hotbar {
   position: absolute;
@@ -339,7 +368,7 @@ table.crops th, table.crops td { text-align: left; padding: 3px 4px; border-bott
 /* Telas estreitas: barra de itens sobe para não cobrir o botão Salvar */
 @media (max-width: 900px) {
   .hud-hotbar { bottom: 60px; }
-  .day-clock svg { width: 110px; height: auto; }
+  .day-clock { transform: scale(0.8); transform-origin: top right; }
 }
 
 /* Janelas baixas: botões do menu menores para a coluna da esquerda não bater no botão Salvar */

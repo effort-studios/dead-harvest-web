@@ -55,7 +55,7 @@ Item 5. Falta o usuário testar: abrir o menu lateral (🛒), comprar sementes (
 
 ## Histórico
 - 2026-10-22 – Compra de terreno: `plots` no `SaveData`, Loja > Terreno com escolha da posição no mapa, preço +50% por compra, terrenos colados com cerca só no perímetro. Corrigido índice negativo da textura de terra em terrenos comprados para cima/esquerda. Depende da API (migration `plots`).
-- 2026-10-22 – Relógio do dia em SVG (ui/DayClock.tsx): aro dentado, mostrador com 4 fases que gira sob um ponteiro fixo.
+- 2026-10-22 – Relógio do dia refeito (ui/DayClock.tsx): cúpula de céu com sol/lua num arco + placas com dia, fase e hora (clockTime em daycycle.ts).
 - 2026-10-22 – Loja com select, compra x1/x5/x10 e aba de venda; 4 plantas novas; tempos maiores; frutas nas árvores; ciclo dia/noite.
 - 2026-10-21 – Design system (DESIGN.md, style.ts); props desenhados por código (isoBox, cerca, árvore...), milho em SVG, 22 objetos de cenário em volta da plantação; removido o pacote Isometric Miniature Farm (sprites.ts agora só carrega as plantas).
 - 2026-10-21 – Terra arada nova (procedural, combina com a grama), bordas com tufos; desenho em 2 passadas (chão, depois objetos). Conferida numa cena de teste fora do navegador.
