@@ -3,14 +3,13 @@ import { CROP_ORDER, CROPS, formatDuration, type CropId } from '../game/crops'
 import { FRUIT_ORDER, FRUITS, TREES } from '../game/trees'
 import { plotPrice } from '../game/state'
 import { useGameStore } from '../store/gameStore'
-import { BulbIcon, CloseIcon, CoinIcon, CropIcon, FruitIcon, InfoIcon, ShopIcon } from './Icons'
+import { BulbIcon, CloseIcon, CoinIcon, CropIcon, FruitIcon, ShopIcon } from './Icons'
 
-type Section = 'shop' | 'tips' | 'about'
+type Section = 'shop' | 'tips'
 
 const SECTIONS: { id: Section; Icon: (props: { size?: number }) => React.JSX.Element; title: string }[] = [
   { id: 'shop', Icon: ShopIcon, title: 'Loja' },
   { id: 'tips', Icon: BulbIcon, title: 'Dicas' },
-  { id: 'about', Icon: InfoIcon, title: 'Sobre' },
 ]
 
 // Menu lateral: uma faixa de ícones que abre um painel por cima do mapa.
@@ -56,7 +55,6 @@ export function SideMenu() {
           </h2>
           {open === 'shop' && <ShopPanel />}
           {open === 'tips' && <TipsPanel />}
-          {open === 'about' && <AboutPanel />}
         </section>
       )}
     </div>
@@ -262,17 +260,6 @@ function TipsPanel() {
         </tbody>
       </table>
       <p className="muted">Só dá para colher quando a planta está madura.</p>
-    </>
-  )
-}
-
-function AboutPanel() {
-  return (
-    <>
-      <p>Dead Harvest: planta de dia, sobrevive à noite.</p>
-      <p className="muted">
-        A interface, a arte do mundo e os ícones foram desenhados para o jogo. Fonte: Fredoka (Google Fonts).
-      </p>
     </>
   )
 }

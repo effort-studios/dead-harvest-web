@@ -155,17 +155,6 @@ export function FarmerIcon({ size }: IconProps) {
   )
 }
 
-export function InfoIcon({ size }: IconProps) {
-  return (
-    <Svg size={size}>
-      <circle cx="16" cy="16" r="13" fill="#5aa0e0" stroke={OUTLINE} strokeWidth="2" />
-      <circle cx="16" cy="9.8" r="2" fill="#fff3d6" />
-      <rect x="14.2" y="13.4" width="3.6" height="10" rx="1.8" fill="#fff3d6" />
-      <path d="M8 11a9 9 0 0 1 4-3.6" stroke="#fff3d6" strokeWidth="1.6" fill="none" opacity="0.55" />
-    </Svg>
-  )
-}
-
 export function SaveIcon({ size }: IconProps) {
   return (
     <Svg size={size}>
