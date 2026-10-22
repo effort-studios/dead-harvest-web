@@ -74,8 +74,8 @@ canvas:active {
   padding: 2px 14px 2px 4px;
 }
 .portrait {
-  width: 68px;
-  height: 68px;
+  width: 92px;
+  height: 92px;
   flex-shrink: 0;
   border-width: 12px;
   border-image: url('/assets/ui/round_brown.png') 40 fill / 12px stretch;
@@ -534,3 +534,6 @@ button.hud-player:hover { filter: brightness(1.08); }
 .editor-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
 .editor .tabs { flex-wrap: wrap; }
 .editor .tabs button { min-width: 70px; }
+
+/* o retrato tem mais detalhe, então a moldura é maior (área interna de 68px) */
+.hud-player .portrait { margin: -2px 0; }

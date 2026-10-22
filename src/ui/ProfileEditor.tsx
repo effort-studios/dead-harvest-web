@@ -48,7 +48,7 @@ export function ProfileEditor({ onClose }: { onClose: () => void }) {
 
         <div className="editor-top">
           <div className="editor-preview">
-            <Avatar avatar={avatar} size={120} />
+            <Avatar avatar={avatar} size={150} />
           </div>
           <label className="editor-name">
             Nome no jogo
@@ -75,7 +75,7 @@ export function ProfileEditor({ onClose }: { onClose: () => void }) {
               onClick={() => setAvatar({ ...avatar, [part]: option })}
             >
               {/* cada opção mostra como o avatar ficaria com ela */}
-              <Avatar avatar={{ ...avatar, [part]: option }} size={52} />
+              <Avatar avatar={{ ...avatar, [part]: option }} size={68} />
               <span>{OPTION_LABEL[option]}</span>
             </button>
           ))}

@@ -37,7 +37,7 @@ export function ProfileMenu() {
     <div className="profile" ref={ref}>
       <button className="panel hud-player" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)} title="Perfil e conta">
         <div className="portrait">
-          <Avatar avatar={user.avatar} size={44} />
+          <Avatar avatar={user.avatar} size={68} />
         </div>
         <div className="player-info">
           <div className="player-name">{user.displayName}</div>
