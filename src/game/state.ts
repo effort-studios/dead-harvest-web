@@ -134,7 +134,7 @@ export function migrateSave(data: SaveData): SaveData {
     delete inventory.wheat
   }
   const grid = data.grid.map((row) => row.map((t) => ({ ...t, crop: rename(t.crop) })))
-  return { ...data, inventory, grid, trees: data.trees ?? {}, time: data.time ?? DAY_START }
+  return { ...data, inventory, grid, trees: data.trees ?? {}, time: (data.time ?? DAY_START) % DAY_LENGTH }
 }
 
 function replaceTile(grid: Tile[][], row: number, col: number, tile: Tile): Tile[][] {
