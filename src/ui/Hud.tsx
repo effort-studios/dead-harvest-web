@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
 import { CROP_ORDER, CROPS, formatDuration } from '../game/crops'
 import { useGameStore } from '../store/gameStore'
-import { dayPhase, PHASE_LABEL } from '../game/daycycle'
-import { CoinIcon, CropIcon, FarmerIcon, MoonIcon, SunIcon } from './Icons'
+import { CoinIcon, CropIcon, FarmerIcon } from './Icons'
+import { DayClock } from './DayClock'
 import { SideMenu } from './SideMenu'
 
 const HOTBAR_SLOTS = 9
@@ -24,7 +24,6 @@ export function Hud() {
   }, [])
 
   if (!data) return null
-  const phase = dayPhase(data.time)
 
   return (
     <>
@@ -44,12 +43,7 @@ export function Hud() {
         <SideMenu />
       </div>
 
-      <div className="panel hud-clock">
-        {phase === 'night' ? <MoonIcon size={28} /> : <SunIcon size={28} />}
-        <span>
-          Dia {data.day} <small className="phase">{PHASE_LABEL[phase]}</small>
-        </span>
-      </div>
+      <DayClock time={data.time} day={data.day} />
 
       <div className="panel hud-hotbar">
         {Array.from({ length: HOTBAR_SLOTS }, (_, i) => {

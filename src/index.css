@@ -94,7 +94,7 @@ canvas:active {
 .rail-btn .svg-icon { width: 100%; height: 100%; } /* preenche a área interna da moldura */
 .slot .svg-icon { width: 90%; height: 90%; } /* acompanha o tamanho do slot, que muda com a janela */
 .panel-close { display: flex; align-items: center; justify-content: center; padding: 2px; }
-.money, .hud-clock, .btn { display: inline-flex; align-items: center; gap: 6px; }
+.money, .btn { display: inline-flex; align-items: center; gap: 6px; }
 .panel-title { display: inline-flex; align-items: center; gap: 8px; }
 .player-name { font-size: 13px; opacity: 0.8; }
 .sky-tint {
@@ -104,19 +104,14 @@ canvas:active {
   mix-blend-mode: multiply;
   transition: background-color 1s linear; /* 1 tick por segundo: a mudança fica contínua */
 }
-.phase { display: block; font-size: 12px; font-weight: 400; opacity: 0.85; line-height: 1; }
 .money { font-size: 22px; font-weight: 600; color: #ffd75e; }
 
-.hud-clock {
+.day-clock {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 14px;
-  font-size: 22px;
-  font-weight: 600;
+  top: 6px;
+  right: 6px;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
+  pointer-events: none;
 }
 
 .hud-hotbar {
@@ -344,7 +339,7 @@ table.crops th, table.crops td { text-align: left; padding: 3px 4px; border-bott
 /* Telas estreitas: barra de itens sobe para não cobrir o botão Salvar */
 @media (max-width: 900px) {
   .hud-hotbar { bottom: 60px; }
-  .hud-clock { font-size: 16px; padding: 2px 8px; }
+  .day-clock svg { width: 110px; height: auto; }
 }
 
 /* Janelas baixas: botões do menu menores para a coluna da esquerda não bater no botão Salvar */
