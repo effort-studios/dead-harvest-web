@@ -140,7 +140,7 @@ canvas:active {
   box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.5);
 }
 .clock-day { font-size: 19px; }
-.clock-phase { font-size: 14px; }
+.clock-phase { font-size: 13px; gap: 4px; } /* "Amanhecer" precisa caber */
 .clock-time { font-size: 19px; letter-spacing: 1px; }
 
 .hud-hotbar {

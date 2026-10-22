@@ -54,6 +54,7 @@ Item 5. Falta o usuário testar: abrir o menu lateral (🛒), comprar sementes (
 3. Zumbis (item 7)
 
 ## Histórico
+- 2026-10-22 – Relógio no estilo Stardew: céu do dia inteiro fixo na cúpula (dia embaixo, noite em cima, sol e lua parados, marcas a cada 3h) e ponteiro que gira das 5h às 5h sem encostar na borda. "Amanhecer" cabe na placa.
 - 2026-10-22 – Relógio do dia linear e sequencial (1 s real = 1 min no jogo com o dia de 24 min); fases por horário: amanhecer 5h–8h, manhã 8h–13h, tarde 13h–19h, noite 19h–5h. Cores do céu e sol/lua definidas por hora.
 - 2026-10-22 – Servidor como fonte da verdade: a store manda cada ação para a API (`/game/till`, `plant`, `harvest`, `seeds/buy`, `fruits/sell`, `plots/buy`, `trees/:id/harvest`), mostra uma previsão na hora e troca pelo estado que volta; pedidos em fila, um por vez. Preços, tempos e árvores vêm de `GET /game/catalog` (`setCrops`, `setTrees`, `setPlotPrice`). Removidos o salvamento automático, `putSave` e `migrateSave`. Relógio acertado pelo `serverTime`; sync a cada 30s e ao voltar para a aba. Chapéu de flor e camisa amarela removidos do avatar.
 - 2026-10-22 – Compra de terreno: `plots` no `SaveData`, Loja > Terreno com escolha da posição no mapa, preço +50% por compra, terrenos colados com cerca só no perímetro. Corrigido índice negativo da textura de terra em terrenos comprados para cima/esquerda. Depende da API (migration `plots`).
