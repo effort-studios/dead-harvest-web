@@ -136,6 +136,21 @@ export function BulbIcon({ size }: IconProps) {
   )
 }
 
+// Terreno: um pedaço de terra arada visto de cima, com cerquinha e um broto
+export function PlotIcon({ size }: IconProps) {
+  return (
+    <Svg size={size}>
+      <path d="M3 15l13 7 13-7v3.5l-13 7-13-7z" fill="#7a4416" stroke={OUTLINE} strokeWidth="1.8" />
+      <path d="M16 8l13 7-13 7-13-7z" fill="#b5713c" stroke={OUTLINE} strokeWidth="2" />
+      <path d="M9 12.2l13 7M12.5 10.3l13 7M5.5 14l13 7" stroke="#8a5428" strokeWidth="1.4" fill="none" />
+      <path d="M3 15V10.5M9.5 11.5V7M16 8V3.5M22.5 11.5V7M29 15v-4.5" stroke={OUTLINE} strokeWidth="2.6" />
+      <path d="M3 12l6.5-3.5L16 5l6.5 3.5L29 12" stroke="#c98a4a" strokeWidth="1.6" fill="none" />
+      <path d="M16 16.5v-3.2" stroke="#3f7a2a" strokeWidth="1.6" />
+      <path d="M16 14c-1.8-.2-3-1.2-3.2-2.6 1.8 0 3 .9 3.2 2.6zM16 13.6c1.6-.4 2.7-1.5 2.8-2.9-1.7.2-2.7 1.2-2.8 2.9z" fill="#6cc04a" stroke={OUTLINE} strokeWidth="1" />
+    </Svg>
+  )
+}
+
 export function FarmerIcon({ size }: IconProps) {
   return (
     <Svg size={size}>

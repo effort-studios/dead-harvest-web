@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { CROP_ORDER, CROPS, formatDuration, type CropId } from '../game/crops'
 import { FRUIT_ORDER, FRUITS, TREES } from '../game/trees'
-import { plotPrice } from '../game/state'
+import { GRID_SIZE, plotPrice } from '../game/state'
 import { useGameStore } from '../store/gameStore'
-import { BulbIcon, CloseIcon, CoinIcon, CropIcon, FruitIcon, ShopIcon } from './Icons'
+import { BulbIcon, CloseIcon, CoinIcon, CropIcon, FruitIcon, PlotIcon, ShopIcon } from './Icons'
 
 type Section = 'shop' | 'tips'
 
@@ -182,15 +182,26 @@ function BuyPlot() {
   const buyingPlot = useGameStore((s) => s.buyingPlot)
   const setBuyingPlot = useGameStore((s) => s.setBuyingPlot)
 
+  const missing = price - money
+
   return (
-    <div className="shop-row">
-      <div className="shop-info">
-        <b>Terreno</b> <span className="muted">(você tem {plotCount})</span>
-        <small>{buyingPlot ? 'Clique num terreno destacado no mapa' : 'Um terreno novo 10x10 ao lado de um que você já tem'}</small>
+    <div className="plot-shop">
+      <p className="muted buy-label">Terreno:</p>
+      <div className="seed-card">
+        <PlotIcon size={52} />
+        <ul>
+          <li>Você tem <b>{plotCount}</b> terreno{plotCount === 1 ? '' : 's'}</li>
+          <li>Novo terreno <b>{GRID_SIZE}x{GRID_SIZE}</b>, colado a um seu</li>
+          <li>
+            Custa <CoinIcon size={13} /> <b>{price}</b>
+            {missing > 0 && <span className="plot-missing"> (faltam {missing})</span>}
+          </li>
+        </ul>
       </div>
-      <button className="btn" disabled={!buyingPlot && money < price} onClick={() => setBuyingPlot(!buyingPlot)}>
-        {buyingPlot ? 'Cancelar' : <><CoinIcon size={16} /> {price}</>}
+      <button className={`btn plot-buy ${buyingPlot ? 'danger' : ''}`} disabled={!buyingPlot && missing > 0} onClick={() => setBuyingPlot(!buyingPlot)}>
+        {buyingPlot ? 'Cancelar escolha' : <>Escolher no mapa · <CoinIcon size={15} /> {price}</>}
       </button>
+      {buyingPlot && <p className="muted plot-hint">Clique num dos terrenos destacados no mapa (Esc cancela).</p>}
     </div>
   )
 }

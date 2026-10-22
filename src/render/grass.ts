@@ -20,11 +20,12 @@ type Rgb = [number, number, number]
 const mix = (a: Rgb, b: Rgb, t: number): string =>
   `rgb(${Math.round(a[0] + (b[0] - a[0]) * t)},${Math.round(a[1] + (b[1] - a[1]) * t)},${Math.round(a[2] + (b[2] - a[2]) * t)})`
 
-// Paleta: de tufos "no fundo" (escuros) até tufos "na frente" (claros)
-const BASE_DARK: Rgb = [28, 104, 48]
-const BASE_LIGHT: Rgb = [52, 150, 62]
-const TIP_DARK: Rgb = [70, 168, 70]
-const TIP_LIGHT: Rgb = [150, 222, 92]
+// Paleta: de tufos "no fundo" (escuros) até tufos "na frente" (claros). Verdes mais apagados e
+// próximos entre si, para a grama ficar de fundo e não competir com a plantação e a HUD.
+const BASE_DARK: Rgb = [44, 96, 54]
+const BASE_LIGHT: Rgb = [60, 120, 64]
+const TIP_DARK: Rgb = [78, 136, 76]
+const TIP_LIGHT: Rgb = [112, 160, 90]
 
 export function paintGrassTexture(ctx: CanvasRenderingContext2D, size = GRASS_TEXTURE_SIZE) {
   const rand = seededRandom(20261021)
@@ -43,7 +44,7 @@ export function paintGrassTexture(ctx: CanvasRenderingContext2D, size = GRASS_TE
   }
 
   // 1. Fundo escuro (o que se vê entre os tufos)
-  ctx.fillStyle = '#1f6a34'
+  ctx.fillStyle = '#2f6438'
   ctx.fillRect(0, 0, size, size)
 
   // 2. Uma folha: curva, com ponta fina, e degradê da base até a ponta
@@ -91,7 +92,7 @@ export function paintGrassTexture(ctx: CanvasRenderingContext2D, size = GRASS_TE
   }
 
   // 4. Alguns detalhes: florzinhas espalhadas
-  const flowerColors = ['#fff6d8', '#ffe36a', '#ff9fc0']
+  const flowerColors = ['#ece4c8', '#e3cf7c', '#e2a6b8']
   for (let i = 0; i < 12; i++) {
     const x = rand() * size
     const y = rand() * size
