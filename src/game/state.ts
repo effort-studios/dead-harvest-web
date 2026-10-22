@@ -5,9 +5,9 @@ import type { SaveData, Tile } from './types'
 
 export const GRID_SIZE = 10
 
-const SOIL: Tile = { state: 'soil', crop: null, growth: 0 }
+const TILLED: Tile = { state: 'tilled', crop: null, growth: 0 }
 
-// Clique num tile: terra -> arada -> plantada -> (madura) colhe e volta a ser terra
+// Clique num tile: terra -> arada -> plantada -> (madura) colhe e volta a ficar arada
 export function clickTile(data: SaveData, row: number, col: number, seed: CropId): SaveData {
   const tile = data.grid[row]?.[col]
   if (!tile) return data
@@ -25,7 +25,7 @@ export function clickTile(data: SaveData, row: number, col: number, seed: CropId
   } else {
     if (!isCropId(tile.crop) || tile.growth < CROPS[tile.crop].growTicks) return data // ainda crescendo
     money += CROPS[tile.crop].sellPrice
-    newTile = SOIL
+    newTile = TILLED
   }
 
   return { ...data, grid: replaceTile(data.grid, row, col, newTile), money, inventory }

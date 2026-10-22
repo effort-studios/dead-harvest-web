@@ -23,6 +23,19 @@ export default function App() {
     return () => clearInterval(id)
   }, [status])
 
+  // Salvamento automático: a cada 10s e ao esconder a aba
+  useEffect(() => {
+    if (status !== 'ready') return
+    const save = () => useGameStore.getState().save()
+    const onHide = () => document.visibilityState === 'hidden' && save()
+    const id = setInterval(save, 10_000)
+    document.addEventListener('visibilitychange', onHide)
+    return () => {
+      clearInterval(id)
+      document.removeEventListener('visibilitychange', onHide)
+    }
+  }, [status])
+
   if (status === 'loading') return <p>Carregando...</p>
   if (status === 'error') return <p className="error">Não foi possível conectar à API: {error}</p>
   return (

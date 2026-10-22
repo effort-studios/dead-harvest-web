@@ -1,16 +1,16 @@
 import { useEffect } from 'react'
 import { CROP_ORDER, CROPS } from '../game/crops'
 import { useGameStore } from '../store/gameStore'
-import { CoinIcon, CropIcon, FarmerIcon, SaveIcon, SunIcon } from './Icons'
+import { CoinIcon, CropIcon, FarmerIcon, SunIcon } from './Icons'
 import { SideMenu } from './SideMenu'
 
 const HOTBAR_SLOTS = 9
 
 // HUD inspirada na prévia: jogador e dinheiro (canto superior esquerdo),
-// dia (canto superior direito), barra de itens (embaixo) e salvar (embaixo à esquerda).
+// dia (canto superior direito), barra de itens (embaixo) e erros de salvamento (embaixo à esquerda).
 // Vida, energia, missões e minimapa ainda não existem no jogo e ficam para depois do MVP.
 export function Hud() {
-  const { data, saving, error, save, selectedSeed, selectSeed } = useGameStore()
+  const { data, error, selectedSeed, selectSeed } = useGameStore()
 
   // Teclas 1, 2, 3... escolhem a semente do slot correspondente
   useEffect(() => {
@@ -67,12 +67,11 @@ export function Hud() {
         })}
       </div>
 
-      <div className="hud-save">
-        <button className="btn" onClick={save} disabled={saving}>
-          <SaveIcon size={18} /> {saving ? 'Salvando...' : 'Salvar'}
-        </button>
-        {error && <span className="error">{error}</span>}
-      </div>
+      {error && (
+        <div className="hud-save">
+          <span className="error">{error}</span>
+        </div>
+      )}
     </>
   )
 }
