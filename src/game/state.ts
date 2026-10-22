@@ -1,4 +1,6 @@
+import { DAY_LENGTH, DAY_START } from './daycycle'
 import { CROPS, isCropId, type CropId } from './crops'
+import { FRUIT_REGROW_MS, FRUITS, FRUITS_PER_HARVEST, TREES, type FruitId } from './trees'
 import type { Plot, SaveData, Tile } from './types'
 
 // Funções puras: recebem o estado e devolvem um estado novo, sem mexer em canvas, React ou API.
@@ -35,38 +37,16 @@ export function clickTile(data: SaveData, plot: number, row: number, col: number
   return { ...data, plots: replacePlotGrid(data.plots, plot, replaceTile(data.plots[plot].grid, row, col, newTile)), money, inventory }
 }
 
-// Loja: compra 1 semente se o jogador tiver dinheiro
-export function buySeed(data: SaveData, crop: CropId): SaveData {
+// Loja: compra `qty` sementes; se o dinheiro não dá para tudo, compra só as que dá
+export function buySeed(data: SaveData, crop: CropId, qty = 1): SaveData {
   const price = CROPS[crop].seedPrice
-  if (data.money < price) return data
+  const n = Math.min(qty, Math.floor(data.money / price))
+  if (n < 1) return data
   return {
     ...data,
-    money: data.money - price,
-    inventory: { ...data.inventory, [crop]: (data.inventory[crop] ?? 0) + 1 },
+    money: data.money - price * n,
+    inventory: { ...data.inventory, [crop]: (data.inventory[crop] ?? 0) + n },
   }
-}
-
-// Como o clique age: só no tile, ou em toda a linha / coluna dele
-export type ClickMode = 'tile' | 'row' | 'col'
-
-// Ação em massa: repete o clique em todos os tiles da linha (ou coluna) que estão no
-// mesmo estado do tile clicado. Se as sementes acabam, o resto da linha fica como está.
-export function clickLine(data: SaveData, mode: 'row' | 'col', plot: number, row: number, col: number, seed: CropId): SaveData {
-  const clicked = data.plots[plot]?.grid[row]?.[col]
-  if (!clicked) return data
-  let result = data
-  for (let i = 0; i < GRID_SIZE; i++) {
-    const r = mode === 'row' ? row : i
-    const c = mode === 'row' ? i : col
-    if (result.plots[plot].grid[r][c].state === clicked.state) result = clickTile(result, plot, r, c, seed)
-  }
-  return result
-}
-
-// Tiles afetados por um clique (usado para destacar a linha no desenho)
-export function tilesInMode(mode: ClickMode, row: number, col: number) {
-  if (mode === 'tile') return [{ row, col }]
-  return Array.from({ length: GRID_SIZE }, (_, i) => (mode === 'row' ? { row, col: i } : { row: i, col }))
 }
 
 // Preço do próximo terreno: 1000 e +50% a cada terreno comprado
@@ -104,7 +84,66 @@ export function plotCell(row: number, col: number) {
   return { x, y, row: row - y * PLOT_STEP, col: col - x * PLOT_STEP }
 }
 
-// Passa 1 tick: toda planta cresce 1, até ficar madura
+// Árvore com frutas: nunca colhida, ou colhida há mais de 1 hora
+export function treeHasFruit(data: SaveData, treeId: string, now: number): boolean {
+  const last = data.trees?.[treeId]
+  return last === undefined || now - last >= FRUIT_REGROW_MS
+}
+
+// Ids das árvores com frutas agora
+export function readyTreeIds(data: SaveData, now: number): string[] {
+  return TREES.filter((t) => treeHasFruit(data, t.id, now)).map((t) => t.id)
+}
+
+// Colhe as frutas de uma árvore: vão para o inventário e a árvore só repõe daqui a 1 hora
+export function harvestTree(data: SaveData, treeId: string, now: number): SaveData {
+  const tree = TREES.find((t) => t.id === treeId)
+  if (!tree || !treeHasFruit(data, treeId, now)) return data
+  return {
+    ...data,
+    inventory: { ...data.inventory, [tree.fruit]: (data.inventory[tree.fruit] ?? 0) + FRUITS_PER_HARVEST },
+    trees: { ...data.trees, [treeId]: now },
+  }
+}
+
+// Vende `qty` frutas do inventário (ou todas, se qty não for informado)
+export function sellFruit(data: SaveData, fruit: FruitId, qty?: number): SaveData {
+  const have = data.inventory[fruit] ?? 0
+  const n = Math.min(qty ?? have, have)
+  if (n < 1) return data
+  return {
+    ...data,
+    money: data.money + FRUITS[fruit].sellPrice * n,
+    inventory: { ...data.inventory, [fruit]: have - n },
+  }
+}
+
+
+// Como o clique age: só no tile, ou em toda a linha / coluna dele
+export type ClickMode = 'tile' | 'row' | 'col'
+
+// Ação em massa: repete o clique em todos os tiles da linha (ou coluna) que estão no
+// mesmo estado do tile clicado. Se as sementes acabam, o resto da linha fica como está.
+export function clickLine(data: SaveData, mode: 'row' | 'col', plot: number, row: number, col: number, seed: CropId): SaveData {
+  const clicked = data.plots[plot]?.grid[row]?.[col]
+  if (!clicked) return data
+  let result = data
+  for (let i = 0; i < GRID_SIZE; i++) {
+    const r = mode === 'row' ? row : i
+    const c = mode === 'row' ? i : col
+    if (result.plots[plot].grid[r][c].state === clicked.state) result = clickTile(result, plot, r, c, seed)
+  }
+  return result
+}
+
+// Tiles afetados por um clique (usado para destacar a linha no desenho)
+export function tilesInMode(mode: ClickMode, row: number, col: number) {
+  if (mode === 'tile') return [{ row, col }]
+  return Array.from({ length: GRID_SIZE }, (_, i) => (mode === 'row' ? { row, col: i } : { row: i, col }))
+}
+
+// Passa 1 tick: toda planta cresce 1 (até ficar madura) e o relógio do dia avança.
+// Ao fim do dia (depois da noite) amanhece e o contador de dias sobe.
 export function tick(data: SaveData): SaveData {
   let changed = false
   const plots = data.plots.map((plot) => ({
@@ -118,7 +157,14 @@ export function tick(data: SaveData): SaveData {
       }),
     ),
   }))
-  return changed ? { ...data, plots } : data
+  const time = data.time + 1
+  const newDay = time >= DAY_LENGTH
+  return {
+    ...data,
+    plots: changed ? plots : data.plots, // mesmos terrenos = o mapa não precisa ser redesenhado
+    time: newDay ? 0 : time,
+    day: newDay ? data.day + 1 : data.day,
+  }
 }
 
 // Saves antigos usavam "wheat" (trigo); hoje a planta inicial é o milho
@@ -130,7 +176,7 @@ export function migrateSave(data: SaveData): SaveData {
     delete inventory.wheat
   }
   const plots = data.plots.map((p) => ({ ...p, grid: p.grid.map((row) => row.map((t) => ({ ...t, crop: rename(t.crop) }))) }))
-  return { ...data, inventory, plots }
+  return { ...data, inventory, plots, trees: data.trees ?? {}, time: (data.time ?? DAY_START) % DAY_LENGTH }
 }
 
 function replacePlotGrid(plots: Plot[], index: number, grid: Tile[][]): Plot[] {

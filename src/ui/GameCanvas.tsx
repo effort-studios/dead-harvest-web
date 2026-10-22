@@ -6,10 +6,12 @@ import {
   INITIAL_CAMERA,
   screenToWorld,
   tileFromWorld,
+  treeAt,
   type Hover,
   type Size,
 } from '../render/draw'
 import { freeSlots, plotCell, type ClickMode } from '../game/state'
+import { skyTint } from '../game/daycycle'
 import { loadSprites, type Sprites } from '../render/sprites'
 import { useGameStore } from '../store/gameStore'
 
@@ -26,6 +28,9 @@ export function GameCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const plots = useGameStore((s) => s.data?.plots)
   const buyingPlot = useGameStore((s) => s.buyingPlot)
+  const readyTrees = useGameStore((s) => s.readyTrees)
+  const harvestTree = useGameStore((s) => s.harvestTree)
+  const time = useGameStore((s) => s.data?.time ?? 0)
   const [sprites, setSprites] = useState<Sprites | null>(null)
   const [size, setSize] = useState<Size>({ width: 0, height: 0 })
 
@@ -34,6 +39,7 @@ export function GameCanvas() {
   const drag = useRef<{ startX: number; startY: number; camX: number; camY: number; moved: boolean } | null>(null)
   const frame = useRef(0)
   const hover = useRef<Hover | null>(null) // o que está sob o mouse
+  const treeHover = useRef<string | null>(null) // árvore com frutas sob o mouse (vira cursor de mãozinha)
   const mode = useRef<ClickMode>('tile') // alterado por Shift/Ctrl
   const drawRef = useRef<() => void>(() => {})
 
@@ -62,8 +68,9 @@ export function GameCanvas() {
       canvas.height = Math.round(size.height * dpr)
     }
     const { x, y } = camera.current
-    drawWorld(ctx, sprites, data.plots, { x, y, zoom: fitZoom(size) }, size, dpr, hover.current, buyingPlot ? freeSlots(data) : [])
-  }, [sprites, size])
+    const ready = new Set(readyTrees ? readyTrees.split(',') : [])
+    drawWorld(ctx, sprites, data.plots, ready, { x, y, zoom: fitZoom(size) }, size, dpr, hover.current, buyingPlot ? freeSlots(data) : [])
+  }, [sprites, size, readyTrees])
 
   // Redesenha quando os terrenos, as imagens ou o tamanho da janela mudam
   useEffect(() => {
@@ -98,16 +105,28 @@ export function GameCanvas() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // O que está sob o ponto da tela: um terreno livre (na compra) ou um tile de um terreno
-  function targetAt(e: React.PointerEvent<HTMLCanvasElement>, newMode: ClickMode): Hover | null {
-    const data = useGameStore.getState().data
-    if (!data) return null
+  // Ponto do mundo sob o mouse
+  function worldAt(e: React.PointerEvent<HTMLCanvasElement>) {
     const rect = e.currentTarget.getBoundingClientRect()
     const cam = { ...camera.current, zoom: fitZoom(size) }
-    const world = screenToWorld(e.clientX - rect.left, e.clientY - rect.top, cam, size)
-    const t = tileFromWorld(world.x, world.y)
+    return screenToWorld(e.clientX - rect.left, e.clientY - rect.top, cam, size)
+  }
+
+  // Árvore com frutas sob o ponto (fora do modo de compra de terreno)
+  function readyTreeAt(wx: number, wy: number): string | null {
+    const { data, readyTrees, buyingPlot } = useGameStore.getState()
+    if (!data || buyingPlot) return null
+    const tree = treeAt(wx, wy, data.plots)
+    return tree && readyTrees.split(',').includes(tree) ? tree : null
+  }
+
+  // O que está sob o ponto: um terreno livre (na compra) ou um tile de um terreno
+  function targetAt(wx: number, wy: number, newMode: ClickMode): Hover | null {
+    const { data, buyingPlot } = useGameStore.getState()
+    if (!data) return null
+    const t = tileFromWorld(wx, wy)
     const cell = plotCell(t.row, t.col)
-    if (useGameStore.getState().buyingPlot) {
+    if (buyingPlot) {
       return freeSlots(data).some((s) => s.x === cell.x && s.y === cell.y) ? { kind: 'slot', x: cell.x, y: cell.y } : null
     }
     const plot = data.plots.findIndex((p) => p.x === cell.x && p.y === cell.y)
@@ -115,8 +134,14 @@ export function GameCanvas() {
   }
 
   function updateHover(e: React.PointerEvent<HTMLCanvasElement>) {
+    const world = worldAt(e)
+    const ready = readyTreeAt(world.x, world.y)
+    if (ready !== treeHover.current) {
+      treeHover.current = ready
+      e.currentTarget.style.cursor = ready ? 'pointer' : ''
+    }
     const newMode = modeOf(e)
-    const next = targetAt(e, newMode)
+    const next = ready ? null : targetAt(world.x, world.y, newMode) // sobre a árvore não destaca tile
     const old = hover.current
     const same =
       next?.kind === 'slot'
@@ -155,7 +180,13 @@ export function GameCanvas() {
     const d = drag.current
     drag.current = null
     if (!d || d.moved) return // foi um arrasto, não um clique
-    const target = targetAt(e, modeOf(e))
+    const world = worldAt(e)
+    const tree = readyTreeAt(world.x, world.y)
+    if (tree) {
+      harvestTree(tree)
+      return
+    }
+    const target = targetAt(world.x, world.y, modeOf(e))
     if (target?.kind === 'slot') useGameStore.getState().buyPlot(target.x, target.y)
     else if (target) useGameStore.getState().clickTile(target.plot, target.row, target.col, target.mode)
   }
@@ -174,6 +205,8 @@ export function GameCanvas() {
           scheduleDraw()
         }}
       />
+      {/* Luz do dia: cobre só o mapa (a HUD fica de fora) e muda aos poucos com a hora */}
+      <div className="sky-tint" style={{ backgroundColor: skyTint(time) }} />
     </div>
   )
 }

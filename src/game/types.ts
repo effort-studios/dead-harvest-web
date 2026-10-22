@@ -14,7 +14,9 @@ export type Plot = {
 
 export type SaveData = {
   day: number
+  time: number // ticks (segundos) desde o amanhecer; veja game/daycycle.ts
   money: number
   plots: Plot[]
-  inventory: Record<string, number>
+  inventory: Record<string, number> // sementes e frutas colhidas
+  trees?: Record<string, number> // id da árvore -> ms (Date.now) da última coleta de frutas
 }
