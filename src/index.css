@@ -74,8 +74,8 @@ canvas:active {
   padding: 2px 14px 2px 4px;
 }
 .portrait {
-  width: 92px;
-  height: 92px;
+  width: 104px;
+  height: 104px;
   flex-shrink: 0;
   border-width: 12px;
   border-image: url('/assets/ui/round_brown.png') 40 fill / 12px stretch;
@@ -489,7 +489,7 @@ button.hud-player:hover { filter: brightness(1.08); }
   overflow-y: auto;
   background: rgba(20, 12, 4, 0.6);
 }
-.editor { width: 460px; max-width: 100%; padding: 0 6px 6px; font-size: 15px; }
+.editor { width: 520px; max-width: 100%; padding: 0 6px 6px; font-size: 15px; }
 .editor h2 { display: flex; align-items: center; justify-content: space-between; margin: 6px 0 10px; font-size: 18px; }
 .editor-top { display: flex; align-items: center; gap: 14px; margin-bottom: 4px; }
 .editor-preview {
@@ -513,7 +513,7 @@ button.hud-player:hover { filter: brightness(1.08); }
   border: 2px solid #8a4f1c;
   border-radius: 8px;
 }
-.option-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 6px; }
+.option-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 6px; }
 .option {
   display: flex;
   flex-direction: column;
@@ -535,5 +535,9 @@ button.hud-player:hover { filter: brightness(1.08); }
 .editor .tabs { flex-wrap: wrap; }
 .editor .tabs button { min-width: 70px; }
 
-/* o retrato tem mais detalhe, então a moldura é maior (área interna de 68px) */
+/* retrato em pixel art: área interna de 80px = grade de 40 em 2x */
 .hud-player .portrait { margin: -2px 0; }
+
+/* pixel art: amplia sem suavizar */
+.pixel-avatar { display: block; image-rendering: pixelated; }
+.editor-preview { padding: 4px; border-radius: 8px; }
