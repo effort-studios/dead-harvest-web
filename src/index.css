@@ -536,8 +536,17 @@ button.hud-player:hover { filter: brightness(1.08); }
 .editor .tabs button { min-width: 70px; }
 
 /* retrato em pixel art: área interna de 80px = grade de 40 em 2x */
-.hud-player .portrait { margin: -2px 0; }
+/* a foto ocupa a moldura inteira: borda fina no lugar do aro da moldura do pacote de UI */
+.hud-player .portrait {
+  width: auto;
+  height: auto;
+  border: 3px solid #2a170a;
+  border-image: none;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 0 0 2px #c98f4e;
+}
 
 /* pixel art: amplia sem suavizar */
 .pixel-avatar { display: block; image-rendering: pixelated; }
-.editor-preview { padding: 4px; border-radius: 8px; }
+.editor-preview { padding: 0; background: none; border-color: #2a170a; border-radius: 10px; overflow: hidden; box-shadow: 0 0 0 2px #c98f4e; }
