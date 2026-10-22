@@ -1,6 +1,13 @@
-// Ciclo do dia. O tempo é contado em ticks (1 tick = 1 segundo) desde o amanhecer.
-export const DAY_LENGTH = 300 // um dia inteiro dura 5 minutos: 4 fases de 75s (amanhecer, manhã, tarde, noite)
-export const DAY_START = 75 // jogo novo começa no início da manhã
+// Ciclo do dia. O tempo é contado em segundos desde o amanhecer. A duração do dia é regra do servidor
+// (DAY_LENGTH_SECONDS no .env da API) e chega pelo catálogo; o dia tem 4 fases iguais (amanhecer, manhã,
+// tarde, noite), então tudo aqui trabalha com a fração do dia.
+let dayLength = 1440
+
+export function setDayLength(seconds: number) {
+  dayLength = seconds
+}
+
+export const dayLengthSeconds = () => dayLength
 
 // Cor que cobre o mapa em cada ponto do dia (fração 0 a 1). O valor `a` é a opacidade.
 // A tela é multiplicada por essa cor: branco com a = 0 deixa o mapa como está (dia claro).
@@ -20,7 +27,7 @@ const KEYFRAMES: Keyframe[] = [
 ]
 
 export function dayFraction(time: number): number {
-  return (((time % DAY_LENGTH) + DAY_LENGTH) % DAY_LENGTH) / DAY_LENGTH
+  return (((time % dayLength) + dayLength) % dayLength) / dayLength
 }
 
 // Cor (CSS) do filtro de luz no horário `time`, misturando linearmente os dois pontos vizinhos

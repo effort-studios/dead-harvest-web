@@ -3,6 +3,7 @@ import * as api from '../api/client'
 import { ApiError, type User } from '../api/client'
 import type { Avatar } from '../game/avatar'
 import { setCrops, type CropId } from '../game/crops'
+import { setDayLength } from '../game/daycycle'
 import {
   applyTileCommand,
   buyPlot,
@@ -199,6 +200,7 @@ async function startGame(user: User) {
   setCrops(catalog.crops)
   setTrees(catalog.fruits, catalog.trees)
   setPlotPrice(catalog.plotPrice)
+  setDayLength(catalog.dayLengthSeconds)
   useGameStore.setState({ status: 'ready', user, error: null, buyingPlot: false, selectedSeed: 'corn' })
   applyServerState(data)
 }

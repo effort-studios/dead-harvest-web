@@ -68,7 +68,7 @@ export const resetPassword = (input: { email: string; code: string; newPassword:
 
 export type Catalog = {
   gridSize: number
-  dayLengthSeconds: number
+  dayLengthSeconds: number // duração do dia inteiro
   dayStartSeconds: number
   plotPrice: { base: number; factor: number }
   crops: CatalogCrop[]

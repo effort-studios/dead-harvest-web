@@ -1,4 +1,4 @@
-import { DAY_LENGTH } from './daycycle'
+import { dayLengthSeconds } from './daycycle'
 import { CROP_ORDER, CROPS, isCropId, type CropId } from './crops'
 import { FRUITS, TREES, type FruitId } from './trees'
 import type { Plot, SaveData, Tile } from './types'
@@ -186,7 +186,7 @@ export function tick(data: SaveData): SaveData {
     ),
   }))
   const time = data.time + 1
-  const newDay = time >= DAY_LENGTH
+  const newDay = time >= dayLengthSeconds()
   return {
     ...data,
     plots: changed ? plots : data.plots, // mesmos terrenos = o mapa não precisa ser redesenhado
