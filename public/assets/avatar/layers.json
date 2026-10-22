@@ -97,10 +97,6 @@
     "coat_brown": {
       "image": "outfit_coat_brown",
       "skin": "outfit_coat_brown_skin"
-    },
-    "shirt_yellow": {
-      "image": "outfit_shirt_yellow",
-      "skin": "outfit_shirt_yellow_skin"
     }
   },
   "head": {

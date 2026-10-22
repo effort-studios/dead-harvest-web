@@ -7,8 +7,8 @@ export const AVATAR_OPTIONS = {
   hair: ['short', 'messy', 'long', 'ponytail', 'bun', 'buzz', 'bald'],
   hairColor: ['black', 'brown', 'auburn', 'ginger', 'blonde', 'gray'],
   beard: ['none', 'stubble', 'mustache', 'goatee', 'full'],
-  hat: ['none', 'straw', 'cap', 'beanie', 'cowboy', 'flower'],
-  outfit: ['overalls_blue', 'overalls_red', 'shirt_green', 'shirt_purple', 'coat_brown', 'shirt_yellow'],
+  hat: ['none', 'straw', 'cap', 'beanie', 'cowboy'],
+  outfit: ['overalls_blue', 'overalls_red', 'shirt_green', 'shirt_purple', 'coat_brown'],
 } as const
 
 export type AvatarPart = keyof typeof AVATAR_OPTIONS
@@ -36,13 +36,12 @@ export const OPTION_LABEL: { [K in AvatarPart]: Record<Avatar[K], string> } = {
   hair: { short: 'Curto', messy: 'Bagunçado', long: 'Comprido', ponytail: 'Rabo de cavalo', bun: 'Coque', buzz: 'Raspado', bald: 'Careca' },
   hairColor: { black: 'Preto', brown: 'Castanho', auburn: 'Acaju', ginger: 'Ruivo', blonde: 'Loiro', gray: 'Grisalho' },
   beard: { none: 'Nenhuma', stubble: 'Por fazer', mustache: 'Bigode', goatee: 'Cavanhaque', full: 'Cheia' },
-  hat: { none: 'Nenhum', straw: 'Palha', cap: 'Boné', beanie: 'Gorro', cowboy: 'Cowboy', flower: 'Flor' },
+  hat: { none: 'Nenhum', straw: 'Palha', cap: 'Boné', beanie: 'Gorro', cowboy: 'Cowboy' },
   outfit: {
     overalls_blue: 'Macacão azul',
     overalls_red: 'Macacão vermelho',
     shirt_green: 'Camisa verde',
     shirt_purple: 'Camisa roxa',
     coat_brown: 'Casaco marrom',
-    shirt_yellow: 'Camisa amarela',
   },
 }

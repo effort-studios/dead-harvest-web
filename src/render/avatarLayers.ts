@@ -171,7 +171,7 @@ async function compose(avatar: Avatar): Promise<string> {
     const keep = hairLayer.keep ? maskOf(hairLayer.keep) : undefined
     draw(hairLayer.image, (d) => recolor(d, hair, (i) => !keep || keep[i + 3] === 0))
   }
-  if (avatar.hat !== 'none') draw(layout.hats[avatar.hat]?.image) // a flor ainda não tem desenho: não aparece
+  if (avatar.hat !== 'none') draw(layout.hats[avatar.hat]?.image)
 
   return canvas.toDataURL('image/png')
 }

@@ -29,8 +29,8 @@ HEAD_TOP = 64  # topo da careca na tela (sobra espaço para chapéu e coque)
 FACES = {'happy': 'feliz', 'calm': 'calmo', 'wink': 'piscando', 'surprised': 'surpreso', 'sleepy': 'sonolento'}
 BEARDS = {'stubble': 'stubble_leve', 'mustache': 'bigode', 'goatee': 'cavanhaque', 'full': 'barba_cheia'}
 HAIRS = {'short': 'curto_fr estilo_frente', 'messy': 'curto_espigado', 'long': 'longo_partido_centro', 'ponytail': 'rabo_cavalo', 'bun': 'coque', 'buzz': 'buzz_cut'}
-HAT_ORDER = ['straw', 'cap', 'beanie', 'cowboy']  # na ordem em que aparecem na linha (a flor não veio)
-OUTFIT_ORDER = ['overalls_blue', 'overalls_red', 'shirt_green', 'shirt_purple', 'coat_brown']  # a listrada veio cortada (ver o fim)
+HAT_ORDER = ['straw', 'cap', 'beanie', 'cowboy']  # na ordem em que aparecem na linha
+OUTFIT_ORDER = ['overalls_blue', 'overalls_red', 'shirt_green', 'shirt_purple', 'coat_brown']  # a listrada veio cortada: fica de fora
 
 
 def load(path):
@@ -252,27 +252,6 @@ def main():
         save('outfit_' + k, im)
         mask_png('outfit_%s_skin' % k, skin_any(im) & (hsv(im)[2] > 0.55))
         layout['outfits'][k] = {'image': 'outfit_' + k, 'skin': 'outfit_%s_skin' % k}
-
-    # Camiseta listrada amarela: o recorte veio cortado. Provisório: a verde recolorida, com listras.
-    green = np.array(Image.open(os.path.join(OUT, 'outfit_shirt_green.png')))
-    green_skin = np.array(Image.open(os.path.join(OUT, 'outfit_shirt_green_skin.png')))[..., 3] > 0
-    cloth = (green[..., 3] > 0) & ~green_skin
-    lum = green[..., :3].astype(float) @ np.array([0.299, 0.587, 0.114])
-    lo, hi = np.percentile(lum[cloth], 2), np.percentile(lum[cloth], 98)
-    ramp = np.array([[92, 64, 16], [156, 116, 24], [207, 159, 37], [242, 197, 61], [255, 230, 130]], float)
-    t = np.clip((lum - lo) / max(hi - lo, 1), 0, 1) * (len(ramp) - 1)
-    i = np.minimum(t.astype(int), len(ramp) - 2)
-    f = (t - i)[..., None]
-    col = ramp[i] * (1 - f) + ramp[i + 1] * f
-    yellow = green.copy()
-    yellow[cloth, :3] = col[cloth].astype(np.uint8)
-    ys = np.nonzero(cloth)[0]
-    top = ys.min()
-    stripes = cloth & (((yy - top) // 7) % 3 == 1) & (lum > lo + (hi - lo) * 0.25)  # listras horizontais
-    yellow[stripes, :3] = (yellow[stripes, :3].astype(float) * 0.78).astype(np.uint8)
-    save('outfit_shirt_yellow', yellow)
-    mask_png('outfit_shirt_yellow_skin', green_skin)
-    layout['outfits']['shirt_yellow'] = {'image': 'outfit_shirt_yellow', 'skin': 'outfit_shirt_yellow_skin'}
 
     json.dump(layout, open(os.path.join(OUT, 'layers.json'), 'w'), indent=2)
     print('ok:', OUT)
