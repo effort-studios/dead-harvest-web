@@ -55,6 +55,7 @@ Item 5. Falta o usuário testar: abrir o menu lateral (🛒), comprar sementes (
 
 ## Histórico
 - 2026-10-22 – Compra de terreno: `plots` no `SaveData`, Loja > Terreno com escolha da posição no mapa, preço +50% por compra, terrenos colados com cerca só no perímetro. Corrigido índice negativo da textura de terra em terrenos comprados para cima/esquerda. Depende da API (migration `plots`).
+- 2026-10-22 – Login obrigatório (sem convidados): tela de login/cadastro/recuperação de senha (ui/AuthScreen.tsx), sessão por cookie httpOnly (credentials: include), painel Conta com Sair; store com `user` no lugar de `playerId`. A API usa o mesmo host da página (porta 3333).
 - 2026-10-22 – Barra de itens só mostra o que o jogador tem (`ownedSeeds`); teclas 1-9 seguem a posição na barra; se a semente acaba, seleciona outra (`pickSeed`). Slots livres ficam para as ferramentas.
 - 2026-10-22 – Zoom com a roda do mouse (0.5x a 3x, em direção ao cursor; listener não-passivo no canvas).
 - 2026-10-22 – Relógio do dia refeito (ui/DayClock.tsx): cúpula de céu com sol/lua num arco + placas com dia, fase e hora (clockTime em daycycle.ts).

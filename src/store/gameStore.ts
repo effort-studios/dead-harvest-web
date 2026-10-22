@@ -1,22 +1,25 @@
 import { create } from 'zustand'
-import { ApiError, createPlayer, loadSave, putSave } from '../api/client'
+import * as api from '../api/client'
+import { ApiError, type User } from '../api/client'
 import type { CropId } from '../game/crops'
 import { buyPlot, buySeed, clickLine, clickTile, harvestTree, migrateSave, pickSeed, readyTreeIds, sellFruit, tick, type ClickMode } from '../game/state'
 import type { FruitId } from '../game/trees'
 import type { SaveData } from '../game/types'
 
-const PLAYER_KEY = 'deadHarvestPlayerId'
-
 type GameState = {
-  status: 'loading' | 'ready' | 'error'
+  // anonymous = ninguém logado (mostra a tela de login)
+  status: 'loading' | 'anonymous' | 'ready' | 'error'
   error: string | null
   saving: boolean
-  playerId: string | null
+  user: User | null
   data: SaveData | null
   readyTrees: string // ids das árvores com frutas, em texto; muda quando alguma árvore repõe ou é colhida (redesenha o mapa)
   selectedSeed: CropId // semente escolhida na barra de itens (não vai para o save)
   buyingPlot: boolean // true = o mapa mostra as posições livres para o jogador escolher
   init: () => Promise<void>
+  login: (email: string, password: string) => Promise<void>
+  register: (email: string, password: string, displayName: string) => Promise<void>
+  logout: () => Promise<void>
   save: () => Promise<void>
   clickTile: (plot: number, row: number, col: number, mode: ClickMode) => void
   selectSeed: (crop: CropId) => void
@@ -26,51 +29,49 @@ type GameState = {
   harvestTree: (treeId: string) => void
   setBuyingPlot: (on: boolean) => void
   buyPlot: (x: number, y: number) => void
-  newGame: () => Promise<void>
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
   status: 'loading',
   error: null,
   saving: false,
-  playerId: null,
+  user: null,
   data: null,
   readyTrees: '',
   selectedSeed: 'corn',
   buyingPlot: false,
 
+  // Ao abrir o jogo: se já há sessão (cookie), carrega o save; senão, mostra a tela de login
   init: async () => {
     try {
-      let playerId = localStorage.getItem(PLAYER_KEY)
-      let data: SaveData | null = null
-
-      if (playerId) {
-        try {
-          data = await loadSave(playerId)
-        } catch (err) {
-          // 404 = id guardado não existe mais (ex.: banco recriado); cria outro jogador
-          if (!(err instanceof ApiError && err.status === 404)) throw err
-        }
-      }
-      if (!data) {
-        playerId = await createPlayer()
-        localStorage.setItem(PLAYER_KEY, playerId)
-        data = await loadSave(playerId)
-      }
-      const migrated = migrateSave(data)
-      set({ status: 'ready', playerId, data: migrated, selectedSeed: pickSeed(migrated.inventory, 'corn'), readyTrees: readyTreeIds(migrated, Date.now()).join() })
+      const user = await api.fetchMe()
+      if (!user) return set({ status: 'anonymous', user: null, data: null })
+      await startGame(user)
     } catch (err) {
       set({ status: 'error', error: err instanceof Error ? err.message : 'Erro desconhecido' })
     }
   },
 
+  // login e register lançam o erro da API (mensagem pronta) para a tela de login mostrar
+  login: async (email, password) => startGame(await api.login({ email, password })),
+
+  register: async (email, password, displayName) => startGame(await api.register({ email, password, displayName })),
+
+  logout: async () => {
+    await get().save() // não perde o que foi feito desde o último salvamento automático
+    await api.logout().catch(() => undefined)
+    set({ status: 'anonymous', user: null, data: null, error: null, buyingPlot: false })
+  },
+
   save: async () => {
-    const { playerId, data } = get()
-    if (!playerId || !data) return
+    const { user, data } = get()
+    if (!user || !data) return
     set({ saving: true })
     try {
-      await putSave(playerId, data)
+      await api.putSave(data)
     } catch (err) {
+      // 401 = a sessão expirou (ou o login caiu em outro lugar): volta para a tela de login
+      if (err instanceof ApiError && err.status === 401) return set({ status: 'anonymous', user: null, data: null })
       set({ error: err instanceof Error ? err.message : 'Erro ao salvar' })
     } finally {
       set({ saving: false })
@@ -118,16 +119,18 @@ export const useGameStore = create<GameState>((set, get) => ({
   setBuyingPlot: (on) => set({ buyingPlot: on }),
 
   buyPlot: (x, y) => set((s) => (s.data ? { data: buyPlot(s.data, x, y), buyingPlot: false } : s)),
-
-  // Cria um jogador convidado novo; o antigo continua guardado no banco
-  newGame: async () => {
-    try {
-      const playerId = await createPlayer()
-      const data = migrateSave(await loadSave(playerId))
-      localStorage.setItem(PLAYER_KEY, playerId)
-      set({ playerId, data, readyTrees: readyTreeIds(data, Date.now()).join(), selectedSeed: pickSeed(data.inventory, 'corn'), buyingPlot: false, error: null })
-    } catch (err) {
-      set({ error: err instanceof Error ? err.message : 'Erro ao criar novo jogo' })
-    }
-  },
 }))
+
+// Carrega o save do usuário logado e entra no jogo
+async function startGame(user: User) {
+  const data = migrateSave(await api.loadSave())
+  useGameStore.setState({
+    status: 'ready',
+    user,
+    data,
+    error: null,
+    buyingPlot: false,
+    selectedSeed: pickSeed(data.inventory, 'corn'),
+    readyTrees: readyTreeIds(data, Date.now()).join(),
+  })
+}

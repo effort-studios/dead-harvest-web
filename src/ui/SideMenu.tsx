@@ -269,34 +269,15 @@ function TipsPanel() {
 }
 
 function AccountPanel() {
-  const playerId = useGameStore((s) => s.playerId)
-  const newGame = useGameStore((s) => s.newGame)
-  const [confirming, setConfirming] = useState(false)
+  const user = useGameStore((s) => s.user)
+  const logout = useGameStore((s) => s.logout)
 
   return (
     <>
-      <p><b>Convidado</b></p>
-      <p className="muted">Id: {playerId?.slice(0, 8)}…</p>
-      <p className="muted">Ainda não há login: seu progresso fica ligado a este navegador.</p>
-
-      <h3>Novo jogo</h3>
-      <p className="muted">Começa do zero com um jogador novo. O progresso atual continua guardado no banco, mas você deixa de ter acesso a ele.</p>
-      {confirming ? (
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button
-            className="btn danger"
-            onClick={() => {
-              newGame()
-              setConfirming(false)
-            }}
-          >
-            Sim, começar de novo
-          </button>
-          <button className="btn" onClick={() => setConfirming(false)}>Cancelar</button>
-        </div>
-      ) : (
-        <button className="btn" onClick={() => setConfirming(true)}>Novo jogo…</button>
-      )}
+      <p><b>{user?.displayName}</b></p>
+      <p className="muted">{user?.email}</p>
+      <p className="muted">O jogo é salvo automaticamente na sua conta.</p>
+      <button className="btn" onClick={() => logout()}>Sair</button>
     </>
   )
 }

@@ -1,9 +1,10 @@
 import { useEffect } from 'react'
 import { useGameStore } from './store/gameStore'
 import { GameCanvas } from './ui/GameCanvas'
+import { AuthScreen } from './ui/AuthScreen'
 import { Hud } from './ui/Hud'
 
-// Em modo dev o StrictMode roda o effect 2x; sem isso criaríamos 2 jogadores
+// Em modo dev o StrictMode roda o effect 2x; sem isso a inicialização rodaria duas vezes
 let started = false
 
 export default function App() {
@@ -37,6 +38,7 @@ export default function App() {
   }, [status])
 
   if (status === 'loading') return <p>Carregando...</p>
+  if (status === 'anonymous') return <AuthScreen />
   if (status === 'error') return <p className="error">Não foi possível conectar à API: {error}</p>
   return (
     <div className="game">
