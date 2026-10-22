@@ -60,6 +60,42 @@ export function MoonIcon({ size }: IconProps) {
   )
 }
 
+// Madrugada: lua fria, com estrelas
+export function LateNightIcon({ size }: IconProps) {
+  return (
+    <Svg size={size}>
+      <path d="M19 5A11 11 0 1 0 27 21 9 9 0 0 1 19 5Z" fill="#cfe3ff" stroke={OUTLINE} strokeWidth="2" />
+      <circle cx="12" cy="19" r="1.6" fill="#a9c6ee" />
+      <path d="M26 3.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z" fill="#eef5ff" stroke={OUTLINE} strokeWidth="1" />
+      <path d="M28 13l.6 1.4 1.4.6-1.4.6-.6 1.4-.6-1.4-1.4-.6 1.4-.6z" fill="#eef5ff" stroke={OUTLINE} strokeWidth="0.9" />
+    </Svg>
+  )
+}
+
+// Amanhecer (subindo) e entardecer (descendo): meio sol no horizonte, com a seta da direção
+export function SunriseIcon({ size }: IconProps) {
+  return <HorizonSun size={size} rising />
+}
+
+export function SunsetIcon({ size }: IconProps) {
+  return <HorizonSun size={size} rising={false} />
+}
+
+function HorizonSun({ size, rising }: IconProps & { rising: boolean }) {
+  const sun = rising ? '#ffc24a' : '#ff8a3d'
+  const ray = rising ? '#ffb52e' : '#f0662e'
+  return (
+    <Svg size={size}>
+      {[-60, -30, 0, 30, 60].map((d) => (
+        <rect key={d} x="14.6" y="5.5" width="2.8" height="4.6" rx="1.4" fill={ray} stroke={OUTLINE} strokeWidth="1.3" transform={`rotate(${d} 16 21)`} />
+      ))}
+      <path d="M7.5 21a8.5 8.5 0 0 1 17 0Z" fill={sun} stroke={OUTLINE} strokeWidth="2" />
+      <path d="M3 21h26" stroke={OUTLINE} strokeWidth="2.4" />
+      <path d={rising ? 'M12.5 28.5l3.5-3.5 3.5 3.5' : 'M12.5 25l3.5 3.5 3.5-3.5'} stroke={OUTLINE} strokeWidth="2.2" fill="none" />
+    </Svg>
+  )
+}
+
 export function ShopIcon({ size }: IconProps) {
   const red = '#e0463a'
   const cream = '#fff3d6'

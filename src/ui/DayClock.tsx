@@ -1,5 +1,6 @@
-import { clockTime, dayHour, dayPhase, PHASE_LABEL } from '../game/daycycle'
-import { MoonIcon, SunIcon } from './Icons'
+import { formatDuration } from '../game/crops'
+import { clockTime, DAY_PHASES, dayHour, dayPhase, PHASE_LABEL, phaseSpan, type DayPhase } from '../game/daycycle'
+import { LateNightIcon, MoonIcon, SunIcon, SunriseIcon, SunsetIcon } from './Icons'
 
 // Relógio do dia, como o do Stardew: uma cúpula com o céu do dia inteiro pintado fixo (dia embaixo,
 // noite em cima, sol e lua parados) e um ponteiro que gira do amanhecer (5h, apontando para baixo),
@@ -21,18 +22,23 @@ function pointAt(hour: number, k: number) {
   return { x: PIVOT.x + SKY.rx * k * Math.cos(a), y: PIVOT.y + SKY.ry * k * Math.sin(a) }
 }
 
-// Cor do céu ao longo do dia (hora -> cor), misturada entre os pontos vizinhos
+// Cor do céu ao longo do dia (hora do jogo -> cor), misturada entre os pontos vizinhos. Segue as fases:
+// madrugada fria (0h–5h), amanhecer quente (5h–6h), manhã e tarde claras (6h–17h), entardecer quente
+// (17h–19h) e noite azul-escura (19h–0h). Vai de 5h a 29h (= 5h do dia seguinte), como a cúpula.
 const SKY_COLORS: [number, [number, number, number]][] = [
-  [5, [58, 62, 122]], // fim da madrugada
-  [6.2, [240, 150, 130]], // amanhecer rosado
-  [7.4, [255, 214, 150]], // sol nascendo
-  [8.5, [128, 204, 255]], // manhã
-  [16, [128, 204, 255]], // fim da tarde clara
-  [17.4, [255, 180, 92]], // tarde dourada
-  [18.5, [226, 112, 90]], // pôr do sol
-  [19.6, [74, 58, 122]], // crepúsculo
-  [21, [30, 40, 92]], // noite
-  [29, [44, 50, 104]], // madrugada
+  [5, [70, 92, 140]], // fim da madrugada, frio
+  [5.4, [236, 140, 120]], // amanhecer rosado
+  [5.8, [255, 196, 120]], // sol nascendo
+  [6.4, [150, 214, 255]], // manhã clara
+  [12, [128, 204, 255]], // meio-dia
+  [16.6, [140, 206, 250]], // fim da tarde
+  [17.4, [255, 190, 100]], // entardecer dourado
+  [18.4, [236, 110, 84]], // pôr do sol
+  [19.2, [42, 46, 110]], // começo da noite
+  [21.5, [22, 30, 84]], // noite azul-escura
+  [24, [26, 36, 92]], // meia-noite
+  [25, [44, 70, 112]], // madrugada fria
+  [29, [70, 92, 140]],
 ]
 
 function skyColor(hour: number): string {
@@ -54,28 +60,45 @@ const SLICES = Array.from({ length: 24 / SLICE_HOURS }, (_, i) => {
   return { d: `M${PIVOT.x} ${PIVOT.y} L${far(h0)} L${far(h0 + SLICE_HOURS)}Z`, color: skyColor(h0 + SLICE_HOURS / 2) }
 })
 
-// Marcas na borda a cada 3 horas; as de 6h, 12h, 18h e 0h são maiores
-const TICKS = Array.from({ length: 7 }, (_, i) => {
-  const hour = 8 + i * 3
-  const big = hour % 6 === 0
+// Marcas na borda no começo de cada fase (a das 5h fica embaixo, no pivô); 0h e 12h são maiores
+const TICKS = DAY_PHASES.filter((p) => p.start !== 5).map((p) => {
+  const hour = p.start < 5 ? p.start + 24 : p.start
+  const big = p.start % 12 === 0
   const a = pointAt(hour, big ? 0.8 : 0.86)
   const b = pointAt(hour, 0.97)
   return { hour, big, d: `M${a.x.toFixed(2)} ${a.y.toFixed(2)} L${b.x.toFixed(2)} ${b.y.toFixed(2)}` }
 })
 
-// Estrelas no pedaço da noite (hora, distância do pivô, raio)
-const STARS: [number, number, number][] = [[20.5, 0.78, 1.3], [22.5, 0.5, 1], [24, 0.82, 1.4], [26, 0.4, 1.1], [27, 0.74, 1.2], [21.5, 0.32, 0.9]]
+// Estrelas na noite e na madrugada (hora, distância do pivô, raio)
+const STARS: [number, number, number][] = [[20, 0.78, 1.3], [22.5, 0.5, 1], [24, 0.82, 1.4], [26, 0.4, 1.1], [27.5, 0.74, 1.2], [21, 0.32, 0.9]]
 
 const SUN = pointAt(12, 0.58)
-const MOON = pointAt(24.5, 0.6)
+const MOON = pointAt(22, 0.6)
+
+const PHASE_ICON: Record<DayPhase, (props: { size?: number }) => React.JSX.Element> = {
+  lateNight: LateNightIcon,
+  dawn: SunriseIcon,
+  morning: SunIcon,
+  afternoon: SunIcon,
+  dusk: SunsetIcon,
+  night: MoonIcon,
+}
+
+const hh = (hour: number) => `${String(hour).padStart(2, '0')}h`
 
 export function DayClock({ time, day }: { time: number; day: number }) {
   const phase = dayPhase(time)
   const label = PHASE_LABEL[phase]
+  const PhaseIcon = PHASE_ICON[phase]
+  // horário da fase no jogo x quanto ela dura de verdade (depende da duração do dia no servidor)
+  const span = phaseSpan(phase)
   const tip = pointAt(dayHour(time), 0.74) // o ponteiro não chega na borda
 
   return (
-    <div className="day-clock" title={`Dia ${day} · ${label} · ${clockTime(time)}`}>
+    <div
+      className="day-clock"
+      title={`Dia ${day} · ${clockTime(time)}\n${label}: ${hh(span.start)}–${hh(span.end % 24)} no jogo (${formatDuration(Math.round(span.realSeconds))} reais)`}
+    >
       <svg className="clock-dome" viewBox="0 0 80 104" width="80" height="104" strokeLinejoin="round" strokeLinecap="round" aria-hidden="true">
         <defs>
           <linearGradient id="clk-gold" x1="0" y1="0" x2="0" y2="1">
@@ -119,7 +142,7 @@ export function DayClock({ time, day }: { time: number; day: number }) {
       <div className="clock-frame">
         <div className="clock-plate clock-day">Dia {day}</div>
         <div className="clock-plate clock-phase">
-          {phase === 'night' ? <MoonIcon size={20} /> : <SunIcon size={20} />}
+          <PhaseIcon size={20} />
           <span>{label}</span>
         </div>
         <div className="clock-plate clock-time">{clockTime(time)}</div>

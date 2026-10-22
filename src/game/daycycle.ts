@@ -1,7 +1,7 @@
 // Ciclo do dia. O tempo é contado em segundos desde o começo do dia (5h, início do amanhecer). A duração
 // do dia é regra do servidor (DAY_LENGTH_SECONDS no .env da API) e chega pelo catálogo.
 // O relógio é linear: o dia inteiro cobre 24 horas, então com 24 min de dia 1 s real = 1 min no jogo.
-// As fases seguem o horário: amanhecer 5h–8h, manhã 8h–13h, tarde 13h–19h, noite 19h–5h.
+// As fases (DAY_PHASES, mais abaixo) são definidas pela hora do jogo; a duração real de cada uma sai daí.
 let dayLength = 1440
 
 export function setDayLength(seconds: number) {
@@ -54,23 +54,34 @@ export function skyTint(time: number): string {
   return `rgba(${mix(prev.r, next.r)}, ${mix(prev.g, next.g)}, ${mix(prev.b, next.b)}, ${(prev.a + (next.a - prev.a) * t).toFixed(3)})`
 }
 
-export type DayPhase = 'dawn' | 'morning' | 'afternoon' | 'night'
+export type DayPhase = 'lateNight' | 'dawn' | 'morning' | 'afternoon' | 'dusk' | 'night'
 
-export const NIGHT_START_HOUR = 19
+// Fases do dia pela hora do JOGO (não pelo tempo real). São referências de ambientação e podem
+// mudar no futuro (ex.: conforme a estação). Cada fase vai do seu início até o início da próxima;
+// a última vai até 24h, então elas cobrem as 24 horas sem buracos nem sobreposição.
+export const DAY_PHASES: { id: DayPhase; label: string; start: number }[] = [
+  { id: 'lateNight', label: 'Madrugada', start: 0 },
+  { id: 'dawn', label: 'Amanhecer', start: 5 },
+  { id: 'morning', label: 'Manhã', start: 6 },
+  { id: 'afternoon', label: 'Tarde', start: 12 },
+  { id: 'dusk', label: 'Entardecer', start: 17 },
+  { id: 'night', label: 'Noite', start: 19 },
+]
+
+export const PHASE_LABEL = Object.fromEntries(DAY_PHASES.map((p) => [p.id, p.label])) as Record<DayPhase, string>
 
 export function dayPhase(time: number): DayPhase {
-  const h = dayHour(time)
-  if (h < 8) return 'dawn'
-  if (h < 13) return 'morning'
-  if (h < NIGHT_START_HOUR) return 'afternoon'
-  return 'night'
+  const h = dayHour(time) % 24
+  return DAY_PHASES.findLast((p) => p.start <= h)!.id
 }
 
-export const PHASE_LABEL: Record<DayPhase, string> = {
-  dawn: 'Amanhecer',
-  morning: 'Manhã',
-  afternoon: 'Tarde',
-  night: 'Noite',
+// Horário da fase no jogo (início e fim, em horas) e quanto ela dura em tempo real (segundos),
+// conforme a duração do dia configurada no servidor
+export function phaseSpan(phase: DayPhase): { start: number; end: number; realSeconds: number } {
+  const i = DAY_PHASES.findIndex((p) => p.id === phase)
+  const start = DAY_PHASES[i].start
+  const end = DAY_PHASES[i + 1]?.start ?? 24
+  return { start, end, realSeconds: ((end - start) * dayLength) / 24 }
 }
 
 // Ex.: "06:53". Os minutos andam um a um, como num relógio.
