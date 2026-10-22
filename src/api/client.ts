@@ -1,10 +1,11 @@
+import type { Avatar } from '../game/avatar'
 import type { SaveData } from '../game/types'
 
 // A API tem que ser acessada pelo MESMO host que abriu o front (localhost ou o IP da rede): o cookie de
 // sessão só vai junto quando os dois estão no mesmo "site". Por isso, sem VITE_API_URL, usa o host da página.
 const API_URL = import.meta.env.VITE_API_URL || `${location.protocol}//${location.hostname}:3333`
 
-export type User = { id: string; email: string; displayName: string }
+export type User = { id: string; email: string; displayName: string; avatar: Avatar }
 
 // Erro com o status HTTP e a mensagem que a API mandou (já em português)
 export class ApiError extends Error {
@@ -48,6 +49,11 @@ export async function register(input: { email: string; password: string; display
 
 export async function login(input: { email: string; password: string }): Promise<User> {
   return (await post<{ user: User }>('/auth/login', input)).user
+}
+
+// Muda o nome e/ou o avatar; devolve o usuário atualizado
+export async function updateProfile(input: { displayName?: string; avatar?: Avatar }): Promise<User> {
+  return (await request<{ user: User }>('/auth/me', { method: 'PATCH', body: JSON.stringify(input) })).user
 }
 
 export const logout = () => post<void>('/auth/logout')

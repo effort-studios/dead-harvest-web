@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import * as api from '../api/client'
 import { ApiError, type User } from '../api/client'
+import type { Avatar } from '../game/avatar'
 import type { CropId } from '../game/crops'
 import { buyPlot, buySeed, clickLine, clickTile, harvestTree, migrateSave, pickSeed, readyTreeIds, sellFruit, tick, type ClickMode } from '../game/state'
 import type { FruitId } from '../game/trees'
@@ -20,6 +21,7 @@ type GameState = {
   login: (email: string, password: string) => Promise<void>
   register: (email: string, password: string, displayName: string) => Promise<void>
   logout: () => Promise<void>
+  updateProfile: (input: { displayName?: string; avatar?: Avatar }) => Promise<void>
   save: () => Promise<void>
   clickTile: (plot: number, row: number, col: number, mode: ClickMode) => void
   selectSeed: (crop: CropId) => void
@@ -56,6 +58,9 @@ export const useGameStore = create<GameState>((set, get) => ({
   login: async (email, password) => startGame(await api.login({ email, password })),
 
   register: async (email, password, displayName) => startGame(await api.register({ email, password, displayName })),
+
+  // lança o erro da API (mensagem pronta) para o editor de perfil mostrar
+  updateProfile: async (input) => set({ user: await api.updateProfile(input) }),
 
   logout: async () => {
     await get().save() // não perde o que foi feito desde o último salvamento automático

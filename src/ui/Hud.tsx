@@ -2,7 +2,8 @@ import { useEffect } from 'react'
 import { CROPS, formatDuration } from '../game/crops'
 import { ownedSeeds } from '../game/state'
 import { useGameStore } from '../store/gameStore'
-import { CoinIcon, CropIcon, FarmerIcon } from './Icons'
+import { CropIcon } from './Icons'
+import { ProfileMenu } from './ProfileMenu'
 import { DayClock } from './DayClock'
 import { SideMenu } from './SideMenu'
 
@@ -12,7 +13,7 @@ const HOTBAR_SLOTS = 9
 // dia (canto superior direito), barra de itens (embaixo) e erros de salvamento (embaixo à esquerda).
 // Vida, energia, missões e minimapa ainda não existem no jogo e ficam para depois do MVP.
 export function Hud() {
-  const { data, user, error, selectedSeed, selectSeed } = useGameStore()
+  const { data, error, selectedSeed, selectSeed } = useGameStore()
 
   // Teclas 1 a 9 escolhem o item do slot correspondente (só existem slots para o que o jogador tem)
   useEffect(() => {
@@ -32,17 +33,7 @@ export function Hud() {
     <>
       {/* Coluna da esquerda: jogador em cima e menu logo abaixo, sem sobrepor */}
       <div className="hud-left">
-        <div className="panel hud-player">
-          <div className="portrait">
-            <FarmerIcon size={40} />
-          </div>
-          <div>
-            <div className="player-name">{user?.displayName}</div>
-            <div className="money">
-              <CoinIcon size={22} /> {data.money}
-            </div>
-          </div>
-        </div>
+        <ProfileMenu />
         <SideMenu />
       </div>
 

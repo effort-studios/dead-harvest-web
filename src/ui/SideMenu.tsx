@@ -3,14 +3,13 @@ import { CROP_ORDER, CROPS, formatDuration, type CropId } from '../game/crops'
 import { FRUIT_ORDER, FRUITS, FRUIT_REGROW_MS, FRUITS_PER_HARVEST, TREES } from '../game/trees'
 import { plotPrice } from '../game/state'
 import { useGameStore } from '../store/gameStore'
-import { BulbIcon, CloseIcon, CoinIcon, CropIcon, FarmerIcon, FruitIcon, InfoIcon, ShopIcon } from './Icons'
+import { BulbIcon, CloseIcon, CoinIcon, CropIcon, FruitIcon, InfoIcon, ShopIcon } from './Icons'
 
-type Section = 'shop' | 'tips' | 'account' | 'about'
+type Section = 'shop' | 'tips' | 'about'
 
 const SECTIONS: { id: Section; Icon: (props: { size?: number }) => React.JSX.Element; title: string }[] = [
   { id: 'shop', Icon: ShopIcon, title: 'Loja' },
   { id: 'tips', Icon: BulbIcon, title: 'Dicas' },
-  { id: 'account', Icon: FarmerIcon, title: 'Conta' },
   { id: 'about', Icon: InfoIcon, title: 'Sobre' },
 ]
 
@@ -57,7 +56,6 @@ export function SideMenu() {
           </h2>
           {open === 'shop' && <ShopPanel />}
           {open === 'tips' && <TipsPanel />}
-          {open === 'account' && <AccountPanel />}
           {open === 'about' && <AboutPanel />}
         </section>
       )}
@@ -264,20 +262,6 @@ function TipsPanel() {
         </tbody>
       </table>
       <p className="muted">Só dá para colher quando a planta está madura.</p>
-    </>
-  )
-}
-
-function AccountPanel() {
-  const user = useGameStore((s) => s.user)
-  const logout = useGameStore((s) => s.logout)
-
-  return (
-    <>
-      <p><b>{user?.displayName}</b></p>
-      <p className="muted">{user?.email}</p>
-      <p className="muted">O jogo é salvo automaticamente na sua conta.</p>
-      <button className="btn" onClick={() => logout()}>Sair</button>
     </>
   )
 }
