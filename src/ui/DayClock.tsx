@@ -1,4 +1,4 @@
-import { clockTime, dayFraction, dayPhase, PHASE_LABEL, skyTint } from '../game/daycycle'
+import { clockTime, dayHour, dayPhase, NIGHT_START_HOUR, PHASE_LABEL, skyTint } from '../game/daycycle'
 import { MoonIcon, SunIcon } from './Icons'
 
 // Relógio do dia: uma cúpula de céu com o sol (ou a lua) percorrendo um arco, ao lado de placas
@@ -12,11 +12,11 @@ const dome = (rx: number, ry: number) => `M${PIVOT.x} ${PIVOT.y - ry} A${rx} ${r
 
 const STARS: [number, number, number][] = [[34, 24, 1.6], [48, 14, 1.2], [26, 52, 1.2], [44, 36, 1.4], [56, 22, 1], [38, 72, 1.3], [54, 84, 1.1]]
 
-// Sol de manhã e de tarde, lua de noite. A posição no arco vai de baixo (ângulo 90°), pela esquerda, até o topo (270°).
+// Sol das 5h às 19h, lua das 19h às 5h. A posição no arco vai de baixo (ângulo 90°), pela esquerda, até o topo (270°).
 function sunOrMoon(time: number) {
-  const f = dayFraction(time)
-  const night = f >= 0.75
-  const p = night ? (f - 0.75) / 0.25 : f / 0.75
+  const h = dayHour(time)
+  const night = h >= NIGHT_START_HOUR
+  const p = night ? (h - NIGHT_START_HOUR) / (29 - NIGHT_START_HOUR) : (h - 5) / (NIGHT_START_HOUR - 5)
   const a = ((90 + 180 * p) * Math.PI) / 180
   return { night, x: PIVOT.x + ARC.rx * Math.cos(a), y: PIVOT.y + ARC.ry * Math.sin(a) }
 }
