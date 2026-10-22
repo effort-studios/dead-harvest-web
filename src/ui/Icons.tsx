@@ -142,6 +142,30 @@ export function SaveIcon({ size }: IconProps) {
   )
 }
 
+const EYE_OUTLINE = 'M2.5 16C6 10 10.5 7.5 16 7.5S26 10 29.5 16C26 22 21.5 24.5 16 24.5S6 22 2.5 16z'
+
+export function EyeIcon({ size }: IconProps) {
+  return (
+    <Svg size={size}>
+      <path d={EYE_OUTLINE} fill="#fff6dc" stroke={OUTLINE} strokeWidth="2.2" />
+      <circle cx="16" cy="16" r="5" fill="#8a4f1c" stroke={OUTLINE} strokeWidth="2" />
+      <circle cx="17.8" cy="14.2" r="1.4" fill="#fff" />
+    </Svg>
+  )
+}
+
+// Olho riscado: a senha está visível e o clique a esconde
+export function EyeOffIcon({ size }: IconProps) {
+  return (
+    <Svg size={size}>
+      <path d={EYE_OUTLINE} fill="#fff6dc" stroke={OUTLINE} strokeWidth="2.2" />
+      <circle cx="16" cy="16" r="5" fill="#8a4f1c" stroke={OUTLINE} strokeWidth="2" />
+      <path d="M5 27L27 5" stroke="#fff6dc" strokeWidth="6.5" />
+      <path d="M5 27L27 5" stroke={OUTLINE} strokeWidth="2.6" />
+    </Svg>
+  )
+}
+
 export function CloseIcon({ size }: IconProps) {
   return (
     <Svg size={size}>

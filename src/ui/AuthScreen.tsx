@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { forgotPassword, resetPassword } from '../api/client'
 import { useGameStore } from '../store/gameStore'
-import { FarmerIcon } from './Icons'
+import { EyeIcon, EyeOffIcon, FarmerIcon } from './Icons'
 
 type Mode = 'login' | 'register' | 'forgot' | 'reset'
 
@@ -22,6 +22,7 @@ export function AuthScreen() {
   const [password, setPassword] = useState('')
   const [displayName, setDisplayName] = useState('')
   const [code, setCode] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
@@ -90,15 +91,27 @@ export function AuthScreen() {
         {mode !== 'forgot' && (
           <label>
             {mode === 'reset' ? 'Nova senha' : 'Senha'}
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              minLength={mode === 'login' ? 1 : 8}
-              maxLength={128}
-              required
-              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-            />
+            <span className="password-field">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                minLength={mode === 'login' ? 1 : 8}
+                maxLength={128}
+                required
+                autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                aria-label={showPassword ? 'Esconder senha' : 'Mostrar senha'}
+                aria-pressed={showPassword}
+                title={showPassword ? 'Esconder senha' : 'Mostrar senha'}
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeOffIcon size={22} /> : <EyeIcon size={22} />}
+              </button>
+            </span>
             {mode !== 'login' && <small>Pelo menos 8 caracteres.</small>}
           </label>
         )}

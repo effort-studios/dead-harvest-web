@@ -426,3 +426,19 @@ table.crops th, table.crops td { text-align: left; padding: 3px 4px; border-bott
   border: none;
   cursor: pointer;
 }
+.password-field { position: relative; display: block; }
+.auth-card .password-field input { padding-right: 42px; }
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  display: flex;
+  padding: 3px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.password-toggle:hover { background: #f3d99b; }
+.password-toggle:focus-visible { outline: 3px solid #e0b25a; }
