@@ -112,17 +112,19 @@ canvas:active {
   right: 10px;
   display: flex;
   align-items: center;
-  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.35));
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.35)); /* sombra dura, sem desfoque (pixel art) */
   pointer-events: none;
 }
-.clock-dome { position: relative; z-index: 1; margin-right: -10px; flex: none; }
+/* cúpula desenhada em 40x52 e ampliada 2x sem suavizar */
+.clock-dome { position: relative; z-index: 1; margin-right: -10px; flex: none; width: 80px; height: 104px; image-rendering: pixelated; }
 .clock-frame {
   display: flex;
   flex-direction: column;
   gap: 4px;
   width: 124px;
   padding: 5px 5px 5px 14px;
-  background: linear-gradient(#f6c04a, #c67d1c);
+  background: #f2b234;
+  box-shadow: inset 0 3px 0 #ffd75e, inset 0 -3px 0 #c67d1c; /* luz e sombra em faixas, sem degradê */
   border: 3px solid #4a2a12;
   border-radius: 10px;
 }
@@ -139,9 +141,9 @@ canvas:active {
   border-radius: 6px;
   box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.5);
 }
-.clock-day { font-size: 19px; }
-.clock-phase { font-size: 13px; gap: 4px; } /* "Amanhecer" precisa caber */
-.clock-time { font-size: 19px; letter-spacing: 1px; }
+.clock-day { font-size: 16px; height: 23px; }
+.clock-phase { font-size: 13px; gap: 4px; } /* "Entardecer" precisa caber */
+.clock-time { font-size: 22px; height: 29px; font-weight: 700; letter-spacing: 1px; } /* a hora é a informação principal */
 
 .hud-hotbar {
   position: absolute;

@@ -1,4 +1,4 @@
-// Ciclo do dia. O tempo é contado em segundos desde o começo do dia (5h, início do amanhecer). A duração
+// Ciclo do dia. O tempo é contado em segundos desde a meia-noite (o dia vira às 00h). A duração
 // do dia é regra do servidor (DAY_LENGTH_SECONDS no .env da API) e chega pelo catálogo.
 // O relógio é linear: o dia inteiro cobre 24 horas, então com 24 min de dia 1 s real = 1 min no jogo.
 // As fases (DAY_PHASES, mais abaixo) são definidas pela hora do jogo; a duração real de cada uma sai daí.
@@ -10,36 +10,38 @@ export function setDayLength(seconds: number) {
 
 export const dayLengthSeconds = () => dayLength
 
-const DAY_START_HOUR = 5
 const MINUTES_PER_DAY = 24 * 60
 
-// Minutos de relógio desde o começo do dia (0 a 1439)
+// Minutos de relógio desde a meia-noite (0 a 1439)
 function dayMinutes(time: number): number {
   const t = ((time % dayLength) + dayLength) % dayLength
   return Math.floor((t * MINUTES_PER_DAY) / dayLength)
 }
 
-// Hora do relógio, com fração, de 5 a 29 (29h = 5h do dia seguinte)
+// Hora do relógio, com fração, de 0 a 24
 export function dayHour(time: number): number {
   const t = ((time % dayLength) + dayLength) % dayLength
-  return DAY_START_HOUR + (t / dayLength) * 24
+  return (t / dayLength) * 24
 }
 
-// Cor que cobre o mapa em cada hora do dia (de 5h até 29h = 5h do dia seguinte). O valor `a` é a opacidade.
+// Cor que cobre o mapa em cada hora do dia, seguindo as fases (madrugada 0h–5h, amanhecer 5h–6h,
+// manhã 6h–12h, tarde 12h–17h, entardecer 17h–19h, noite 19h–0h). O valor `a` é a opacidade.
 // A tela é multiplicada por essa cor: branco com a = 0 deixa o mapa como está (dia claro).
 type Keyframe = { hour: number; r: number; g: number; b: number; a: number }
 const KEYFRAMES: Keyframe[] = [
-  { hour: 5, r: 30, g: 35, b: 90, a: 0.52 }, // começo do amanhecer: ainda escuro
-  { hour: 6, r: 255, g: 140, b: 110, a: 0.28 }, // amanhecer rosado
-  { hour: 7, r: 255, g: 200, b: 140, a: 0.14 }, // sol nascendo
-  { hour: 8, r: 255, g: 255, b: 255, a: 0 }, // manhã clara
-  { hour: 13, r: 255, g: 255, b: 255, a: 0 }, // fim da manhã
-  { hour: 15.5, r: 255, g: 170, b: 80, a: 0.22 }, // tarde dourada
-  { hour: 17.5, r: 255, g: 110, b: 60, a: 0.34 }, // pôr do sol
+  { hour: 0, r: 15, g: 25, b: 80, a: 0.58 }, // meia-noite
+  { hour: 4.5, r: 30, g: 40, b: 95, a: 0.52 }, // fim da madrugada
+  { hour: 5, r: 70, g: 70, b: 130, a: 0.42 }, // começo do amanhecer: ainda azulado
+  { hour: 5.5, r: 255, g: 140, b: 110, a: 0.28 }, // amanhecer rosado
+  { hour: 6, r: 255, g: 200, b: 140, a: 0.14 }, // sol nascendo
+  { hour: 7, r: 255, g: 255, b: 255, a: 0 }, // manhã clara
+  { hour: 16.5, r: 255, g: 255, b: 255, a: 0 }, // fim da tarde
+  { hour: 17.3, r: 255, g: 190, b: 100, a: 0.18 }, // entardecer dourado
+  { hour: 18.2, r: 255, g: 120, b: 80, a: 0.32 }, // pôr do sol
+  { hour: 18.7, r: 235, g: 100, b: 120, a: 0.36 }, // céu rosado
   { hour: 19, r: 90, g: 50, b: 120, a: 0.46 }, // crepúsculo: começa a noite
-  { hour: 22, r: 15, g: 25, b: 80, a: 0.58 }, // noite
-  { hour: 26.5, r: 15, g: 25, b: 80, a: 0.56 },
-  { hour: 29, r: 30, g: 35, b: 90, a: 0.52 }, // igual ao início, para o ciclo emendar
+  { hour: 20, r: 15, g: 25, b: 80, a: 0.58 }, // noite
+  { hour: 24, r: 15, g: 25, b: 80, a: 0.58 }, // igual à meia-noite, para o ciclo emendar
 ]
 
 // Cor (CSS) do filtro de luz no horário `time`, misturando linearmente os dois pontos vizinhos
@@ -71,7 +73,7 @@ export const DAY_PHASES: { id: DayPhase; label: string; start: number }[] = [
 export const PHASE_LABEL = Object.fromEntries(DAY_PHASES.map((p) => [p.id, p.label])) as Record<DayPhase, string>
 
 export function dayPhase(time: number): DayPhase {
-  const h = dayHour(time) % 24
+  const h = dayHour(time)
   return DAY_PHASES.findLast((p) => p.start <= h)!.id
 }
 
@@ -86,7 +88,7 @@ export function phaseSpan(phase: DayPhase): { start: number; end: number; realSe
 
 // Ex.: "06:53". Os minutos andam um a um, como num relógio.
 export function clockTime(time: number): string {
-  const total = DAY_START_HOUR * 60 + dayMinutes(time) // minutos desde 0h
+  const total = dayMinutes(time) // minutos desde 0h
   const h = Math.floor(total / 60) % 24
   const m = total % 60
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
