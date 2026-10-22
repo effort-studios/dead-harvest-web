@@ -239,6 +239,7 @@ function TipsPanel() {
       <h3>Controles</h3>
       <ul>
         <li>Arraste o mapa com o mouse para se mover.</li>
+        <li>Role a roda do mouse para aproximar e afastar.</li>
         <li>Clique num tile: arar, plantar e colher.</li>
         <li><b>Shift</b> + clique: ação na linha inteira.</li>
         <li><b>Ctrl</b> + clique: ação na coluna inteira.</li>

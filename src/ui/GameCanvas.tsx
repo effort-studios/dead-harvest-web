@@ -20,6 +20,11 @@ function modeOf(e: { shiftKey: boolean; ctrlKey: boolean }): ClickMode {
   return e.shiftKey ? 'row' : e.ctrlKey ? 'col' : 'tile'
 }
 
+// Zoom do jogador (multiplica o zoom que ajusta o mapa à janela) e seus limites
+const MIN_USER_ZOOM = 0.5
+const MAX_USER_ZOOM = 3
+const WHEEL_SENSITIVITY = 0.0015
+
 // Movimento menor que isso (em px) conta como clique; maior, como arrasto do mapa
 const DRAG_THRESHOLD = 5
 
@@ -37,6 +42,7 @@ export function GameCanvas() {
   // A câmera fica num ref (e não em state) para arrastar não re-renderizar o React a cada pixel
   const camera = useRef({ ...INITIAL_CAMERA })
   const drag = useRef<{ startX: number; startY: number; camX: number; camY: number; moved: boolean } | null>(null)
+  const userZoom = useRef(1) // controlado pela roda do mouse
   const frame = useRef(0)
   const hover = useRef<Hover | null>(null) // o que está sob o mouse
   const treeHover = useRef<string | null>(null) // árvore com frutas sob o mouse (vira cursor de mãozinha)
@@ -69,7 +75,7 @@ export function GameCanvas() {
     }
     const { x, y } = camera.current
     const ready = new Set(readyTrees ? readyTrees.split(',') : [])
-    drawWorld(ctx, sprites, data.plots, ready, { x, y, zoom: fitZoom(size) }, size, dpr, hover.current, buyingPlot ? freeSlots(data) : [])
+    drawWorld(ctx, sprites, data.plots, ready, { x, y, zoom: fitZoom(size) * userZoom.current }, size, dpr, hover.current, buyingPlot ? freeSlots(data) : [])
   }, [sprites, size, readyTrees])
 
   // Redesenha quando os terrenos, as imagens ou o tamanho da janela mudam
@@ -108,7 +114,7 @@ export function GameCanvas() {
   // Ponto do mundo sob o mouse
   function worldAt(e: React.PointerEvent<HTMLCanvasElement>) {
     const rect = e.currentTarget.getBoundingClientRect()
-    const cam = { ...camera.current, zoom: fitZoom(size) }
+    const cam = { ...camera.current, zoom: fitZoom(size) * userZoom.current }
     return screenToWorld(e.clientX - rect.left, e.clientY - rect.top, cam, size)
   }
 
@@ -132,6 +138,34 @@ export function GameCanvas() {
     const plot = data.plots.findIndex((p) => p.x === cell.x && p.y === cell.y)
     return plot < 0 ? null : { kind: 'tile', plot, row: cell.row, col: cell.col, mode: newMode }
   }
+
+  // Roda do mouse: zoom em direção ao cursor (o ponto do mapa sob o mouse fica parado na tela)
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    function onWheel(e: WheelEvent) {
+      e.preventDefault()
+      const rect = canvas!.getBoundingClientRect()
+      const sx = e.clientX - rect.left
+      const sy = e.clientY - rect.top
+      const fit = fitZoom(size)
+      const oldZoom = fit * userZoom.current
+      const next = Math.min(Math.max(userZoom.current * Math.exp(-e.deltaY * WHEEL_SENSITIVITY), MIN_USER_ZOOM), MAX_USER_ZOOM)
+      if (next === userZoom.current) return
+      const world = screenToWorld(sx, sy, { ...camera.current, zoom: oldZoom }, size)
+      userZoom.current = next
+      const zoom = fit * next
+      camera.current = clampCamera(
+        world.x - (sx - size.width / 2) / zoom,
+        world.y - (sy - size.height / 2) / zoom,
+        useGameStore.getState().data?.plots ?? [],
+      )
+      scheduleDraw()
+    }
+    canvas.addEventListener('wheel', onWheel, { passive: false })
+    return () => canvas.removeEventListener('wheel', onWheel)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [size])
 
   function updateHover(e: React.PointerEvent<HTMLCanvasElement>) {
     const world = worldAt(e)
@@ -171,7 +205,7 @@ export function GameCanvas() {
     if (!d.moved && Math.hypot(dx, dy) < DRAG_THRESHOLD) return
     d.moved = true
     // arrastar o mapa para a direita = câmera vai para a esquerda
-    const zoom = fitZoom(size)
+    const zoom = fitZoom(size) * userZoom.current
     camera.current = { ...clampCamera(d.camX - dx / zoom, d.camY - dy / zoom, useGameStore.getState().data?.plots ?? []) }
     scheduleDraw()
   }
