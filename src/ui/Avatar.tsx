@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import type { Avatar as AvatarData } from '../game/avatar'
 
-// Avatar do jogador desenhado em SVG (caixa 32x32), no mesmo estilo dos ícones: contorno marrom
+// Avatar do jogador desenhado em SVG (desenhado numa caixa 32x32 e enquadrado em busto: cabeça, chapéu e ombros), no mesmo estilo dos ícones: contorno marrom
 // grosso e cores chapadas. É montado em camadas: roupa, cabeça, cabelo, barba, rosto, bigode e chapéu.
 const OUTLINE = '#4a2a12'
 const HAIR = '#5a3a1f'
@@ -74,33 +74,33 @@ function Face({ kind, lightMouth }: { kind: AvatarData['face']; lightMouth: bool
       <circle {...eyeR} r={r} fill={OUTLINE} />
     </>
   )
-  const smile = <path d="M13.6 20.2q2.4 1.8 4.8 0" stroke={mouth} strokeWidth="1.4" fill="none" strokeLinecap="round" />
+  const smile = <path d="M13.6 20.2q2.4 1.8 4.8 0" stroke={mouth} strokeWidth="1.7" fill="none" strokeLinecap="round" />
   return (
     <>
-      <circle cx="11.4" cy="19.4" r="1.3" fill="#ec8f7c" opacity=".6" />
-      <circle cx="20.6" cy="19.4" r="1.3" fill="#ec8f7c" opacity=".6" />
+      <circle cx="11.4" cy="19.4" r="1.3" fill="#ec8f7c" opacity=".75" />
+      <circle cx="20.6" cy="19.4" r="1.3" fill="#ec8f7c" opacity=".75" />
       {kind === 'happy' && (
         <>
-          {dots(1)}
+          {dots(1.25)}
           {smile}
         </>
       )}
       {kind === 'calm' && (
         <>
-          {dots(1)}
-          <path d="M14.4 20.5h3.2" stroke={mouth} strokeWidth="1.4" strokeLinecap="round" />
+          {dots(1.25)}
+          <path d="M14.4 20.5h3.2" stroke={mouth} strokeWidth="1.7" strokeLinecap="round" />
         </>
       )}
       {kind === 'wink' && (
         <>
-          <circle {...eyeL} r="1" fill={OUTLINE} />
-          <path d="M17.6 17.5q1.2-1.2 2.4 0" stroke={OUTLINE} strokeWidth="1.4" fill="none" strokeLinecap="round" />
+          <circle {...eyeL} r="1.25" fill={OUTLINE} />
+          <path d="M17.6 17.5q1.2-1.2 2.4 0" stroke={OUTLINE} strokeWidth="1.7" fill="none" strokeLinecap="round" />
           {smile}
         </>
       )}
       {kind === 'surprised' && (
         <>
-          {dots(1.3)}
+          {dots(1.5)}
           <circle cx="16" cy="20.7" r="1.2" fill="none" stroke={mouth} strokeWidth="1.3" />
         </>
       )}
@@ -168,7 +168,7 @@ function Hat({ kind }: { kind: AvatarData['hat'] }) {
 
 export function Avatar({ avatar, size = 32 }: { avatar: AvatarData; size?: number }) {
   return (
-    <svg className="svg-icon" width={size} height={size} viewBox="0 0 32 32" strokeLinejoin="round" strokeLinecap="round" aria-hidden="true">
+    <svg className="svg-icon" width={size} height={size} viewBox="2 2 28 28" strokeLinejoin="round" strokeLinecap="round" aria-hidden="true">
       <Outfit kind={avatar.outfit} />
       <circle cx="16" cy="16.5" r="7" fill={SKIN[avatar.skin]} stroke={OUTLINE} strokeWidth="2" />
       {(avatar.hat === 'none' || avatar.hat === 'flower') && <Hair />}
