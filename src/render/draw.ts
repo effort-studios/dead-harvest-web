@@ -152,7 +152,7 @@ function drawGround(ctx: CanvasRenderingContext2D, view: Rect) {
 
 // Estágio de crescimento: 0 = broto, 1 = crescendo, 2 = madura
 function stageOf(crop: CropId, growth: number): 0 | 1 | 2 {
-  const progress = growth / CROPS[crop].growTicks
+  const progress = growth / CROPS[crop].growSeconds
   return progress >= 1 ? 2 : progress >= 0.4 ? 1 : 0
 }
 

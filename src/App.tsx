@@ -17,23 +17,24 @@ export default function App() {
     useGameStore.getState().init()
   }, [])
 
-  // Relógio do jogo: 1 tick por segundo, só depois de carregar o save
+  // Relógio na tela: 1 tick por segundo, só depois de carregar o jogo
   useEffect(() => {
     if (status !== 'ready') return
     const id = setInterval(() => useGameStore.getState().tick(), 1000)
     return () => clearInterval(id)
   }, [status])
 
-  // Salvamento automático: a cada 10s e ao esconder a aba
+  // Nada é salvo pelo front (cada ação já vai para o servidor). Aqui só busca o estado de verdade
+  // a cada 30s e ao voltar para a aba, para acertar o relógio e ver o que mudou em outro aparelho.
   useEffect(() => {
     if (status !== 'ready') return
-    const save = () => useGameStore.getState().save()
-    const onHide = () => document.visibilityState === 'hidden' && save()
-    const id = setInterval(save, 10_000)
-    document.addEventListener('visibilitychange', onHide)
+    const sync = () => useGameStore.getState().sync()
+    const onShow = () => document.visibilityState === 'visible' && sync()
+    const id = setInterval(sync, 30_000)
+    document.addEventListener('visibilitychange', onShow)
     return () => {
       clearInterval(id)
-      document.removeEventListener('visibilitychange', onHide)
+      document.removeEventListener('visibilitychange', onShow)
     }
   }, [status])
 

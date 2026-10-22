@@ -49,7 +49,7 @@ export function Hud() {
               className={`slot ${crop && crop === selectedSeed ? 'selected' : ''}`}
               disabled={!crop}
               onClick={() => crop && selectSeed(crop)}
-              title={info ? `Semente de ${info.name.toLowerCase()} — amadurece em ${formatDuration(info.growTicks)}, vende por ${info.sellPrice}` : undefined}
+              title={info ? `Semente de ${info.name.toLowerCase()} — amadurece em ${formatDuration(info.growSeconds)}, vende por ${info.sellPrice}` : undefined}
             >
               <span className="slot-key">{i + 1}</span>
               {crop && <CropIcon crop={crop} size={34} />}

@@ -7,7 +7,7 @@
 - [ ] 5. Dinheiro e loja de sementes — código pronto (Loja no menu lateral), falta confirmar no navegador
 - [x] 6. Ciclo dia/noite (filtro de cor no mapa: amanhecer, dia, entardecer, noite) — falta confirmação do usuário
 - [ ] 7. Zumbis nas bordas pisoteiam plantações; clicar afasta
-- [ ] 8. Salvamento automático
+- [x] 8. Estado no servidor: cada clique/compra/venda vira uma ação na API; o front não salva nada
 
 ## Em andamento
 Item 5. Falta o usuário testar: abrir o menu lateral (🛒), comprar sementes (botão desabilitado sem dinheiro), plantar com elas; testar Dicas, Conta (Novo jogo com confirmação) e Sobre.
@@ -46,7 +46,7 @@ Item 5. Falta o usuário testar: abrir o menu lateral (🛒), comprar sementes (
 - Sem sementes não dá para plantar até a loja (item 5); jogadores antigos só têm milho (o save inicial novo traz as 3 sementes: limpe `deadHarvestPlayerId` do localStorage para criar jogador novo).
 - Se a aba ficar em segundo plano o navegador desacelera o setInterval e as plantas crescem mais devagar.
 - Fluxo no navegador ainda não testado (só o CORS foi verificado por curl).
-- Falha ao salvar só mostra a mensagem de erro no HUD; sem nova tentativa.
+- Ação recusada pelo servidor mostra o motivo no HUD por 4s e a tela volta para o estado do servidor; sem conexão, o sync de 30s acerta depois.
 
 ## Próximos passos
 1. Confirmar os itens 4 e 5 no navegador
@@ -54,6 +54,7 @@ Item 5. Falta o usuário testar: abrir o menu lateral (🛒), comprar sementes (
 3. Zumbis (item 7)
 
 ## Histórico
+- 2026-10-22 – Servidor como fonte da verdade: a store manda cada ação para a API (`/game/till`, `plant`, `harvest`, `seeds/buy`, `fruits/sell`, `plots/buy`, `trees/:id/harvest`), mostra uma previsão na hora e troca pelo estado que volta; pedidos em fila, um por vez. Preços, tempos e árvores vêm de `GET /game/catalog` (`setCrops`, `setTrees`, `setPlotPrice`). Removidos o salvamento automático, `putSave` e `migrateSave`. Relógio acertado pelo `serverTime`; sync a cada 30s e ao voltar para a aba. Chapéu de flor e camisa amarela removidos do avatar.
 - 2026-10-22 – Compra de terreno: `plots` no `SaveData`, Loja > Terreno com escolha da posição no mapa, preço +50% por compra, terrenos colados com cerca só no perímetro. Corrigido índice negativo da textura de terra em terrenos comprados para cima/esquerda. Depende da API (migration `plots`).
 - 2026-10-22 – Avatar com camadas desenhadas (art/avatar-source → scripts/build_avatar_layers.py → public/assets/avatar): alinha as peças pela cabeça e pelas orelhas, extrai a barba por diferença, gera máscaras de pele/íris. O front (render/avatarLayers.ts) empilha as camadas e recolore pele, cabelo e olhos por paleta mantendo a luminosidade. Novas peças: olhos, estilo e cor do cabelo. Falta desenho da flor (não aparece) e a camiseta listrada é provisória (verde recolorida).
 - 2026-10-22 – (substituído) Retrato do avatar em pixel art gerada por código (render/pixelAvatar.ts): grade 40x40, máscaras com 4 tons em faixas + contorno de 1px, olhos/boca/sobrancelhas pixel a pixel; exibido em múltiplos inteiros (80px no HUD, 160px no editor). O mapa continua vetorial.

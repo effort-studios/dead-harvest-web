@@ -1,4 +1,6 @@
 import type { Avatar } from '../game/avatar'
+import type { CatalogCrop } from '../game/crops'
+import type { CatalogFruit, CatalogTree } from '../game/trees'
 import type { SaveData } from '../game/types'
 
 // A API tem que ser acessada pelo MESMO host que abriu o front (localhost ou o IP da rede): o cookie de
@@ -62,5 +64,27 @@ export const resetPassword = (input: { email: string; code: string; newPassword:
 
 // ---------- Jogo ----------
 
-export const loadSave = () => request<SaveData>('/saves/me')
-export const putSave = (data: SaveData) => request<unknown>('/saves/me', { method: 'PUT', body: JSON.stringify(data) })
+// O front não grava estado: cada ação vai para o servidor, que valida, aplica e devolve o estado novo.
+
+export type Catalog = {
+  gridSize: number
+  dayLengthSeconds: number
+  dayStartSeconds: number
+  plotPrice: { base: number; factor: number }
+  crops: CatalogCrop[]
+  fruits: CatalogFruit[]
+  trees: CatalogTree[]
+}
+
+export const fetchCatalog = () => request<Catalog>('/game/catalog')
+export const loadState = () => request<SaveData>('/game/state')
+
+type Tiles = { x: number; y: number; tiles: { row: number; col: number }[] }
+
+export const till = (input: Tiles) => post<SaveData>('/game/till', input)
+export const plant = (input: Tiles & { cropId: string }) => post<SaveData>('/game/plant', input)
+export const harvest = (input: Tiles) => post<SaveData>('/game/harvest', input)
+export const buySeed = (cropId: string, quantity: number) => post<SaveData>('/game/seeds/buy', { cropId, quantity })
+export const sellFruit = (itemId: string, quantity?: number) => post<SaveData>('/game/fruits/sell', { itemId, quantity })
+export const buyPlot = (x: number, y: number) => post<SaveData>('/game/plots/buy', { x, y })
+export const harvestTree = (treeId: string) => post<SaveData>(`/game/trees/${encodeURIComponent(treeId)}/harvest`, {})

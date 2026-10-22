@@ -1,20 +1,26 @@
-import { DAY_LENGTH, DAY_START } from './daycycle'
+import { DAY_LENGTH } from './daycycle'
 import { CROP_ORDER, CROPS, isCropId, type CropId } from './crops'
-import { FRUIT_REGROW_MS, FRUITS, FRUITS_PER_HARVEST, TREES, type FruitId } from './trees'
+import { FRUITS, TREES, type FruitId } from './trees'
 import type { Plot, SaveData, Tile } from './types'
 
 // Funções puras: recebem o estado e devolvem um estado novo, sem mexer em canvas, React ou API.
+// Quem manda é o servidor: estas funções só PREVEEM o resultado de uma ação para a tela responder na
+// hora; logo depois chega o estado de verdade da API e substitui a previsão (veja store/gameStore.ts).
 
 export const GRID_SIZE = 10
 // Distância entre terrenos vizinhos em tiles: ficam colados
 export const PLOT_STEP = GRID_SIZE
-const PLOT_BASE_PRICE = 1000
-const PLOT_PRICE_FACTOR = 1.5
+
+// Preço dos terrenos (regra do servidor, vem do catálogo)
+const plotRule = { base: 0, factor: 1 }
+export function setPlotPrice(rule: { base: number; factor: number }) {
+  Object.assign(plotRule, rule)
+}
 
 const TILLED: Tile = { state: 'tilled', crop: null, growth: 0 }
 
 // Clique num tile: terra -> arada -> plantada -> (madura) colhe e volta a ficar arada
-export function clickTile(data: SaveData, plot: number, row: number, col: number, seed: CropId): SaveData {
+function clickTile(data: SaveData, plot: number, row: number, col: number, seed: CropId): SaveData {
   const tile = data.plots[plot]?.grid[row]?.[col]
   if (!tile) return data
 
@@ -29,7 +35,7 @@ export function clickTile(data: SaveData, plot: number, row: number, col: number
     inventory = { ...inventory, [seed]: inventory[seed] - 1 }
     newTile = { state: 'planted', crop: seed, growth: 0 }
   } else {
-    if (!isCropId(tile.crop) || tile.growth < CROPS[tile.crop].growTicks) return data // ainda crescendo
+    if (!isCropId(tile.crop) || tile.growth < CROPS[tile.crop].growSeconds) return data // ainda crescendo
     money += CROPS[tile.crop].sellPrice
     newTile = TILLED
   }
@@ -59,9 +65,9 @@ export function buySeed(data: SaveData, crop: CropId, qty = 1): SaveData {
   }
 }
 
-// Preço do próximo terreno: 1000 e +50% a cada terreno comprado
+// Preço do próximo terreno (sobe a cada terreno comprado)
 export function plotPrice(data: SaveData): number {
-  return Math.round(PLOT_BASE_PRICE * PLOT_PRICE_FACTOR ** (data.plots.length - 1))
+  return Math.round(plotRule.base * plotRule.factor ** (data.plots.length - 1))
 }
 
 // Posições livres ao lado (4 direções) de algum terreno que o jogador já tem
@@ -94,10 +100,11 @@ export function plotCell(row: number, col: number) {
   return { x, y, row: row - y * PLOT_STEP, col: col - x * PLOT_STEP }
 }
 
-// Árvore com frutas: nunca colhida, ou colhida há mais de 1 hora
+// Árvore com frutas: nunca colhida, ou colhida há mais tempo que a rebrota. `now` é o relógio do servidor.
 export function treeHasFruit(data: SaveData, treeId: string, now: number): boolean {
-  const last = data.trees?.[treeId]
-  return last === undefined || now - last >= FRUIT_REGROW_MS
+  const tree = TREES.find((t) => t.id === treeId)
+  const last = data.trees[treeId]
+  return !!tree && (last === undefined || now - last >= tree.regrowMs)
 }
 
 // Ids das árvores com frutas agora
@@ -105,13 +112,13 @@ export function readyTreeIds(data: SaveData, now: number): string[] {
   return TREES.filter((t) => treeHasFruit(data, t.id, now)).map((t) => t.id)
 }
 
-// Colhe as frutas de uma árvore: vão para o inventário e a árvore só repõe daqui a 1 hora
+// Colhe as frutas de uma árvore: vão para o inventário e a árvore só repõe depois da rebrota
 export function harvestTree(data: SaveData, treeId: string, now: number): SaveData {
   const tree = TREES.find((t) => t.id === treeId)
   if (!tree || !treeHasFruit(data, treeId, now)) return data
   return {
     ...data,
-    inventory: { ...data.inventory, [tree.fruit]: (data.inventory[tree.fruit] ?? 0) + FRUITS_PER_HARVEST },
+    inventory: { ...data.inventory, [tree.fruit]: (data.inventory[tree.fruit] ?? 0) + tree.fruitsPerHarvest },
     trees: { ...data.trees, [treeId]: now },
   }
 }
@@ -132,18 +139,29 @@ export function sellFruit(data: SaveData, fruit: FruitId, qty?: number): SaveDat
 // Como o clique age: só no tile, ou em toda a linha / coluna dele
 export type ClickMode = 'tile' | 'row' | 'col'
 
-// Ação em massa: repete o clique em todos os tiles da linha (ou coluna) que estão no
-// mesmo estado do tile clicado. Se as sementes acabam, o resto da linha fica como está.
-export function clickLine(data: SaveData, mode: 'row' | 'col', plot: number, row: number, col: number, seed: CropId): SaveData {
-  const clicked = data.plots[plot]?.grid[row]?.[col]
-  if (!clicked) return data
-  let result = data
-  for (let i = 0; i < GRID_SIZE; i++) {
-    const r = mode === 'row' ? row : i
-    const c = mode === 'row' ? i : col
-    if (result.plots[plot].grid[r][c].state === clicked.state) result = clickTile(result, plot, r, c, seed)
-  }
-  return result
+export type TileAction = 'till' | 'plant' | 'harvest'
+export type TileCommand = { action: TileAction; plot: number; tiles: { row: number; col: number }[] }
+
+// O que um clique pede ao servidor: a ação vem do estado do tile clicado (terra = arar, arado = plantar,
+// plantado = colher) e vale para os tiles do modo (tile, linha ou coluna) que estão no mesmo estado.
+// null = nada a fazer (ex.: planta ainda verde).
+export function tileCommand(data: SaveData, plot: number, row: number, col: number, mode: ClickMode): TileCommand | null {
+  const grid = data.plots[plot]?.grid
+  const clicked = grid?.[row]?.[col]
+  if (!clicked) return null
+  const ripe = (t: Tile) => isCropId(t.crop) && t.growth >= CROPS[t.crop].growSeconds
+  if (clicked.state === 'planted' && !ripe(clicked)) return null
+  const tiles = tilesInMode(mode, row, col).filter(({ row: r, col: c }) => {
+    const t = grid[r][c]
+    return t.state === clicked.state && (t.state !== 'planted' || ripe(t))
+  })
+  const action: TileAction = clicked.state === 'soil' ? 'till' : clicked.state === 'tilled' ? 'plant' : 'harvest'
+  return { action, plot, tiles }
+}
+
+// Previsão de uma ação em tiles: aplica o clique em cada um, na ordem (se as sementes acabam, o resto fica)
+export function applyTileCommand(data: SaveData, cmd: TileCommand, seed: CropId): SaveData {
+  return cmd.tiles.reduce((d, t) => clickTile(d, cmd.plot, t.row, t.col, seed), data)
 }
 
 // Tiles afetados por um clique (usado para destacar a linha no desenho)
@@ -152,8 +170,8 @@ export function tilesInMode(mode: ClickMode, row: number, col: number) {
   return Array.from({ length: GRID_SIZE }, (_, i) => (mode === 'row' ? { row, col: i } : { row: i, col }))
 }
 
-// Passa 1 tick: toda planta cresce 1 (até ficar madura) e o relógio do dia avança.
-// Ao fim do dia (depois da noite) amanhece e o contador de dias sobe.
+// Passa 1 segundo na tela, entre um estado do servidor e outro: toda planta cresce 1 (até ficar
+// madura) e o relógio do dia avança. Ao fim do dia (depois da noite) amanhece e o contador de dias sobe.
 export function tick(data: SaveData): SaveData {
   let changed = false
   const plots = data.plots.map((plot) => ({
@@ -161,7 +179,7 @@ export function tick(data: SaveData): SaveData {
     grid: plot.grid.map((row) =>
       row.map((tile) => {
         if (tile.state !== 'planted' || !isCropId(tile.crop)) return tile
-        if (tile.growth >= CROPS[tile.crop].growTicks) return tile
+        if (tile.growth >= CROPS[tile.crop].growSeconds) return tile
         changed = true
         return { ...tile, growth: tile.growth + 1 }
       }),
@@ -175,18 +193,6 @@ export function tick(data: SaveData): SaveData {
     time: newDay ? 0 : time,
     day: newDay ? data.day + 1 : data.day,
   }
-}
-
-// Saves antigos usavam "wheat" (trigo); hoje a planta inicial é o milho
-export function migrateSave(data: SaveData): SaveData {
-  const rename = (crop: string | null) => (crop === 'wheat' ? 'corn' : crop)
-  const inventory = { ...data.inventory }
-  if ('wheat' in inventory) {
-    inventory.corn = (inventory.corn ?? 0) + inventory.wheat
-    delete inventory.wheat
-  }
-  const plots = data.plots.map((p) => ({ ...p, grid: p.grid.map((row) => row.map((t) => ({ ...t, crop: rename(t.crop) }))) }))
-  return { ...data, inventory, plots, trees: data.trees ?? {}, time: (data.time ?? DAY_START) % DAY_LENGTH }
 }
 
 function replacePlotGrid(plots: Plot[], index: number, grid: Tile[][]): Plot[] {

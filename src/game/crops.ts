@@ -1,34 +1,44 @@
-// Tipos de planta. Os tempos são em ticks (1 tick = 1 segundo).
-export type CropId = 'corn' | 'tomato' | 'pumpkin' | 'carrot' | 'potato' | 'strawberry' | 'watermelon'
+// Tipos de planta. Os ids são os que o front sabe desenhar; nome, tempo e preços são regras do jogo e
+// vêm da API (GET /game/catalog) ao abrir o jogo, em setCrops. Os tempos são em segundos.
+export const CROP_IDS = ['corn', 'tomato', 'pumpkin', 'carrot', 'potato', 'strawberry', 'watermelon'] as const
+export type CropId = (typeof CROP_IDS)[number]
 
 export type CropInfo = {
   name: string
-  growTicks: number // ticks até ficar madura
-  seedPrice: number // custo da semente na loja (item 5)
+  growSeconds: number // até ficar madura
+  seedPrice: number // custo da semente na loja
   sellPrice: number // dinheiro ao colher
 }
 
-// Tempos longos de propósito: dá tempo de fazer outras coisas em vez de ficar só plantando e colhendo.
-// Quanto mais demora, mais compensa (preço de venda sobe mais rápido que o de semente).
-export const CROPS: Record<CropId, CropInfo> = {
-  tomato: { name: 'Tomate', growTicks: 90, seedPrice: 4, sellPrice: 9 },
-  carrot: { name: 'Cenoura', growTicks: 120, seedPrice: 5, sellPrice: 12 },
-  corn: { name: 'Milho', growTicks: 180, seedPrice: 7, sellPrice: 18 },
-  potato: { name: 'Batata', growTicks: 240, seedPrice: 9, sellPrice: 24 },
-  strawberry: { name: 'Morango', growTicks: 300, seedPrice: 12, sellPrice: 34 },
-  pumpkin: { name: 'Abóbora', growTicks: 480, seedPrice: 18, sellPrice: 58 },
-  watermelon: { name: 'Melancia', growTicks: 720, seedPrice: 28, sellPrice: 100 },
-}
+export const CROPS = {} as Record<CropId, CropInfo>
 
-// Ordem na barra de itens (teclas 1 a 7) e na loja
-export const CROP_ORDER: CropId[] = ['corn', 'tomato', 'pumpkin', 'carrot', 'potato', 'strawberry', 'watermelon']
+// Ordem na barra de itens e na loja (a do catálogo)
+export const CROP_ORDER: CropId[] = []
+
+export type CatalogCrop = { id: string; name: string; growSeconds: number; harvestPrice: number; seedPrice: number }
+
+// Preenche CROPS e CROP_ORDER com o catálogo do servidor (planta sem desenho no front fica de fora)
+export function setCrops(list: CatalogCrop[]) {
+  CROP_ORDER.length = 0
+  for (const c of list) {
+    if (!(CROP_IDS as readonly string[]).includes(c.id)) continue
+    const id = c.id as CropId
+    CROPS[id] = { name: c.name, growSeconds: c.growSeconds, seedPrice: c.seedPrice, sellPrice: c.harvestPrice }
+    CROP_ORDER.push(id)
+  }
+}
 
 export function isCropId(value: string | null): value is CropId {
   return value !== null && value in CROPS
 }
 
-// 90 -> "1min30s", 180 -> "3min", 45 -> "45s"
+// 90 -> "1min30s", 180 -> "3min", 45 -> "45s", 3600 -> "1h", 5400 -> "1h30min"
 export function formatDuration(seconds: number): string {
+  const h = Math.floor(seconds / 3600)
+  if (h > 0) {
+    const rest = seconds % 3600
+    return rest === 0 ? `${h}h` : `${h}h${formatDuration(rest)}`
+  }
   const m = Math.floor(seconds / 60)
   const s = seconds % 60
   if (m === 0) return `${s}s`

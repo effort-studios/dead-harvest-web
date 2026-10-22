@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { CROP_ORDER, CROPS, formatDuration, type CropId } from '../game/crops'
-import { FRUIT_ORDER, FRUITS, FRUIT_REGROW_MS, FRUITS_PER_HARVEST, TREES } from '../game/trees'
+import { FRUIT_ORDER, FRUITS, TREES } from '../game/trees'
 import { plotPrice } from '../game/state'
 import { useGameStore } from '../store/gameStore'
 import { BulbIcon, CloseIcon, CoinIcon, CropIcon, FruitIcon, InfoIcon, ShopIcon } from './Icons'
@@ -133,7 +133,7 @@ function SeedSelect({ value, onChange }: { value: CropId; onChange: (crop: CropI
             >
               <CropIcon crop={id} size={28} />
               <span className="select-name">{CROPS[id].name}</span>
-              <span className="select-time">{formatDuration(CROPS[id].growTicks)}</span>
+              <span className="select-time">{formatDuration(CROPS[id].growSeconds)}</span>
               <span className="select-price">
                 <CoinIcon size={14} /> {CROPS[id].seedPrice}
               </span>
@@ -160,7 +160,7 @@ function BuySeeds() {
       <div className="seed-card">
         <CropIcon crop={crop} size={52} />
         <ul>
-          <li>Amadurece em <b>{formatDuration(info.growTicks)}</b></li>
+          <li>Amadurece em <b>{formatDuration(info.growSeconds)}</b></li>
           <li>Vende por <CoinIcon size={13} /> <b>{info.sellPrice}</b> (lucro <b>{info.sellPrice - info.seedPrice}</b>)</li>
           <li>Você tem <b>{inventory[crop] ?? 0}</b> semente(s)</li>
         </ul>
@@ -225,8 +225,8 @@ function SellFruits() {
         )
       })}
       <p className="muted">
-        Árvores com frutas agora: {ready}/{TREES.length}. Cada colheita dá {FRUITS_PER_HARVEST} frutas e a árvore
-        repõe depois de {FRUIT_REGROW_MS / 3600000} hora.
+        Árvores com frutas agora: {ready}/{TREES.length}.
+        {TREES[0] && ` Cada colheita dá ${TREES[0].fruitsPerHarvest} frutas e a árvore repõe depois de ${formatDuration(TREES[0].regrowMs / 1000)}.`}
       </p>
     </>
   )
@@ -254,7 +254,7 @@ function TipsPanel() {
           {CROP_ORDER.map((id) => (
             <tr key={id}>
               <td>{CROPS[id].name}</td>
-              <td>{formatDuration(CROPS[id].growTicks)}</td>
+              <td>{formatDuration(CROPS[id].growSeconds)}</td>
               <td>{CROPS[id].seedPrice}</td>
               <td>{CROPS[id].sellPrice}</td>
             </tr>
