@@ -65,8 +65,8 @@ export function AuthScreen() {
           <FarmerIcon size={48} />
           <h1>Dead Harvest</h1>
         </div>
-        {/* no login o botão "Entrar" já diz tudo; os outros modos precisam do título */}
-        {mode !== 'login' && <h2>{TITLES[mode]}</h2>}
+        {/* entrar e criar conta: o botão já diz o que faz; só a recuperação de senha precisa de título */}
+        {(mode === 'forgot' || mode === 'reset') && <h2>{TITLES[mode]}</h2>}
 
         {notice && <p className="auth-notice">{notice}</p>}
 
