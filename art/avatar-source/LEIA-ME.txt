@@ -1,0 +1,5 @@
+ASSETS DE PIXEL ART - RECORTES POR CAMADA
+
+Cada PNG contém um recorte individual da sprite sheet original, organizado por pasta.
+Importante: a imagem gerada não respeitou perfeitamente a transparência nem a grade 64x64. Por isso, estes arquivos são recortes de referência, não sprites finais prontos para sobreposição pixel-perfect.
+Para o Claude: use os arquivos como referência visual e ajuste/remova o fundo, padronize cada sprite para 64x64 e alinhe as camadas antes de integrar ao character creator.

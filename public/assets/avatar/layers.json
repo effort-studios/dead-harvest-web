@@ -1,0 +1,112 @@
+{
+  "canvas": 232,
+  "faces": {
+    "happy": {
+      "image": "face_happy",
+      "skin": "face_happy_skin",
+      "iris": "face_happy_iris"
+    },
+    "calm": {
+      "image": "face_calm",
+      "skin": "face_calm_skin",
+      "iris": "face_calm_iris"
+    },
+    "wink": {
+      "image": "face_wink",
+      "skin": "face_wink_skin",
+      "iris": "face_wink_iris"
+    },
+    "surprised": {
+      "image": "face_surprised",
+      "skin": "face_surprised_skin",
+      "iris": "face_surprised_iris"
+    },
+    "sleepy": {
+      "image": "face_sleepy",
+      "skin": "face_sleepy_skin",
+      "iris": "face_sleepy_iris"
+    }
+  },
+  "beards": {
+    "stubble": {
+      "image": "beard_stubble"
+    },
+    "mustache": {
+      "image": "beard_mustache"
+    },
+    "goatee": {
+      "image": "beard_goatee"
+    },
+    "full": {
+      "image": "beard_full"
+    }
+  },
+  "hairs": {
+    "short": {
+      "image": "hair_short"
+    },
+    "messy": {
+      "image": "hair_messy"
+    },
+    "long": {
+      "image": "hair_long"
+    },
+    "ponytail": {
+      "image": "hair_ponytail",
+      "keep": "hair_ponytail_keep"
+    },
+    "bun": {
+      "image": "hair_bun",
+      "keep": "hair_bun_keep"
+    },
+    "buzz": {
+      "image": "hair_buzz"
+    }
+  },
+  "hats": {
+    "straw": {
+      "image": "hat_straw"
+    },
+    "cap": {
+      "image": "hat_cap"
+    },
+    "beanie": {
+      "image": "hat_beanie"
+    },
+    "cowboy": {
+      "image": "hat_cowboy"
+    }
+  },
+  "outfits": {
+    "overalls_blue": {
+      "image": "outfit_overalls_blue",
+      "skin": "outfit_overalls_blue_skin"
+    },
+    "overalls_red": {
+      "image": "outfit_overalls_red",
+      "skin": "outfit_overalls_red_skin"
+    },
+    "shirt_green": {
+      "image": "outfit_shirt_green",
+      "skin": "outfit_shirt_green_skin"
+    },
+    "shirt_purple": {
+      "image": "outfit_shirt_purple",
+      "skin": "outfit_shirt_purple_skin"
+    },
+    "coat_brown": {
+      "image": "outfit_coat_brown",
+      "skin": "outfit_coat_brown_skin"
+    },
+    "shirt_yellow": {
+      "image": "outfit_shirt_yellow",
+      "skin": "outfit_shirt_yellow_skin"
+    }
+  },
+  "head": {
+    "x0": 51,
+    "y0": 64,
+    "x1": 181,
+    "y1": 189
+  }
+}

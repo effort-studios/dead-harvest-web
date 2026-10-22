@@ -76,7 +76,7 @@ export function ProfileEditor({ onClose }: { onClose: () => void }) {
             >
               {/* cada opção mostra como o avatar ficaria com ela */}
               <Avatar avatar={{ ...avatar, [part]: option }} size={80} />
-              <span>{OPTION_LABEL[option]}</span>
+              <span>{(OPTION_LABEL[part] as Record<string, string>)[option]}</span>
             </button>
           ))}
         </div>

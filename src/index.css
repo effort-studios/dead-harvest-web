@@ -547,6 +547,7 @@ button.hud-player:hover { filter: brightness(1.08); }
   box-shadow: 0 0 0 2px #c98f4e;
 }
 
-/* pixel art: amplia sem suavizar */
-.pixel-avatar { display: block; image-rendering: pixelated; }
+/* retrato do avatar (montado a partir das camadas em public/assets/avatar) */
+.avatar-img { display: block; }
+.avatar-loading { background: #e2c99a; }
 .editor-preview { padding: 0; background: none; border-color: #2a170a; border-radius: 10px; overflow: hidden; box-shadow: 0 0 0 2px #c98f4e; }

@@ -1,0 +1,302 @@
+[
+  {
+    "arquivo": "01_base/base_calmo.png",
+    "linha": 1,
+    "coluna": 1,
+    "dimensoes_px": [
+      200,
+      177
+    ],
+    "observacao": "Recorte da sprite sheet gerada; o fundo pode não estar transparente."
+  },
+  {
+    "arquivo": "02_cabelo/curto_fr estilo_frente.png",
+    "linha": 2,
+    "coluna": 1,
+    "dimensoes_px": [
+      200,
+      186
+    ],
+    "observacao": "Recorte da sprite sheet gerada; o fundo pode não estar transparente."
+  },
+  {
+    "arquivo": "02_cabelo/curto_espigado.png",
+    "linha": 2,
+    "coluna": 2,
+    "dimensoes_px": [
+      204,
+      186
+    ],
+    "observacao": "Recorte da sprite sheet gerada; o fundo pode não estar transparente."
+  },
+  {
+    "arquivo": "02_cabelo/longo_partido_centro.png",
+    "linha": 2,
+    "coluna": 3,
+    "dimensoes_px": [
+      207,
+      186
+    ],
+    "observacao": "Recorte da sprite sheet gerada; o fundo pode não estar transparente."
+  },
+  {
+    "arquivo": "02_cabelo/rabo_cavalo.png",
+    "linha": 2,
+    "coluna": 4,
+    "dimensoes_px": [
+      210,
+      186
+    ],
+    "observacao": "Recorte da sprite sheet gerada; o fundo pode não estar transparente."
+  },
+  {
+    "arquivo": "02_cabelo/coque.png",
+    "linha": 2,
+    "coluna": 5,
+    "dimensoes_px": [
+      210,
+      186
+    ],
+    "observacao": "Recorte da sprite sheet gerada; o fundo pode não estar transparente."
+  },
+  {
+    "arquivo": "02_cabelo/buzz_cut.png",
+    "linha": 2,
+    "coluna": 6,
+    "dimensoes_px": [
+      209,
+      186
+    ],
+    "observacao": "Recorte da sprite sheet gerada; o fundo pode não estar transparente."
+  },
+  {
+    "arquivo": "02_cabelo/careca_vazio.png",
+    "linha": 2,
+    "coluna": 7,
+    "dimensoes_px": [
+      196,
+      186
+    ],
+    "observacao": "Recorte da sprite sheet gerada; o fundo pode não estar transparente."
+  },
+  {
+    "arquivo": "03_expressoes/feliz.png",
+    "linha": 3,
+    "coluna": 1,
+    "dimensoes_px": [
+      200,
+      153
+    ],
+    "observacao": "Recorte da sprite sheet gerada; o fundo pode não estar transparente."
+  },
+  {
+    "arquivo": "03_expressoes/calmo.png",
+    "linha": 3,
+    "coluna": 2,
+    "dimensoes_px": [
+      204,
+      153
+    ],
+    "observacao": "Recorte da sprite sheet gerada; o fundo pode não estar transparente."
+  },
+  {
+    "arquivo": "03_expressoes/piscando.png",
+    "linha": 3,
+    "coluna": 3,
+    "dimensoes_px": [
+      207,
+      153
+    ],
+    "observacao": "Recorte da sprite sheet gerada; o fundo pode não estar transparente."
+  },
+  {
+    "arquivo": "03_expressoes/surpreso.png",
+    "linha": 3,
+    "coluna": 4,
+    "dimensoes_px": [
+      210,
+      153
+    ],
+    "observacao": "Recorte da sprite sheet gerada; o fundo pode não estar transparente."
+  },
+  {
+    "arquivo": "03_expressoes/sonolento.png",
+    "linha": 3,
+    "coluna": 5,
+    "dimensoes_px": [
+      210,
+      153
+    ],
+    "observacao": "Recorte da sprite sheet gerada; o fundo pode não estar transparente."
+  },
+  {
+    "arquivo": "04_barbas/sem_barba.png",
+    "linha": 4,
+    "coluna": 1,
+    "dimensoes_px": [
+      200,
+      149
+    ],
+    "observacao": "Recorte da sprite sheet gerada; o fundo pode não estar transparente."
+  },
+  {
+    "arquivo": "04_barbas/stubble_leve.png",
+    "linha": 4,
+    "coluna": 2,
+    "dimensoes_px": [
+      204,
+      149
+    ],
+    "observacao": "Recorte da sprite sheet gerada; o fundo pode não estar transparente."
+  },
+  {
+    "arquivo": "04_barbas/bigode.png",
+    "linha": 4,
+    "coluna": 3,
+    "dimensoes_px": [
+      207,
+      149
+    ],
+    "observacao": "Recorte da sprite sheet gerada; o fundo pode não estar transparente."
+  },
+  {
+    "arquivo": "04_barbas/cavanhaque.png",
+    "linha": 4,
+    "coluna": 4,
+    "dimensoes_px": [
+      210,
+      149
+    ],
+    "observacao": "Recorte da sprite sheet gerada; o fundo pode não estar transparente."
+  },
+  {
+    "arquivo": "04_barbas/barba_cheia.png",
+    "linha": 4,
+    "coluna": 5,
+    "dimensoes_px": [
+      210,
+      149
+    ],
+    "observacao": "Recorte da sprite sheet gerada; o fundo pode não estar transparente."
+  },
+  {
+    "arquivo": "05_chapeus_acessorios/sem_chapeu.png",
+    "linha": 5,
+    "coluna": 1,
+    "dimensoes_px": [
+      200,
+      150
+    ],
+    "observacao": "Recorte da sprite sheet gerada; o fundo pode não estar transparente."
+  },
+  {
+    "arquivo": "05_chapeus_acessorios/chapeu_palha.png",
+    "linha": 5,
+    "coluna": 2,
+    "dimensoes_px": [
+      204,
+      150
+    ],
+    "observacao": "Recorte da sprite sheet gerada; o fundo pode não estar transparente."
+  },
+  {
+    "arquivo": "05_chapeus_acessorios/bone_vermelho.png",
+    "linha": 5,
+    "coluna": 3,
+    "dimensoes_px": [
+      207,
+      150
+    ],
+    "observacao": "Recorte da sprite sheet gerada; o fundo pode não estar transparente."
+  },
+  {
+    "arquivo": "05_chapeus_acessorios/gorro_azul.png",
+    "linha": 5,
+    "coluna": 4,
+    "dimensoes_px": [
+      210,
+      150
+    ],
+    "observacao": "Recorte da sprite sheet gerada; o fundo pode não estar transparente."
+  },
+  {
+    "arquivo": "05_chapeus_acessorios/chapeu_cowboy.png",
+    "linha": 5,
+    "coluna": 5,
+    "dimensoes_px": [
+      210,
+      150
+    ],
+    "observacao": "Recorte da sprite sheet gerada; o fundo pode não estar transparente."
+  },
+  {
+    "arquivo": "05_chapeus_acessorios/flor_rosa.png",
+    "linha": 5,
+    "coluna": 6,
+    "dimensoes_px": [
+      209,
+      150
+    ],
+    "observacao": "Recorte da sprite sheet gerada; o fundo pode não estar transparente."
+  },
+  {
+    "arquivo": "06_roupas/jardineira_azul.png",
+    "linha": 6,
+    "coluna": 1,
+    "dimensoes_px": [
+      200,
+      131
+    ],
+    "observacao": "Recorte da sprite sheet gerada; o fundo pode não estar transparente."
+  },
+  {
+    "arquivo": "06_roupas/jardineira_vermelha.png",
+    "linha": 6,
+    "coluna": 2,
+    "dimensoes_px": [
+      204,
+      131
+    ],
+    "observacao": "Recorte da sprite sheet gerada; o fundo pode não estar transparente."
+  },
+  {
+    "arquivo": "06_roupas/camiseta_verde.png",
+    "linha": 6,
+    "coluna": 3,
+    "dimensoes_px": [
+      207,
+      131
+    ],
+    "observacao": "Recorte da sprite sheet gerada; o fundo pode não estar transparente."
+  },
+  {
+    "arquivo": "06_roupas/camiseta_roxa.png",
+    "linha": 6,
+    "coluna": 4,
+    "dimensoes_px": [
+      210,
+      131
+    ],
+    "observacao": "Recorte da sprite sheet gerada; o fundo pode não estar transparente."
+  },
+  {
+    "arquivo": "06_roupas/casaco_marrom.png",
+    "linha": 6,
+    "coluna": 5,
+    "dimensoes_px": [
+      210,
+      131
+    ],
+    "observacao": "Recorte da sprite sheet gerada; o fundo pode não estar transparente."
+  },
+  {
+    "arquivo": "06_roupas/camiseta_listrada_amarela.png",
+    "linha": 6,
+    "coluna": 6,
+    "dimensoes_px": [
+      209,
+      131
+    ],
+    "observacao": "Recorte da sprite sheet gerada; o fundo pode não estar transparente."
+  }
+]
