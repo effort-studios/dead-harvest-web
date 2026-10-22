@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { ApiError, createPlayer, loadSave, putSave } from '../api/client'
 import type { CropId } from '../game/crops'
-import { buySeed, clickLine, clickTile, migrateSave, tick, type ClickMode } from '../game/state'
+import { buyPlot, buySeed, clickLine, clickTile, migrateSave, tick, type ClickMode } from '../game/state'
 import type { SaveData } from '../game/types'
 
 const PLAYER_KEY = 'deadHarvestPlayerId'
@@ -13,12 +13,15 @@ type GameState = {
   playerId: string | null
   data: SaveData | null
   selectedSeed: CropId // semente escolhida na barra de itens (não vai para o save)
+  buyingPlot: boolean // true = o mapa mostra as posições livres para o jogador escolher
   init: () => Promise<void>
   save: () => Promise<void>
-  clickTile: (row: number, col: number, mode: ClickMode) => void
+  clickTile: (plot: number, row: number, col: number, mode: ClickMode) => void
   selectSeed: (crop: CropId) => void
   tick: () => void
   buySeed: (crop: CropId) => void
+  setBuyingPlot: (on: boolean) => void
+  buyPlot: (x: number, y: number) => void
   newGame: () => Promise<void>
 }
 
@@ -29,6 +32,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   playerId: null,
   data: null,
   selectedSeed: 'corn',
+  buyingPlot: false,
 
   init: async () => {
     try {
@@ -67,13 +71,13 @@ export const useGameStore = create<GameState>((set, get) => ({
     }
   },
 
-  clickTile: (row, col, mode) =>
+  clickTile: (plot, row, col, mode) =>
     set((s) => {
       if (!s.data) return s
       const data =
         mode === 'tile'
-          ? clickTile(s.data, row, col, s.selectedSeed)
-          : clickLine(s.data, mode, row, col, s.selectedSeed)
+          ? clickTile(s.data, plot, row, col, s.selectedSeed)
+          : clickLine(s.data, mode, plot, row, col, s.selectedSeed)
       return { data }
     }),
 
@@ -83,13 +87,17 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   buySeed: (crop) => set((s) => (s.data ? { data: buySeed(s.data, crop) } : s)),
 
+  setBuyingPlot: (on) => set({ buyingPlot: on }),
+
+  buyPlot: (x, y) => set((s) => (s.data ? { data: buyPlot(s.data, x, y), buyingPlot: false } : s)),
+
   // Cria um jogador convidado novo; o antigo continua guardado no banco
   newGame: async () => {
     try {
       const playerId = await createPlayer()
       const data = migrateSave(await loadSave(playerId))
       localStorage.setItem(PLAYER_KEY, playerId)
-      set({ playerId, data, selectedSeed: 'corn', error: null })
+      set({ playerId, data, selectedSeed: 'corn', buyingPlot: false, error: null })
     } catch (err) {
       set({ error: err instanceof Error ? err.message : 'Erro ao criar novo jogo' })
     }

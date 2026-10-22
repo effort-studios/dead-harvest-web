@@ -5,9 +5,16 @@ export type Tile = {
   growth: number
 }
 
+// Terreno 10x10; (x, y) é a posição na malha de terrenos (o inicial é 0,0)
+export type Plot = {
+  x: number
+  y: number
+  grid: Tile[][]
+}
+
 export type SaveData = {
   day: number
   money: number
-  grid: Tile[][]
+  plots: Plot[]
   inventory: Record<string, number>
 }

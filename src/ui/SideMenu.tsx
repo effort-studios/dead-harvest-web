@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { CROP_ORDER, CROPS } from '../game/crops'
+import { plotPrice } from '../game/state'
 import { useGameStore } from '../store/gameStore'
 import { BulbIcon, CloseIcon, CoinIcon, CropIcon, FarmerIcon, InfoIcon, ShopIcon } from './Icons'
 
@@ -67,6 +68,10 @@ function ShopPanel() {
   const money = useGameStore((s) => s.data?.money ?? 0)
   const inventory = useGameStore((s) => s.data?.inventory ?? {})
   const buySeed = useGameStore((s) => s.buySeed)
+  const price = useGameStore((s) => (s.data ? plotPrice(s.data) : 0))
+  const plotCount = useGameStore((s) => s.data?.plots.length ?? 0)
+  const buyingPlot = useGameStore((s) => s.buyingPlot)
+  const setBuyingPlot = useGameStore((s) => s.setBuyingPlot)
 
   return (
     <>
@@ -90,6 +95,15 @@ function ShopPanel() {
           </div>
         )
       })}
+      <div className="shop-row">
+        <div className="shop-info">
+          <b>Terreno</b> <span className="muted">(você tem {plotCount})</span>
+          <small>{buyingPlot ? 'Clique num terreno destacado no mapa' : 'Um terreno novo 10x10 ao lado de um que você já tem'}</small>
+        </div>
+        <button className="btn" disabled={!buyingPlot && money < price} onClick={() => setBuyingPlot(!buyingPlot)}>
+          {buyingPlot ? 'Cancelar' : <><CoinIcon size={16} /> {price}</>}
+        </button>
+      </div>
     </>
   )
 }
