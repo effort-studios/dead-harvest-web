@@ -1,7 +1,7 @@
 import { dayLengthSeconds } from './daycycle'
 import { CROP_ORDER, CROPS, isCropId, type CropId } from './crops'
 import { FRUITS, TREES, type FruitId } from './trees'
-import type { Plot, SaveData, Tile } from './types'
+import type { SaveData, Tile } from './types'
 
 // Funções puras: recebem o estado e devolvem um estado novo, sem mexer em canvas, React ou API.
 // Quem manda é o servidor: estas funções só PREVEEM o resultado de uma ação para a tela responder na
@@ -15,32 +15,6 @@ export const PLOT_STEP = GRID_SIZE
 const plotRule = { base: 0, factor: 1 }
 export function setPlotPrice(rule: { base: number; factor: number }) {
   Object.assign(plotRule, rule)
-}
-
-const TILLED: Tile = { state: 'tilled', crop: null, growth: 0 }
-
-// Clique num tile: terra -> arada -> plantada -> (madura) colhe e volta a ficar arada
-function clickTile(data: SaveData, plot: number, row: number, col: number, seed: CropId): SaveData {
-  const tile = data.plots[plot]?.grid[row]?.[col]
-  if (!tile) return data
-
-  let newTile: Tile
-  let money = data.money
-  let inventory = data.inventory
-
-  if (tile.state === 'soil') {
-    newTile = { ...tile, state: 'tilled' }
-  } else if (tile.state === 'tilled') {
-    if ((inventory[seed] ?? 0) < 1) return data // sem semente, não planta
-    inventory = { ...inventory, [seed]: inventory[seed] - 1 }
-    newTile = { state: 'planted', crop: seed, growth: 0 }
-  } else {
-    if (!isCropId(tile.crop) || tile.growth < CROPS[tile.crop].growSeconds) return data // ainda crescendo
-    money += CROPS[tile.crop].sellPrice
-    newTile = TILLED
-  }
-
-  return { ...data, plots: replacePlotGrid(data.plots, plot, replaceTile(data.plots[plot].grid, row, col, newTile)), money, inventory }
 }
 
 // Sementes que o jogador tem (quantidade > 0), na ordem da loja: são as que aparecem na barra de itens
@@ -112,17 +86,6 @@ export function readyTreeIds(data: SaveData, now: number): string[] {
   return TREES.filter((t) => treeHasFruit(data, t.id, now)).map((t) => t.id)
 }
 
-// Colhe as frutas de uma árvore: vão para o inventário e a árvore só repõe depois da rebrota
-export function harvestTree(data: SaveData, treeId: string, now: number): SaveData {
-  const tree = TREES.find((t) => t.id === treeId)
-  if (!tree || !treeHasFruit(data, treeId, now)) return data
-  return {
-    ...data,
-    inventory: { ...data.inventory, [tree.fruit]: (data.inventory[tree.fruit] ?? 0) + tree.fruitsPerHarvest },
-    trees: { ...data.trees, [treeId]: now },
-  }
-}
-
 // Vende `qty` frutas do inventário (ou todas, se qty não for informado)
 export function sellFruit(data: SaveData, fruit: FruitId, qty?: number): SaveData {
   const have = data.inventory[fruit] ?? 0
@@ -159,11 +122,6 @@ export function tileCommand(data: SaveData, plot: number, row: number, col: numb
   return { action, plot, tiles }
 }
 
-// Previsão de uma ação em tiles: aplica o clique em cada um, na ordem (se as sementes acabam, o resto fica)
-export function applyTileCommand(data: SaveData, cmd: TileCommand, seed: CropId): SaveData {
-  return cmd.tiles.reduce((d, t) => clickTile(d, cmd.plot, t.row, t.col, seed), data)
-}
-
 // Tiles afetados por um clique (usado para destacar a linha no desenho)
 export function tilesInMode(mode: ClickMode, row: number, col: number) {
   if (mode === 'tile') return [{ row, col }]
@@ -193,12 +151,4 @@ export function tick(data: SaveData): SaveData {
     time: newDay ? 0 : time,
     day: newDay ? data.day + 1 : data.day,
   }
-}
-
-function replacePlotGrid(plots: Plot[], index: number, grid: Tile[][]): Plot[] {
-  return plots.map((p, i) => (i === index ? { ...p, grid } : p))
-}
-
-function replaceTile(grid: Tile[][], row: number, col: number, tile: Tile): Tile[][] {
-  return grid.map((r, i) => (i === row ? r.map((t, j) => (j === col ? tile : t)) : r))
 }

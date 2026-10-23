@@ -11,9 +11,11 @@ import {
   type Size,
 } from '@/features/farm/render/draw'
 import { freeSlots, plotCell, type ClickMode } from '@/features/farm/model/state'
+import { farmerPose, type Pose } from '@/features/farm/model/farmer'
+import { useProfileStore } from '@/features/profile/store'
 import { skyTint } from '@/features/farm/model/daycycle'
 import { loadSprites, type Sprites } from '@/features/farm/render/sprites'
-import { useFarmStore } from '../store'
+import { serverNow, useFarmStore } from '../store'
 
 // Shift = ação na linha inteira, Ctrl = na coluna inteira, nenhum = só no tile
 function modeOf(e: { shiftKey: boolean; ctrlKey: boolean }): ClickMode {
@@ -34,7 +36,7 @@ export function GameCanvas() {
   const plots = useFarmStore((s) => s.data?.plots)
   const buyingPlot = useFarmStore((s) => s.buyingPlot)
   const readyTrees = useFarmStore((s) => s.readyTrees)
-  const harvestTree = useFarmStore((s) => s.harvestTree)
+  const animating = useFarmStore((s) => (s.data?.farmer.jobs.length ?? 0) > 0) // há fila: o personagem se mexe
   const time = useFarmStore((s) => s.data?.time ?? 0)
   const [sprites, setSprites] = useState<Sprites | null>(null)
   const [size, setSize] = useState<Size>({ width: 0, height: 0 })
@@ -48,6 +50,7 @@ export function GameCanvas() {
   const treeHover = useRef<string | null>(null) // árvore com frutas sob o mouse (vira cursor de mãozinha)
   const mode = useRef<ClickMode>('tile') // alterado por Shift/Ctrl
   const drawRef = useRef<() => void>(() => {})
+  const facing = useRef<Pose['facing']>({ dr: 1, dc: 0 }) // para onde o fazendeiro olhava na última vez que se mexeu
 
   useEffect(() => {
     loadSprites().then(setSprites)
@@ -75,7 +78,15 @@ export function GameCanvas() {
     }
     const { x, y } = camera.current
     const ready = new Set(readyTrees ? readyTrees.split(',') : [])
-    drawWorld(ctx, sprites, data.plots, ready, { x, y, zoom: fitZoom(size) * userZoom.current }, size, dpr, hover.current, buyingPlot ? freeSlots(data) : [])
+    const avatar = useProfileStore.getState().user?.avatar
+    // O fazendeiro é do servidor: a pose sai dos horários da fila que ele mandou
+    const pose = farmerPose(data.farmer, serverNow(), facing.current)
+    if (pose.walking || pose.acting) facing.current = pose.facing
+    const queued = data.farmer.jobs.filter((j) => j.row !== null).map((j) => ({ r: j.targetRow, c: j.targetCol }))
+    drawWorld(
+      ctx, sprites, data.plots, ready, { x, y, zoom: fitZoom(size) * userZoom.current }, size, dpr, hover.current,
+      buyingPlot ? freeSlots(data) : [], avatar ? { pose, avatar, queued } : null,
+    )
   }, [sprites, size, readyTrees])
 
   // Redesenha quando os terrenos, as imagens ou o tamanho da janela mudam
@@ -85,6 +96,18 @@ export function GameCanvas() {
   }, [draw, plots, buyingPlot])
 
   drawRef.current = draw
+
+  // Com fila no servidor, redesenha a cada frame para o personagem andar suave; sem fila, não gasta nada
+  useEffect(() => {
+    if (!animating) return
+    let id = 0
+    const frameStep = () => {
+      drawRef.current()
+      id = requestAnimationFrame(frameStep)
+    }
+    id = requestAnimationFrame(frameStep)
+    return () => cancelAnimationFrame(id)
+  }, [animating])
 
   // Durante o arrasto, no máximo um desenho por frame da tela
   function scheduleDraw() {
@@ -217,12 +240,12 @@ export function GameCanvas() {
     const world = worldAt(e)
     const tree = readyTreeAt(world.x, world.y)
     if (tree) {
-      harvestTree(tree)
+      useFarmStore.getState().queueTree(tree)
       return
     }
     const target = targetAt(world.x, world.y, modeOf(e))
     if (target?.kind === 'slot') useFarmStore.getState().buyPlot(target.x, target.y)
-    else if (target) useFarmStore.getState().clickTile(target.plot, target.row, target.col, target.mode)
+    else if (target) useFarmStore.getState().queueTiles(target.plot, target.row, target.col, target.mode)
   }
 
   return (

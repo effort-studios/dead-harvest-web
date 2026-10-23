@@ -13,6 +13,25 @@ export type Plot = {
   grid: Tile[][]
 }
 
+// Tarefa do fazendeiro na fila do servidor. Só a primeira (em andamento) tem horários (ms, relógio do servidor).
+export type FarmJob = {
+  id: string
+  action: 'till' | 'plant' | 'harvest' | 'harvest_tree'
+  plotX: number | null
+  plotY: number | null
+  row: number | null
+  col: number | null
+  treeId: string | null
+  targetRow: number // célula do mapa onde ele precisa estar
+  targetCol: number
+  startsAt?: number // começa a andar
+  arriveAt?: number // chega e começa o gesto
+  endsAt?: number // termina o gesto (a ação acontece no servidor nesse instante)
+}
+
+// Onde o fazendeiro está parado antes de começar jobs[0], e a fila
+export type FarmerState = { row: number; col: number; jobs: FarmJob[] }
+
 export type SaveData = {
   serverTime: number // ms no relógio do servidor quando o estado foi montado
   day: number
@@ -21,4 +40,5 @@ export type SaveData = {
   plots: Plot[]
   inventory: Record<string, number> // sementes e frutas colhidas
   trees: Record<string, number> // id da árvore -> ms (relógio do servidor) da última coleta de frutas
+  farmer: FarmerState // onde o fazendeiro está e a fila de tarefas dele (o servidor é quem anda)
 }
