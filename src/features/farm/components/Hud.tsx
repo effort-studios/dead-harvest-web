@@ -13,7 +13,7 @@ const HOTBAR_SLOTS = 9
 // dia (canto superior direito), barra de itens (embaixo) e erros de salvamento (embaixo à esquerda).
 // Vida, energia, missões e minimapa ainda não existem no jogo e ficam para depois do MVP.
 export function Hud({ onLogout }: { onLogout: () => void }) {
-  const { data, error, selectedSeed, selectSeed } = useFarmStore()
+  const { data, error, selectedSeed, selectSeed, cancelQueue } = useFarmStore()
 
   // Teclas 1 a 9 escolhem o item do slot correspondente (só existem slots para o que o jogador tem)
   useEffect(() => {
@@ -59,9 +59,14 @@ export function Hud({ onLogout }: { onLogout: () => void }) {
         })}
       </div>
 
-      {error && (
+      {(error || data.farmer.jobs.length > 0) && (
         <div className="hud-save">
-          <span className="error">{error}</span>
+          {data.farmer.jobs.length > 0 && (
+            <button className="btn danger" onClick={cancelQueue} title="Cancela as tarefas que ele ainda não fez; ele para onde está">
+              Parar fazendeiro ({data.farmer.jobs.length})
+            </button>
+          )}
+          {error && <span className="error">{error}</span>}
         </div>
       )}
     </>

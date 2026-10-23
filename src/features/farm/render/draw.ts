@@ -7,6 +7,9 @@ import { createSoilTiles, drawGrassFringe, drawSoilEdges, EDGE } from './soil'
 import { FRUITS, TREES } from '@/features/farm/model/trees'
 import { drawFence, drawProp, TILE_HALF, TREE_HIT, type PropKind } from './props'
 import type { SpriteName, Sprites } from './sprites'
+import type { Pose } from '@/features/farm/model/farmer'
+import type { Avatar } from '@/features/profile/model/avatar'
+import { drawFarmer } from './farmerSprite'
 
 // Projeção isométrica: cada tile é um losango com o dobro de largura que de altura.
 // A célula (linha r, coluna c) fica no mundo em:
@@ -100,7 +103,7 @@ type Edge = 'N' | 'E' | 'S' | 'W'
 // Item a desenhar numa célula. Cada item é de um só tipo:
 // sprite (planta), soil (terra arada + máscara dos lados que dão para a grama),
 // fence (trecho de cerca) ou prop (objeto do cenário)
-type Item = { r: number; c: number; sprite?: SpriteName; soil?: number; fence?: Edge; prop?: PropKind; fruitColor?: string }
+type Item = { r: number; c: number; sprite?: SpriteName; soil?: number; fence?: Edge; prop?: PropKind; fruitColor?: string; farmer?: boolean }
 
 // Objetos soltos em volta da plantação (r/c fora da grade 0..9)
 const prop = (kind: PropKind, r: number, c: number): Item => ({ r, c, prop: kind })
@@ -188,7 +191,7 @@ const SOIL_GEO = { halfW: HALF_W, halfH: HALF_H }
 let soilTiles: HTMLCanvasElement[] | null = null
 
 // Lista tudo que fica de pé sobre o mapa, na ordem em que cada item deve ser desenhado
-function buildItems(plots: Plot[], readyTrees: ReadonlySet<string>): Item[] {
+function buildItems(plots: Plot[], readyTrees: ReadonlySet<string>, farmer: Pose | null): Item[] {
   const items: Item[] = DECOR.filter((item) => !onPlot(item, plots))
   // árvores frutíferas: mostram as frutas só quando há o que colher
   for (const t of TREES) {
@@ -220,6 +223,8 @@ function buildItems(plots: Plot[], readyTrees: ReadonlySet<string>): Item[] {
       }),
     )
   }
+  // o fazendeiro entra por último: na mesma profundidade fica na frente da planta do tile onde está
+  if (farmer) items.push({ r: farmer.r, c: farmer.c, farmer: true })
   // Quem está mais ao fundo (menor r + c) é desenhado primeiro. O sort é estável,
   // então itens da mesma célula mantêm a ordem em que foram inseridos acima.
   return items.sort((a, b) => a.r + a.c - (b.r + b.c))
@@ -236,6 +241,7 @@ export function drawWorld(
   pixelRatio: number,
   hover: Hover | null,
   slots: Slot[], // posições livres, desenhadas só durante a compra de terreno
+  farmer: { pose: Pose; avatar: Avatar; queued: { r: number; c: number }[] } | null, // fazendeiro e as células da fila
 ) {
   // Transformação: mundo -> tela. Daqui em diante desenhamos em coordenadas do mundo.
   const k = cam.zoom * pixelRatio
@@ -248,7 +254,7 @@ export function drawWorld(
 
   drawGround(ctx, view) // a grama cobre a tela toda, então não precisa limpar antes
 
-  const items = buildItems(plots, readyTrees)
+  const items = buildItems(plots, readyTrees, farmer?.pose ?? null)
   // 1ª passada: a terra, que é chão. Assim ela nunca cobre plantas ou cercas de outros tiles.
   soilTiles ??= createSoilTiles(SOIL_GEO, 3, (w, h) => {
     const canvas = document.createElement('canvas')
@@ -264,9 +270,11 @@ export function drawWorld(
     drawGrassFringe(ctx, x, y, SOIL_GEO, soil)
   }
   // 2ª passada: tudo que fica de pé, do fundo para a frente
-  for (const { r, c, sprite, fence, prop: kind, fruitColor } of items) {
+  for (const { r, c, sprite, fence, prop: kind, fruitColor, farmer: isFarmer } of items) {
     const { x, y } = cellToWorld(r, c)
-    if (fence) {
+    if (isFarmer && farmer) {
+      drawFarmer(ctx, farmer.pose, farmer.avatar, x, y)
+    } else if (fence) {
       // pontas do lado do losango: N = topo->direita, E = direita->baixo, S = baixo->esquerda, W = esquerda->topo
       const top: [number, number] = [x, y - HALF_H]
       const right: [number, number] = [x + HALF_W, y]
@@ -302,6 +310,19 @@ export function drawWorld(
     ctx.lineWidth = 4
     ctx.setLineDash(on ? [] : [18, 12])
     ctx.stroke()
+    ctx.setLineDash([])
+  }
+
+  // Tiles que o fazendeiro ainda vai trabalhar (fila do servidor): contorno tracejado discreto
+  if (farmer && farmer.queued.length > 0) {
+    ctx.strokeStyle = 'rgba(255,255,255,0.55)'
+    ctx.lineWidth = 2
+    ctx.setLineDash([8, 6])
+    for (const q of farmer.queued) {
+      const { x, y } = cellToWorld(q.r, q.c)
+      diamondPath(ctx, x, y, HALF_W - 4, HALF_H - 2)
+      ctx.stroke()
+    }
     ctx.setLineDash([])
   }
 

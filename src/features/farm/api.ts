@@ -22,10 +22,13 @@ export const loadState = () => request<SaveData>('/game/state')
 
 type Tiles = { x: number; y: number; tiles: { row: number; col: number }[] }
 
-export const till = (input: Tiles) => post<SaveData>('/game/till', input)
-export const plant = (input: Tiles & { cropId: string }) => post<SaveData>('/game/plant', input)
-export const harvest = (input: Tiles) => post<SaveData>('/game/harvest', input)
+// Arar, plantar e colher são tarefas do fazendeiro: o servidor enfileira, anda e executa uma de cada vez
+export type JobRequest =
+  | (Tiles & { action: 'till' | 'harvest' })
+  | (Tiles & { action: 'plant'; cropId: string })
+  | { action: 'harvest_tree'; treeId: string }
+export const enqueueJob = (job: JobRequest) => post<SaveData>('/game/jobs', job)
+export const cancelJobs = () => request<SaveData>('/game/jobs', { method: 'DELETE' })
 export const buySeed = (cropId: string, quantity: number) => post<SaveData>('/game/seeds/buy', { cropId, quantity })
 export const sellFruit = (itemId: string, quantity?: number) => post<SaveData>('/game/fruits/sell', { itemId, quantity })
 export const buyPlot = (x: number, y: number) => post<SaveData>('/game/plots/buy', { x, y })
-export const harvestTree = (treeId: string) => post<SaveData>(`/game/trees/${encodeURIComponent(treeId)}/harvest`, {})

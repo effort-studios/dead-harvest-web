@@ -4,10 +4,8 @@ import { ApiError } from '@/shared/api/http'
 import { setCrops, type CropId } from '@/features/farm/model/crops'
 import { setDayLength } from '@/features/farm/model/daycycle'
 import {
-  applyTileCommand,
   buyPlot,
   buySeed,
-  harvestTree,
   pickSeed,
   readyTreeIds,
   sellFruit,
@@ -34,12 +32,13 @@ type FarmState = {
   reset: () => void
   flush: () => Promise<void>
   sync: () => Promise<void>
-  clickTile: (plot: number, row: number, col: number, mode: ClickMode) => void
+  queueTiles: (plot: number, row: number, col: number, mode: ClickMode) => void // pede ao servidor: o fazendeiro vai até lá e age
+  queueTree: (treeId: string) => void
+  cancelQueue: () => void
   selectSeed: (crop: CropId) => void
   tick: () => void
   buySeed: (crop: CropId, qty?: number) => void
   sellFruit: (fruit: FruitId, qty?: number) => void
-  harvestTree: (treeId: string) => void
   setBuyingPlot: (on: boolean) => void
   buyPlot: (x: number, y: number) => void
 }
@@ -64,7 +63,10 @@ export const useFarmStore = create<FarmState>((set, get) => ({
   },
 
   // Sai do jogo (logout ou sessão que caiu): some com o estado do jogador
-  reset: () => set({ active: false, data: null, error: null, buyingPlot: false }),
+  reset: () => {
+    clearTimeout(farmerTimer)
+    set({ active: false, data: null, error: null, buyingPlot: false })
+  },
 
   // Espera as ações que estão a caminho chegarem ao servidor (antes de sair)
   flush: () => queue,
@@ -81,16 +83,24 @@ export const useFarmStore = create<FarmState>((set, get) => ({
     }
   },
 
-  clickTile: (plot, row, col, mode) => {
+  // O front só pede; quem enfileira, anda e age é o servidor (e continua com o jogo fechado)
+  queueTiles: (plot, row, col, mode) => {
     const { data, selectedSeed } = get()
     const cmd = data && tileCommand(data, plot, row, col, mode)
     if (!data || !cmd || cmd.tiles.length === 0) return
     const input = { x: data.plots[plot].x, y: data.plots[plot].y, tiles: cmd.tiles }
-    run(
-      (d) => applyTileCommand(d, cmd, selectedSeed),
-      () => (cmd.action === 'till' ? api.till(input) : cmd.action === 'plant' ? api.plant({ ...input, cropId: selectedSeed }) : api.harvest(input)),
-    )
+    if (cmd.action === 'plant') {
+      const seeds = data.inventory[selectedSeed] ?? 0
+      if (seeds < 1) return
+      run(undefined, () => api.enqueueJob({ ...input, action: 'plant', cropId: selectedSeed, tiles: input.tiles.slice(0, seeds) }))
+    } else {
+      run(undefined, () => api.enqueueJob({ ...input, action: cmd.action as 'till' | 'harvest' }))
+    }
   },
+
+  queueTree: (treeId) => run(undefined, () => api.enqueueJob({ action: 'harvest_tree', treeId })),
+
+  cancelQueue: () => run(undefined, api.cancelJobs),
 
   selectSeed: (crop) => set({ selectedSeed: crop }),
 
@@ -106,8 +116,6 @@ export const useFarmStore = create<FarmState>((set, get) => ({
   buySeed: (crop, qty = 1) => run((d) => buySeed(d, crop, qty), () => api.buySeed(crop, qty)),
 
   sellFruit: (fruit, qty) => run((d) => sellFruit(d, fruit, qty), () => api.sellFruit(fruit, qty)),
-
-  harvestTree: (treeId) => run((d) => harvestTree(d, treeId, serverNow()), () => api.harvestTree(treeId)),
 
   setBuyingPlot: (on) => set({ buyingPlot: on }),
 
@@ -126,7 +134,7 @@ export function setUnauthorizedHandler(handler: () => void) {
 // ---------- Conversa com o servidor ----------
 
 let clockOffset = 0 // relógio do servidor - relógio deste aparelho (ms)
-const serverNow = () => Date.now() + clockOffset
+export const serverNow = () => Date.now() + clockOffset
 
 // As ações vão para o servidor uma de cada vez, na ordem dos cliques
 let queue: Promise<void> = Promise.resolve()
@@ -137,11 +145,22 @@ let errorTimer: ReturnType<typeof setTimeout> | undefined
 // O estado do servidor substitui o que está na tela (previsão incluída)
 function applyServerState(data: SaveData) {
   clockOffset = data.serverTime - Date.now()
+  scheduleFarmerSync(data)
   useFarmStore.setState((s) => ({
     data,
     selectedSeed: pickSeed(data.inventory, s.selectedSeed), // a semente pode ter acabado
     readyTrees: readyTreeIds(data, serverNow()).join(),
   }))
+}
+
+// Quando o fazendeiro termina a tarefa da frente, a ação acontece no servidor: busca o estado nesse
+// instante (um pouco depois) para o mapa mostrar o resultado e a próxima tarefa começar na tela.
+let farmerTimer: ReturnType<typeof setTimeout> | undefined
+function scheduleFarmerSync(data: SaveData) {
+  clearTimeout(farmerTimer)
+  const endsAt = data.farmer.jobs[0]?.endsAt
+  if (endsAt === undefined) return
+  farmerTimer = setTimeout(() => void useFarmStore.getState().sync(), Math.max(endsAt - serverNow() + 80, 250))
 }
 
 function showError(message: string) {
@@ -162,16 +181,18 @@ function handleFailure(err: unknown) {
 // Ação do jogador: mostra a previsão na hora e põe o pedido na fila. Quando a fila esvazia, a tela
 // fica com o último estado que o servidor devolveu. Se o servidor recusa a ação (ex.: a planta ainda
 // não amadureceu lá), mostra o motivo e busca o estado de verdade.
-function run(predict: (data: SaveData) => SaveData, send: () => Promise<SaveData>) {
+function run(predict: ((data: SaveData) => SaveData) | undefined, send: () => Promise<SaveData>) {
   const { data, active } = useFarmStore.getState()
   if (!data || !active) return
-  const predicted = predict(data)
-  if (predicted === data) return // nem a previsão muda nada (sem dinheiro, sem semente...): não pede
-  useFarmStore.setState((s) => ({
-    data: predicted,
-    selectedSeed: pickSeed(predicted.inventory, s.selectedSeed),
-    readyTrees: readyTreeIds(predicted, serverNow()).join(),
-  }))
+  if (predict) {
+    const predicted = predict(data)
+    if (predicted === data) return // nem a previsão muda nada (sem dinheiro, sem semente...): não pede
+    useFarmStore.setState((s) => ({
+      data: predicted,
+      selectedSeed: pickSeed(predicted.inventory, s.selectedSeed),
+      readyTrees: readyTreeIds(predicted, serverNow()).join(),
+    }))
+  }
 
   pending++
   queue = queue.then(async () => {
