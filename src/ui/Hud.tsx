@@ -3,7 +3,7 @@ import { CROPS, formatDuration } from '../game/crops'
 import { ownedSeeds } from '../game/state'
 import { useGameStore } from '../store/gameStore'
 import { CropIcon } from './Icons'
-import { ProfileMenu } from './ProfileMenu'
+import { ProfileMenu } from '@/features/profile/components/ProfileMenu'
 import { DayClock } from './DayClock'
 import { SideMenu } from './SideMenu'
 

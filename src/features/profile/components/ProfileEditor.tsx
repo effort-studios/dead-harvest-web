@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { AVATAR_OPTIONS, AVATAR_PARTS, OPTION_LABEL, PART_LABEL, type Avatar as AvatarData, type AvatarPart } from '../game/avatar'
-import { useGameStore } from '../store/gameStore'
+import { AVATAR_OPTIONS, AVATAR_PARTS, OPTION_LABEL, PART_LABEL, type Avatar as AvatarData, type AvatarPart } from '@/features/profile/model/avatar'
+import { useGameStore } from '@/store/gameStore'
 import { Avatar } from './Avatar'
 import { CloseIcon } from '@/shared/ui/icons'
 

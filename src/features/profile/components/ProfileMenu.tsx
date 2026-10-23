@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useGameStore } from '../store/gameStore'
+import { useGameStore } from '@/store/gameStore'
 import { Avatar } from './Avatar'
 import { CoinIcon } from '@/shared/ui/icons'
 import { ProfileEditor } from './ProfileEditor'

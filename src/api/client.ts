@@ -1,10 +1,8 @@
 import { ApiError, post, request } from '@/shared/api/http'
-import type { Avatar } from '../game/avatar'
+import type { User } from '@/features/profile/model/user'
 import type { CatalogCrop } from '../game/crops'
 import type { CatalogFruit, CatalogTree } from '../game/trees'
 import type { SaveData } from '../game/types'
-
-export type User = { id: string; email: string; displayName: string; avatar: Avatar }
 
 // ---------- Conta ----------
 
@@ -24,11 +22,6 @@ export async function register(input: { email: string; password: string; display
 
 export async function login(input: { email: string; password: string }): Promise<User> {
   return (await post<{ user: User }>('/auth/login', input)).user
-}
-
-// Muda o nome e/ou o avatar; devolve o usuário atualizado
-export async function updateProfile(input: { displayName?: string; avatar?: Avatar }): Promise<User> {
-  return (await request<{ user: User }>('/auth/me', { method: 'PATCH', body: JSON.stringify(input) })).user
 }
 
 export const logout = () => post<void>('/auth/logout')

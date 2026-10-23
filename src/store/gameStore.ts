@@ -1,8 +1,9 @@
 import { create } from 'zustand'
 import * as api from '../api/client'
 import { ApiError } from '@/shared/api/http'
-import type { User } from '../api/client'
-import type { Avatar } from '../game/avatar'
+import { updateProfile } from '@/features/profile/api'
+import type { User } from '@/features/profile/model/user'
+import type { Avatar } from '@/features/profile/model/avatar'
 import { setCrops, type CropId } from '../game/crops'
 import { setDayLength } from '../game/daycycle'
 import {
@@ -75,7 +76,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   register: async (email, password, displayName) => startGame(await api.register({ email, password, displayName })),
 
   // lança o erro da API (mensagem pronta) para o editor de perfil mostrar
-  updateProfile: async (input) => set({ user: await api.updateProfile(input) }),
+  updateProfile: async (input) => set({ user: await updateProfile(input) }),
 
   logout: async () => {
     await queue // deixa as ações que estão a caminho chegarem ao servidor
