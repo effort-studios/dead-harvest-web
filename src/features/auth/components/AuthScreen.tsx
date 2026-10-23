@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
-import { forgotPassword, resetPassword } from '../api/client'
-import { useGameStore } from '../store/gameStore'
+import { forgotPassword, resetPassword } from '../api'
+import { useGameStore } from '@/store/gameStore'
 import { EyeIcon, EyeOffIcon, FarmerIcon } from '@/shared/ui/icons'
 
 type Mode = 'login' | 'register' | 'forgot' | 'reset'

@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import * as authApi from '@/features/auth/api'
 import * as api from '../api/client'
 import { ApiError } from '@/shared/api/http'
 import { updateProfile } from '@/features/profile/api'
@@ -62,7 +63,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   // Ao abrir o jogo: se já há sessão (cookie), carrega o jogo; senão, mostra a tela de login
   init: async () => {
     try {
-      const user = await api.fetchMe()
+      const user = await authApi.fetchMe()
       if (!user) return set({ status: 'anonymous', user: null, data: null })
       await startGame(user)
     } catch (err) {
@@ -71,16 +72,16 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   // login e register lançam o erro da API (mensagem pronta) para a tela de login mostrar
-  login: async (email, password) => startGame(await api.login({ email, password })),
+  login: async (email, password) => startGame(await authApi.login({ email, password })),
 
-  register: async (email, password, displayName) => startGame(await api.register({ email, password, displayName })),
+  register: async (email, password, displayName) => startGame(await authApi.register({ email, password, displayName })),
 
   // lança o erro da API (mensagem pronta) para o editor de perfil mostrar
   updateProfile: async (input) => set({ user: await updateProfile(input) }),
 
   logout: async () => {
     await queue // deixa as ações que estão a caminho chegarem ao servidor
-    await api.logout().catch(() => undefined)
+    await authApi.logout().catch(() => undefined)
     set({ status: 'anonymous', user: null, data: null, error: null, buyingPlot: false })
   },
 

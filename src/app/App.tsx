@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useGameStore } from '@/store/gameStore'
 import { GameCanvas } from '@/ui/GameCanvas'
-import { AuthScreen } from '@/ui/AuthScreen'
+import { AuthScreen } from '@/features/auth/components/AuthScreen'
 import { Hud } from '@/ui/Hud'
 
 // Em modo dev o StrictMode roda o effect 2x; sem isso a inicialização rodaria duas vezes
