@@ -266,12 +266,45 @@ canvas:active {
   left: calc(100% + 10px);
   width: 330px;
   max-width: calc(100vw - 100px);
-  max-height: calc(100vh - 250px); /* não passa da barra de itens; rola por dentro se precisar */
-  overflow-y: auto;
+  max-height: calc(100vh - 250px); /* não passa da barra de itens; o conteúdo rola por dentro */
+  display: flex;
+  flex-direction: column;
   padding: 9px 13px 13px;
   font-size: 15px;
 }
+/* só o conteúdo rola: o título fica fixo e a moldura nunca é cortada */
+.side-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  margin-right: -6px;
+  padding-right: 6px;
+}
+/* barra de rolagem no estilo da HUD: trilho creme e polegar dourado com contorno marrom */
+.side-body,
+.select-list {
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold-dark) #ecc98a;
+}
+.side-body::-webkit-scrollbar,
+.select-list::-webkit-scrollbar { width: 12px; }
+.side-body::-webkit-scrollbar-track,
+.select-list::-webkit-scrollbar-track {
+  background: #ecc98a;
+  border: 2px solid var(--plate-border);
+  border-radius: 6px;
+}
+.side-body::-webkit-scrollbar-thumb,
+.select-list::-webkit-scrollbar-thumb {
+  background: var(--gold);
+  border: 2px solid var(--outline);
+  border-radius: 6px;
+  box-shadow: inset 0 2px 0 var(--gold-light), inset 0 -2px 0 var(--gold-dark);
+}
+.side-body::-webkit-scrollbar-thumb:hover,
+.select-list::-webkit-scrollbar-thumb:hover { background: #f6c04a; }
 .side-panel h2 {
+  flex: none;
   margin: 0 0 8px;
   font-size: 19px;
   font-weight: 600;

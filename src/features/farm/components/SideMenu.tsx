@@ -54,8 +54,10 @@ export function SideMenu() {
               <CloseIcon size={20} />
             </button>
           </h2>
-          {open === 'shop' && <ShopPanel />}
-          {open === 'tips' && <TipsPanel />}
+          <div className="side-body">
+            {open === 'shop' && <ShopPanel />}
+            {open === 'tips' && <TipsPanel />}
+          </div>
         </section>
       )}
     </div>
