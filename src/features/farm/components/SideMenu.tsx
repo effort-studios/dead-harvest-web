@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
-import { CROP_ORDER, CROPS, formatDuration, type CropId } from '../game/crops'
-import { FRUIT_ORDER, FRUITS, TREES } from '../game/trees'
-import { GRID_SIZE, plotPrice } from '../game/state'
-import { useGameStore } from '../store/gameStore'
-import { BulbIcon, CloseIcon, CoinIcon, CropIcon, FruitIcon, PlotIcon, ShopIcon } from './Icons'
+import { CROP_ORDER, CROPS, formatDuration, type CropId } from '@/features/farm/model/crops'
+import { FRUIT_ORDER, FRUITS, TREES } from '@/features/farm/model/trees'
+import { GRID_SIZE, plotPrice } from '@/features/farm/model/state'
+import { useFarmStore } from '../store'
+import { CloseIcon, CoinIcon } from '@/shared/ui/icons'
+import { BulbIcon, CropIcon, FruitIcon, PlotIcon, ShopIcon } from './icons'
 
 type Section = 'shop' | 'tips'
 
@@ -62,7 +63,7 @@ export function SideMenu() {
 }
 
 function ShopPanel() {
-  const money = useGameStore((s) => s.data?.money ?? 0)
+  const money = useFarmStore((s) => s.data?.money ?? 0)
   const [tab, setTab] = useState<'buy' | 'sell'>('buy')
 
   return (
@@ -94,7 +95,7 @@ function ShopPanel() {
 function SeedSelect({ value, onChange }: { value: CropId; onChange: (crop: CropId) => void }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
-  const money = useGameStore((s) => s.data?.money ?? 0)
+  const money = useFarmStore((s) => s.data?.money ?? 0)
 
   // Fecha ao clicar fora
   useEffect(() => {
@@ -146,9 +147,9 @@ function SeedSelect({ value, onChange }: { value: CropId; onChange: (crop: CropI
 const BUY_AMOUNTS = [1, 5, 10]
 
 function BuySeeds() {
-  const money = useGameStore((s) => s.data?.money ?? 0)
-  const inventory = useGameStore((s) => s.data?.inventory ?? {})
-  const buySeed = useGameStore((s) => s.buySeed)
+  const money = useFarmStore((s) => s.data?.money ?? 0)
+  const inventory = useFarmStore((s) => s.data?.inventory ?? {})
+  const buySeed = useFarmStore((s) => s.buySeed)
   const [crop, setCrop] = useState<CropId>(CROP_ORDER[0])
   const info = CROPS[crop]
 
@@ -176,11 +177,11 @@ function BuySeeds() {
 }
 
 function BuyPlot() {
-  const money = useGameStore((s) => s.data?.money ?? 0)
-  const price = useGameStore((s) => (s.data ? plotPrice(s.data) : 0))
-  const plotCount = useGameStore((s) => s.data?.plots.length ?? 0)
-  const buyingPlot = useGameStore((s) => s.buyingPlot)
-  const setBuyingPlot = useGameStore((s) => s.setBuyingPlot)
+  const money = useFarmStore((s) => s.data?.money ?? 0)
+  const price = useFarmStore((s) => (s.data ? plotPrice(s.data) : 0))
+  const plotCount = useFarmStore((s) => s.data?.plots.length ?? 0)
+  const buyingPlot = useFarmStore((s) => s.buyingPlot)
+  const setBuyingPlot = useFarmStore((s) => s.setBuyingPlot)
 
   const missing = price - money
 
@@ -207,9 +208,9 @@ function BuyPlot() {
 }
 
 function SellFruits() {
-  const inventory = useGameStore((s) => s.data?.inventory ?? {})
-  const sellFruit = useGameStore((s) => s.sellFruit)
-  const readyTrees = useGameStore((s) => s.readyTrees)
+  const inventory = useFarmStore((s) => s.data?.inventory ?? {})
+  const sellFruit = useFarmStore((s) => s.sellFruit)
+  const readyTrees = useFarmStore((s) => s.readyTrees)
   const ready = readyTrees ? readyTrees.split(',').length : 0
   const owned = FRUIT_ORDER.filter((id) => (inventory[id] ?? 0) > 0)
 

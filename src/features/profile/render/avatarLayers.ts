@@ -1,4 +1,4 @@
-import type { Avatar } from '../game/avatar'
+import type { Avatar } from '@/features/profile/model/avatar'
 
 // Monta o retrato do jogador empilhando as camadas desenhadas em public/assets/avatar/
 // (geradas por scripts/build_avatar_layers.py). Tom de pele, cor do cabelo e dos olhos não têm

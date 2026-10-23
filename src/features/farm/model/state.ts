@@ -5,7 +5,7 @@ import type { Plot, SaveData, Tile } from './types'
 
 // Funções puras: recebem o estado e devolvem um estado novo, sem mexer em canvas, React ou API.
 // Quem manda é o servidor: estas funções só PREVEEM o resultado de uma ação para a tela responder na
-// hora; logo depois chega o estado de verdade da API e substitui a previsão (veja store/gameStore.ts).
+// hora; logo depois chega o estado de verdade da API e substitui a previsão (veja features/farm/store.ts).
 
 export const GRID_SIZE = 10
 // Distância entre terrenos vizinhos em tiles: ficam colados

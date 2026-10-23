@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import type { Avatar as AvatarData } from '../game/avatar'
-import { avatarImageUrl } from '../render/avatarLayers'
+import type { Avatar as AvatarData } from '@/features/profile/model/avatar'
+import { avatarImageUrl } from '@/features/profile/render/avatarLayers'
 
 // Retrato do jogador: camadas desenhadas (public/assets/avatar) montadas e recoloridas em render/avatarLayers.ts.
 // Enquanto a imagem é montada (só na primeira vez de cada combinação), mostra o fundo vazio.

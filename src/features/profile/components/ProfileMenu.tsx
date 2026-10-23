@@ -1,14 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
-import { useGameStore } from '../store/gameStore'
+import { useProfileStore } from '../store'
 import { Avatar } from './Avatar'
-import { CoinIcon } from './Icons'
+import { CoinIcon } from '@/shared/ui/icons'
 import { ProfileEditor } from './ProfileEditor'
 
 // Painel do jogador (canto superior esquerdo). Clicar abre o menu da conta: editar perfil e sair.
-export function ProfileMenu() {
-  const user = useGameStore((s) => s.user)
-  const money = useGameStore((s) => s.data?.money ?? 0)
-  const logout = useGameStore((s) => s.logout)
+export function ProfileMenu({ money, onLogout }: { money: number; onLogout: () => void }) {
+  const user = useProfileStore((s) => s.user)
 
   const [open, setOpen] = useState(false)
   const [editing, setEditing] = useState(false)
@@ -60,7 +58,7 @@ export function ProfileMenu() {
           >
             Editar perfil
           </button>
-          <button role="menuitem" className="danger" onClick={() => logout()}>
+          <button role="menuitem" className="danger" onClick={() => onLogout()}>
             Sair
           </button>
         </div>

@@ -1,26 +1,27 @@
 import { useEffect } from 'react'
-import { useGameStore } from './store/gameStore'
-import { GameCanvas } from './ui/GameCanvas'
-import { AuthScreen } from './ui/AuthScreen'
-import { Hud } from './ui/Hud'
+import { useFarmStore } from '@/features/farm/store'
+import { GameCanvas } from '@/features/farm/components/GameCanvas'
+import { AuthScreen } from '@/features/auth/components/AuthScreen'
+import { Hud } from '@/features/farm/components/Hud'
+import { init, login, logout, register, useSession } from './session'
 
 // Em modo dev o StrictMode roda o effect 2x; sem isso a inicialização rodaria duas vezes
 let started = false
 
 export default function App() {
-  const status = useGameStore((s) => s.status)
-  const error = useGameStore((s) => s.error)
+  const status = useSession((s) => s.status)
+  const error = useSession((s) => s.error)
 
   useEffect(() => {
     if (started) return
     started = true
-    useGameStore.getState().init()
+    init()
   }, [])
 
   // Relógio na tela: 1 tick por segundo, só depois de carregar o jogo
   useEffect(() => {
     if (status !== 'ready') return
-    const id = setInterval(() => useGameStore.getState().tick(), 1000)
+    const id = setInterval(() => useFarmStore.getState().tick(), 1000)
     return () => clearInterval(id)
   }, [status])
 
@@ -28,7 +29,7 @@ export default function App() {
   // a cada 30s e ao voltar para a aba, para acertar o relógio e ver o que mudou em outro aparelho.
   useEffect(() => {
     if (status !== 'ready') return
-    const sync = () => useGameStore.getState().sync()
+    const sync = () => useFarmStore.getState().sync()
     const onShow = () => document.visibilityState === 'visible' && sync()
     const id = setInterval(sync, 30_000)
     document.addEventListener('visibilitychange', onShow)
@@ -39,12 +40,12 @@ export default function App() {
   }, [status])
 
   if (status === 'loading') return <p>Carregando...</p>
-  if (status === 'anonymous') return <AuthScreen />
+  if (status === 'anonymous') return <AuthScreen onLogin={login} onRegister={register} />
   if (status === 'error') return <p className="error">Não foi possível conectar à API: {error}</p>
   return (
     <div className="game">
       <GameCanvas />
-      <Hud />
+      <Hud onLogout={logout} />
     </div>
   )
 }

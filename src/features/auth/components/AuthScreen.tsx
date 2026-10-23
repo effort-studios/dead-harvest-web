@@ -1,7 +1,6 @@
 import { useState, type FormEvent } from 'react'
-import { forgotPassword, resetPassword } from '../api/client'
-import { useGameStore } from '../store/gameStore'
-import { EyeIcon, EyeOffIcon, FarmerIcon } from './Icons'
+import { forgotPassword, resetPassword } from '../api'
+import { EyeIcon, EyeOffIcon, FarmerIcon } from '@/shared/ui/icons'
 
 type Mode = 'login' | 'register' | 'forgot' | 'reset'
 
@@ -13,9 +12,12 @@ const TITLES: Record<Mode, string> = {
 }
 
 // Tela de login: é a primeira coisa que o jogador vê. Não existe jogo sem conta.
-export function AuthScreen() {
-  const login = useGameStore((s) => s.login)
-  const register = useGameStore((s) => s.register)
+type Props = {
+  onLogin: (email: string, password: string) => Promise<void>
+  onRegister: (email: string, password: string, displayName: string) => Promise<void>
+}
+
+export function AuthScreen({ onLogin, onRegister }: Props) {
 
   const [mode, setMode] = useState<Mode>('login')
   const [email, setEmail] = useState('')
@@ -39,8 +41,8 @@ export function AuthScreen() {
     setBusy(true)
     setError(null)
     try {
-      if (mode === 'login') await login(email, password)
-      else if (mode === 'register') await register(email, password, displayName)
+      if (mode === 'login') await onLogin(email, password)
+      else if (mode === 'register') await onRegister(email, password, displayName)
       else if (mode === 'forgot') {
         await forgotPassword(email)
         go('reset')

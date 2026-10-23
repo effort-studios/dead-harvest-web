@@ -1,9 +1,8 @@
 import { create } from 'zustand'
-import * as api from '../api/client'
-import { ApiError, type User } from '../api/client'
-import type { Avatar } from '../game/avatar'
-import { setCrops, type CropId } from '../game/crops'
-import { setDayLength } from '../game/daycycle'
+import * as api from '@/features/farm/api'
+import { ApiError } from '@/shared/api/http'
+import { setCrops, type CropId } from '@/features/farm/model/crops'
+import { setDayLength } from '@/features/farm/model/daycycle'
 import {
   applyTileCommand,
   buyPlot,
@@ -16,27 +15,24 @@ import {
   tick,
   tileCommand,
   type ClickMode,
-} from '../game/state'
-import { setTrees, type FruitId } from '../game/trees'
-import type { SaveData } from '../game/types'
+} from '@/features/farm/model/state'
+import { setTrees, type FruitId } from '@/features/farm/model/trees'
+import type { SaveData } from '@/features/farm/model/types'
 
 // O servidor é a fonte da verdade. Toda ação do jogador vai para a API, que valida e devolve o estado
-// novo; enquanto a resposta não chega, a tela mostra uma previsão (game/state.ts) para responder na hora.
+// novo; enquanto a resposta não chega, a tela mostra uma previsão (model/state.ts) para responder na hora.
+// Quem está logado e a tela exibida são da sessão (app/session.ts); aqui só vive o jogo.
 
-type GameState = {
-  // anonymous = ninguém logado (mostra a tela de login)
-  status: 'loading' | 'anonymous' | 'ready' | 'error'
-  error: string | null // erro ao abrir o jogo, ou o motivo de uma ação recusada (some sozinho)
-  user: User | null
+type FarmState = {
+  active: boolean // true = o jogo está carregado e aceita ações
+  error: string | null // motivo de uma ação recusada ou de falha de conexão (some sozinho)
   data: SaveData | null
   readyTrees: string // ids das árvores com frutas, em texto; muda quando alguma árvore repõe ou é colhida (redesenha o mapa)
   selectedSeed: CropId // semente escolhida na barra de itens (só da tela)
   buyingPlot: boolean // true = o mapa mostra as posições livres para o jogador escolher
-  init: () => Promise<void>
-  login: (email: string, password: string) => Promise<void>
-  register: (email: string, password: string, displayName: string) => Promise<void>
-  logout: () => Promise<void>
-  updateProfile: (input: { displayName?: string; avatar?: Avatar }) => Promise<void>
+  start: () => Promise<void>
+  reset: () => void
+  flush: () => Promise<void>
   sync: () => Promise<void>
   clickTile: (plot: number, row: number, col: number, mode: ClickMode) => void
   selectSeed: (crop: CropId) => void
@@ -48,44 +44,35 @@ type GameState = {
   buyPlot: (x: number, y: number) => void
 }
 
-export const useGameStore = create<GameState>((set, get) => ({
-  status: 'loading',
+export const useFarmStore = create<FarmState>((set, get) => ({
+  active: false,
   error: null,
-  user: null,
   data: null,
   readyTrees: '',
   selectedSeed: 'corn',
   buyingPlot: false,
 
-  // Ao abrir o jogo: se já há sessão (cookie), carrega o jogo; senão, mostra a tela de login
-  init: async () => {
-    try {
-      const user = await api.fetchMe()
-      if (!user) return set({ status: 'anonymous', user: null, data: null })
-      await startGame(user)
-    } catch (err) {
-      set({ status: 'error', error: err instanceof Error ? err.message : 'Erro desconhecido' })
-    }
+  // Carrega as regras (catálogo) e o estado do jogador logado; lança o erro da API se falhar
+  start: async () => {
+    const [catalog, data] = await Promise.all([api.fetchCatalog(), api.loadState()])
+    setCrops(catalog.crops)
+    setTrees(catalog.fruits, catalog.trees)
+    setPlotPrice(catalog.plotPrice)
+    setDayLength(catalog.dayLengthSeconds)
+    set({ active: true, error: null, buyingPlot: false, selectedSeed: 'corn' })
+    applyServerState(data)
   },
 
-  // login e register lançam o erro da API (mensagem pronta) para a tela de login mostrar
-  login: async (email, password) => startGame(await api.login({ email, password })),
+  // Sai do jogo (logout ou sessão que caiu): some com o estado do jogador
+  reset: () => set({ active: false, data: null, error: null, buyingPlot: false }),
 
-  register: async (email, password, displayName) => startGame(await api.register({ email, password, displayName })),
-
-  // lança o erro da API (mensagem pronta) para o editor de perfil mostrar
-  updateProfile: async (input) => set({ user: await api.updateProfile(input) }),
-
-  logout: async () => {
-    await queue // deixa as ações que estão a caminho chegarem ao servidor
-    await api.logout().catch(() => undefined)
-    set({ status: 'anonymous', user: null, data: null, error: null, buyingPlot: false })
-  },
+  // Espera as ações que estão a caminho chegarem ao servidor (antes de sair)
+  flush: () => queue,
 
   // Busca o estado no servidor (de tempos em tempos e ao voltar para a aba): acerta o relógio e mostra
   // o que mudou em outro aparelho. Com ação a caminho, espera ela, que já traz o estado.
   sync: async () => {
-    if (pending > 0 || get().status !== 'ready') return
+    if (pending > 0 || !get().active) return
     try {
       const data = await api.loadState()
       if (pending === 0) applyServerState(data)
@@ -130,6 +117,12 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 }))
 
+// Quem cuida da sessão (app/session.ts) avisa aqui o que fazer quando o servidor responde 401
+let onUnauthorized: (() => void) | undefined
+export function setUnauthorizedHandler(handler: () => void) {
+  onUnauthorized = handler
+}
+
 // ---------- Conversa com o servidor ----------
 
 let clockOffset = 0 // relógio do servidor - relógio deste aparelho (ms)
@@ -144,7 +137,7 @@ let errorTimer: ReturnType<typeof setTimeout> | undefined
 // O estado do servidor substitui o que está na tela (previsão incluída)
 function applyServerState(data: SaveData) {
   clockOffset = data.serverTime - Date.now()
-  useGameStore.setState((s) => ({
+  useFarmStore.setState((s) => ({
     data,
     selectedSeed: pickSeed(data.inventory, s.selectedSeed), // a semente pode ter acabado
     readyTrees: readyTreeIds(data, serverNow()).join(),
@@ -153,14 +146,14 @@ function applyServerState(data: SaveData) {
 
 function showError(message: string) {
   clearTimeout(errorTimer)
-  useGameStore.setState({ error: message })
-  errorTimer = setTimeout(() => useGameStore.setState({ error: null }), 4000)
+  useFarmStore.setState({ error: message })
+  errorTimer = setTimeout(() => useFarmStore.setState({ error: null }), 4000)
 }
 
-// 401 = a sessão expirou (ou caiu em outro lugar): volta para a tela de login
+// 401 = a sessão expirou (ou caiu em outro lugar): a sessão volta para a tela de login
 function handleFailure(err: unknown) {
   if (err instanceof ApiError && err.status === 401) {
-    useGameStore.setState({ status: 'anonymous', user: null, data: null, buyingPlot: false })
+    onUnauthorized?.()
   } else {
     showError(err instanceof ApiError ? err.message : 'Sem conexão com o servidor')
   }
@@ -170,11 +163,11 @@ function handleFailure(err: unknown) {
 // fica com o último estado que o servidor devolveu. Se o servidor recusa a ação (ex.: a planta ainda
 // não amadureceu lá), mostra o motivo e busca o estado de verdade.
 function run(predict: (data: SaveData) => SaveData, send: () => Promise<SaveData>) {
-  const { data, status } = useGameStore.getState()
-  if (!data || status !== 'ready') return
+  const { data, active } = useFarmStore.getState()
+  if (!data || !active) return
   const predicted = predict(data)
   if (predicted === data) return // nem a previsão muda nada (sem dinheiro, sem semente...): não pede
-  useGameStore.setState((s) => ({
+  useFarmStore.setState((s) => ({
     data: predicted,
     selectedSeed: pickSeed(predicted.inventory, s.selectedSeed),
     readyTrees: readyTreeIds(predicted, serverNow()).join(),
@@ -189,18 +182,7 @@ function run(predict: (data: SaveData) => SaveData, send: () => Promise<SaveData
       latest = await api.loadState().catch(() => latest) // sem conexão: o sync periódico acerta depois
     }
     pending--
-    if (pending === 0 && latest && useGameStore.getState().status === 'ready') applyServerState(latest)
+    if (pending === 0 && latest && useFarmStore.getState().active) applyServerState(latest)
     if (pending === 0) latest = null
   })
-}
-
-// Carrega as regras (catálogo) e o estado do jogador logado e entra no jogo
-async function startGame(user: User) {
-  const [catalog, data] = await Promise.all([api.fetchCatalog(), api.loadState()])
-  setCrops(catalog.crops)
-  setTrees(catalog.fruits, catalog.trees)
-  setPlotPrice(catalog.plotPrice)
-  setDayLength(catalog.dayLengthSeconds)
-  useGameStore.setState({ status: 'ready', user, error: null, buyingPlot: false, selectedSeed: 'corn' })
-  applyServerState(data)
 }

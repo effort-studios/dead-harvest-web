@@ -9,11 +9,11 @@ import {
   treeAt,
   type Hover,
   type Size,
-} from '../render/draw'
-import { freeSlots, plotCell, type ClickMode } from '../game/state'
-import { skyTint } from '../game/daycycle'
-import { loadSprites, type Sprites } from '../render/sprites'
-import { useGameStore } from '../store/gameStore'
+} from '@/features/farm/render/draw'
+import { freeSlots, plotCell, type ClickMode } from '@/features/farm/model/state'
+import { skyTint } from '@/features/farm/model/daycycle'
+import { loadSprites, type Sprites } from '@/features/farm/render/sprites'
+import { useFarmStore } from '../store'
 
 // Shift = ação na linha inteira, Ctrl = na coluna inteira, nenhum = só no tile
 function modeOf(e: { shiftKey: boolean; ctrlKey: boolean }): ClickMode {
@@ -31,11 +31,11 @@ const DRAG_THRESHOLD = 5
 export function GameCanvas() {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const plots = useGameStore((s) => s.data?.plots)
-  const buyingPlot = useGameStore((s) => s.buyingPlot)
-  const readyTrees = useGameStore((s) => s.readyTrees)
-  const harvestTree = useGameStore((s) => s.harvestTree)
-  const time = useGameStore((s) => s.data?.time ?? 0)
+  const plots = useFarmStore((s) => s.data?.plots)
+  const buyingPlot = useFarmStore((s) => s.buyingPlot)
+  const readyTrees = useFarmStore((s) => s.readyTrees)
+  const harvestTree = useFarmStore((s) => s.harvestTree)
+  const time = useFarmStore((s) => s.data?.time ?? 0)
   const [sprites, setSprites] = useState<Sprites | null>(null)
   const [size, setSize] = useState<Size>({ width: 0, height: 0 })
 
@@ -65,7 +65,7 @@ export function GameCanvas() {
   const draw = useCallback(() => {
     const canvas = canvasRef.current
     const ctx = canvas?.getContext('2d')
-    const { data, buyingPlot } = useGameStore.getState()
+    const { data, buyingPlot } = useFarmStore.getState()
     if (!canvas || !ctx || !sprites || !data || size.width === 0) return
     const dpr = window.devicePixelRatio || 1
     // só mexe no tamanho se mudou (mexer apaga o desenho)
@@ -95,7 +95,7 @@ export function GameCanvas() {
   // Apertar ou soltar Shift/Ctrl com o mouse parado também muda o destaque
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') useGameStore.getState().setBuyingPlot(false)
+      if (e.key === 'Escape') useFarmStore.getState().setBuyingPlot(false)
       const next = modeOf(e)
       if (next === mode.current) return
       mode.current = next
@@ -120,7 +120,7 @@ export function GameCanvas() {
 
   // Árvore com frutas sob o ponto (fora do modo de compra de terreno)
   function readyTreeAt(wx: number, wy: number): string | null {
-    const { data, readyTrees, buyingPlot } = useGameStore.getState()
+    const { data, readyTrees, buyingPlot } = useFarmStore.getState()
     if (!data || buyingPlot) return null
     const tree = treeAt(wx, wy, data.plots)
     return tree && readyTrees.split(',').includes(tree) ? tree : null
@@ -128,7 +128,7 @@ export function GameCanvas() {
 
   // O que está sob o ponto: um terreno livre (na compra) ou um tile de um terreno
   function targetAt(wx: number, wy: number, newMode: ClickMode): Hover | null {
-    const { data, buyingPlot } = useGameStore.getState()
+    const { data, buyingPlot } = useFarmStore.getState()
     if (!data) return null
     const t = tileFromWorld(wx, wy)
     const cell = plotCell(t.row, t.col)
@@ -158,7 +158,7 @@ export function GameCanvas() {
       camera.current = clampCamera(
         world.x - (sx - size.width / 2) / zoom,
         world.y - (sy - size.height / 2) / zoom,
-        useGameStore.getState().data?.plots ?? [],
+        useFarmStore.getState().data?.plots ?? [],
       )
       scheduleDraw()
     }
@@ -206,7 +206,7 @@ export function GameCanvas() {
     d.moved = true
     // arrastar o mapa para a direita = câmera vai para a esquerda
     const zoom = fitZoom(size) * userZoom.current
-    camera.current = { ...clampCamera(d.camX - dx / zoom, d.camY - dy / zoom, useGameStore.getState().data?.plots ?? []) }
+    camera.current = { ...clampCamera(d.camX - dx / zoom, d.camY - dy / zoom, useFarmStore.getState().data?.plots ?? []) }
     scheduleDraw()
   }
 
@@ -221,8 +221,8 @@ export function GameCanvas() {
       return
     }
     const target = targetAt(world.x, world.y, modeOf(e))
-    if (target?.kind === 'slot') useGameStore.getState().buyPlot(target.x, target.y)
-    else if (target) useGameStore.getState().clickTile(target.plot, target.row, target.col, target.mode)
+    if (target?.kind === 'slot') useFarmStore.getState().buyPlot(target.x, target.y)
+    else if (target) useFarmStore.getState().clickTile(target.plot, target.row, target.col, target.mode)
   }
 
   return (

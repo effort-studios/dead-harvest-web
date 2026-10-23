@@ -1,7 +1,7 @@
 # Design system do Dead Harvest
 
 Regras para tudo ter cara de "feito pela mesma mão". Antes de criar um objeto novo, leia isto.
-Os valores de cor e contorno dos objetos estão em [src/render/style.ts](src/render/style.ts).
+Os valores de cor e contorno dos objetos estão em [src/features/farm/render/style.ts](src/features/farm/render/style.ts).
 
 ## Princípios
 

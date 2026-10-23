@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
-import { formatDuration } from '../game/crops'
-import { clockTime, dayHour, dayPhase, PHASE_LABEL, phaseSpan, type DayPhase } from '../game/daycycle'
-import { LateNightIcon, MoonIcon, SunIcon, SunriseIcon, SunsetIcon } from './Icons'
+import { formatDuration } from '@/features/farm/model/crops'
+import { clockTime, dayHour, dayPhase, PHASE_LABEL, phaseSpan, type DayPhase } from '@/features/farm/model/daycycle'
+import { LateNightIcon, MoonIcon, SunIcon, SunriseIcon, SunsetIcon } from './icons'
 
 // Relógio do dia: uma cúpula em pixel art com o céu da hora atual e um ponteiro de 24 horas, ao lado
 // das placas com o dia, a fase e a hora. Tudo sai do horário do jogo (dayHour, dayPhase, clockTime):
