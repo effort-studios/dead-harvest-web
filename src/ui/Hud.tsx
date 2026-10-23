@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
-import { CROPS, formatDuration } from '../game/crops'
-import { ownedSeeds } from '../game/state'
+import { CROPS, formatDuration } from '@/features/farm/model/crops'
+import { ownedSeeds } from '@/features/farm/model/state'
 import { useGameStore } from '../store/gameStore'
 import { CropIcon } from './Icons'
 import { ProfileMenu } from '@/features/profile/components/ProfileMenu'

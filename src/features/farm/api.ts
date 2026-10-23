@@ -1,7 +1,7 @@
 import { post, request } from '@/shared/api/http'
-import type { CatalogCrop } from '../game/crops'
-import type { CatalogFruit, CatalogTree } from '../game/trees'
-import type { SaveData } from '../game/types'
+import type { CatalogCrop } from '@/features/farm/model/crops'
+import type { CatalogFruit, CatalogTree } from '@/features/farm/model/trees'
+import type { SaveData } from '@/features/farm/model/types'
 
 // ---------- Jogo ----------
 

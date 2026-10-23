@@ -1,5 +1,5 @@
-import type { CropId } from '../game/crops'
-import type { FruitId } from '../game/trees'
+import type { CropId } from '@/features/farm/model/crops'
+import type { FruitId } from '@/features/farm/model/trees'
 import { OUTLINE, Svg, type IconProps } from '@/shared/ui/icons'
 
 export function SunIcon({ size }: IconProps) {

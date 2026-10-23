@@ -1,12 +1,12 @@
 import { create } from 'zustand'
 import * as authApi from '@/features/auth/api'
-import * as api from '../api/client'
+import * as api from '@/features/farm/api'
 import { ApiError } from '@/shared/api/http'
 import { updateProfile } from '@/features/profile/api'
 import type { User } from '@/features/profile/model/user'
 import type { Avatar } from '@/features/profile/model/avatar'
-import { setCrops, type CropId } from '../game/crops'
-import { setDayLength } from '../game/daycycle'
+import { setCrops, type CropId } from '@/features/farm/model/crops'
+import { setDayLength } from '@/features/farm/model/daycycle'
 import {
   applyTileCommand,
   buyPlot,
@@ -19,9 +19,9 @@ import {
   tick,
   tileCommand,
   type ClickMode,
-} from '../game/state'
-import { setTrees, type FruitId } from '../game/trees'
-import type { SaveData } from '../game/types'
+} from '@/features/farm/model/state'
+import { setTrees, type FruitId } from '@/features/farm/model/trees'
+import type { SaveData } from '@/features/farm/model/types'
 
 // O servidor é a fonte da verdade. Toda ação do jogador vai para a API, que valida e devolve o estado
 // novo; enquanto a resposta não chega, a tela mostra uma previsão (game/state.ts) para responder na hora.

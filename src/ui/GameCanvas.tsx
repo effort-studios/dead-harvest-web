@@ -9,10 +9,10 @@ import {
   treeAt,
   type Hover,
   type Size,
-} from '../render/draw'
-import { freeSlots, plotCell, type ClickMode } from '../game/state'
-import { skyTint } from '../game/daycycle'
-import { loadSprites, type Sprites } from '../render/sprites'
+} from '@/features/farm/render/draw'
+import { freeSlots, plotCell, type ClickMode } from '@/features/farm/model/state'
+import { skyTint } from '@/features/farm/model/daycycle'
+import { loadSprites, type Sprites } from '@/features/farm/render/sprites'
 import { useGameStore } from '../store/gameStore'
 
 // Shift = ação na linha inteira, Ctrl = na coluna inteira, nenhum = só no tile
