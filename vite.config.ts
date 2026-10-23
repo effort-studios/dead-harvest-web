@@ -7,4 +7,5 @@ export default defineConfig({
   plugins: [react()],
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } }, // '@/x' = 'src/x'
   server: { host: true }, // expõe na rede local
+  preview: { allowedHosts: true }, // em produção (Railway) o host é o domínio gerado
 })
