@@ -13,7 +13,7 @@ import {
 import { freeSlots, plotCell, type ClickMode } from '@/features/farm/model/state'
 import { skyTint } from '@/features/farm/model/daycycle'
 import { loadSprites, type Sprites } from '@/features/farm/render/sprites'
-import { useGameStore } from '../store/gameStore'
+import { useGameStore } from '@/store/gameStore'
 
 // Shift = ação na linha inteira, Ctrl = na coluna inteira, nenhum = só no tile
 function modeOf(e: { shiftKey: boolean; ctrlKey: boolean }): ClickMode {

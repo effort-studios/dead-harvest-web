@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import { CROP_ORDER, CROPS, formatDuration, type CropId } from '@/features/farm/model/crops'
 import { FRUIT_ORDER, FRUITS, TREES } from '@/features/farm/model/trees'
 import { GRID_SIZE, plotPrice } from '@/features/farm/model/state'
-import { useGameStore } from '../store/gameStore'
+import { useGameStore } from '@/store/gameStore'
 import { CloseIcon, CoinIcon } from '@/shared/ui/icons'
-import { BulbIcon, CropIcon, FruitIcon, PlotIcon, ShopIcon } from './Icons'
+import { BulbIcon, CropIcon, FruitIcon, PlotIcon, ShopIcon } from './icons'
 
 type Section = 'shop' | 'tips'
 
