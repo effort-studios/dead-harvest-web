@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useGameStore } from '../store/gameStore'
 import { Avatar } from './Avatar'
-import { CoinIcon } from './Icons'
+import { CoinIcon } from '@/shared/ui/icons'
 import { ProfileEditor } from './ProfileEditor'
 
 // Painel do jogador (canto superior esquerdo). Clicar abre o menu da conta: editar perfil e sair.

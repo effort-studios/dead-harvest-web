@@ -3,7 +3,8 @@ import { CROP_ORDER, CROPS, formatDuration, type CropId } from '../game/crops'
 import { FRUIT_ORDER, FRUITS, TREES } from '../game/trees'
 import { GRID_SIZE, plotPrice } from '../game/state'
 import { useGameStore } from '../store/gameStore'
-import { BulbIcon, CloseIcon, CoinIcon, CropIcon, FruitIcon, PlotIcon, ShopIcon } from './Icons'
+import { CloseIcon, CoinIcon } from '@/shared/ui/icons'
+import { BulbIcon, CropIcon, FruitIcon, PlotIcon, ShopIcon } from './Icons'
 
 type Section = 'shop' | 'tips'
 

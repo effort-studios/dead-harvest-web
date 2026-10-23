@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { AVATAR_OPTIONS, AVATAR_PARTS, OPTION_LABEL, PART_LABEL, type Avatar as AvatarData, type AvatarPart } from '../game/avatar'
 import { useGameStore } from '../store/gameStore'
 import { Avatar } from './Avatar'
-import { CloseIcon } from './Icons'
+import { CloseIcon } from '@/shared/ui/icons'
 
 // Janela para editar o nome e o avatar. As mudanças só valem ao salvar; cancelar descarta tudo.
 export function ProfileEditor({ onClose }: { onClose: () => void }) {

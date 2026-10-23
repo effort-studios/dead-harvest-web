@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import * as api from '../api/client'
-import { ApiError, type User } from '../api/client'
+import { ApiError } from '@/shared/api/http'
+import type { User } from '../api/client'
 import type { Avatar } from '../game/avatar'
 import { setCrops, type CropId } from '../game/crops'
 import { setDayLength } from '../game/daycycle'
