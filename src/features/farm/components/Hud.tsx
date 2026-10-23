@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { CROPS, formatDuration } from '@/features/farm/model/crops'
 import { ownedSeeds } from '@/features/farm/model/state'
-import { useGameStore } from '@/store/gameStore'
+import { useFarmStore } from '../store'
 import { CropIcon } from './icons'
 import { ProfileMenu } from '@/features/profile/components/ProfileMenu'
 import { DayClock } from './DayClock'
@@ -12,13 +12,13 @@ const HOTBAR_SLOTS = 9
 // HUD inspirada na prévia: jogador e dinheiro (canto superior esquerdo),
 // dia (canto superior direito), barra de itens (embaixo) e erros de salvamento (embaixo à esquerda).
 // Vida, energia, missões e minimapa ainda não existem no jogo e ficam para depois do MVP.
-export function Hud() {
-  const { data, error, selectedSeed, selectSeed } = useGameStore()
+export function Hud({ onLogout }: { onLogout: () => void }) {
+  const { data, error, selectedSeed, selectSeed } = useFarmStore()
 
   // Teclas 1 a 9 escolhem o item do slot correspondente (só existem slots para o que o jogador tem)
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      const { data, selectSeed } = useGameStore.getState()
+      const { data, selectSeed } = useFarmStore.getState()
       const crop = data && ownedSeeds(data.inventory)[Number(e.key) - 1]
       if (crop) selectSeed(crop)
     }
@@ -33,7 +33,7 @@ export function Hud() {
     <>
       {/* Coluna da esquerda: jogador em cima e menu logo abaixo, sem sobrepor */}
       <div className="hud-left">
-        <ProfileMenu />
+        <ProfileMenu money={data.money} onLogout={onLogout} />
         <SideMenu />
       </div>
 

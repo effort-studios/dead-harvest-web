@@ -1,13 +1,13 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { AVATAR_OPTIONS, AVATAR_PARTS, OPTION_LABEL, PART_LABEL, type Avatar as AvatarData, type AvatarPart } from '@/features/profile/model/avatar'
-import { useGameStore } from '@/store/gameStore'
+import { useProfileStore } from '../store'
 import { Avatar } from './Avatar'
 import { CloseIcon } from '@/shared/ui/icons'
 
 // Janela para editar o nome e o avatar. As mudanças só valem ao salvar; cancelar descarta tudo.
 export function ProfileEditor({ onClose }: { onClose: () => void }) {
-  const user = useGameStore((s) => s.user)
-  const updateProfile = useGameStore((s) => s.updateProfile)
+  const user = useProfileStore((s) => s.user)
+  const updateProfile = useProfileStore((s) => s.updateProfile)
 
   const [displayName, setDisplayName] = useState(user?.displayName ?? '')
   const [avatar, setAvatar] = useState<AvatarData>(user!.avatar)
