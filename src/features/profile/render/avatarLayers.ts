@@ -1,4 +1,5 @@
 import type { Avatar } from '@/features/profile/model/avatar'
+import { readCachedImage, writeCachedImage } from './avatarCache'
 
 // Monta o retrato do jogador empilhando as camadas desenhadas em public/assets/avatar/
 // (geradas por scripts/build_avatar_layers.py). Tom de pele, cor do cabelo e dos olhos não têm
@@ -110,12 +111,25 @@ const cache = new Map<string, Promise<string>>()
 
 const keyOf = (a: Avatar) => [a.skin, a.eyes, a.face, a.hair, a.hairColor, a.beard, a.hat, a.outfit].join('|')
 
-// URL (data:) do retrato; a mesma combinação é montada uma vez só
+// Retrato já pronto de um F5 anterior (localStorage), lido na hora; null se não houver
+export const cachedAvatarImage = readCachedImage
+
+// Baixa as camadas antes de alguém pedir um retrato (usado quando o cache não cobre o avatar)
+export const preloadAvatarAssets = () => void loadAssets().catch(() => undefined)
+
+// URL (data:) do retrato; a mesma combinação é montada uma vez só e guardada para o próximo F5
 export function avatarImageUrl(avatar: Avatar): Promise<string> {
   const key = keyOf(avatar)
   let url = cache.get(key)
   if (!url) {
-    url = compose(avatar)
+    const saved = readCachedImage(avatar)
+    url =
+      saved !== null
+        ? Promise.resolve(saved)
+        : compose(avatar).then((made) => {
+            writeCachedImage(avatar, made)
+            return made
+          })
     cache.set(key, url)
   }
   return url
