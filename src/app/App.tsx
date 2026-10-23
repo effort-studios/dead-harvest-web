@@ -1,8 +1,10 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useFarmStore } from '@/features/farm/store'
 import { GameCanvas } from '@/features/farm/components/GameCanvas'
 import { AuthScreen } from '@/features/auth/components/AuthScreen'
 import { Hud } from '@/features/farm/components/Hud'
+import { Avatar } from '@/features/profile/components/Avatar'
+import { readLastUser } from '@/features/profile/render/avatarCache'
 import { init, login, logout, register, useSession } from './session'
 
 // Em modo dev o StrictMode roda o effect 2x; sem isso a inicialização rodaria duas vezes
@@ -39,13 +41,26 @@ export default function App() {
     }
   }, [status])
 
-  if (status === 'loading') return <p>Carregando...</p>
+  if (status === 'loading') return <LoadingScreen />
   if (status === 'anonymous') return <AuthScreen onLogin={login} onRegister={register} />
   if (status === 'error') return <p className="error">Não foi possível conectar à API: {error}</p>
   return (
     <div className="game">
       <GameCanvas />
       <Hud onLogout={logout} />
+    </div>
+  )
+}
+
+// Enquanto a API responde: se já houve login neste navegador, mostra o retrato guardado (só visual; quem confirma
+// o login é a API). Sem registro, o texto de sempre.
+function LoadingScreen() {
+  const last = useMemo(() => readLastUser(), [])
+  if (!last) return <p>Carregando...</p>
+  return (
+    <div className="loading-screen">
+      <Avatar avatar={last.avatar} size={120} />
+      <p>Voltando para a fazenda, {last.displayName}...</p>
     </div>
   )
 }

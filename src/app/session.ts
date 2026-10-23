@@ -2,6 +2,8 @@ import { create } from 'zustand'
 import * as authApi from '@/features/auth/api'
 import { setUnauthorizedHandler, useFarmStore } from '@/features/farm/store'
 import type { User } from '@/features/profile/model/user'
+import { cachedAvatarImage, preloadAvatarAssets } from '@/features/profile/render/avatarLayers'
+import { readLastUser } from '@/features/profile/render/avatarCache'
 import { useProfileStore } from '@/features/profile/store'
 
 // A sessão junta as features: quem está logado (profile), o jogo (farm) e a chamada de login (auth).
@@ -38,6 +40,9 @@ setUnauthorizedHandler(leave)
 
 // Ao abrir o jogo: se já há sessão (cookie), carrega o jogo; senão, mostra a tela de login
 export async function init() {
+  // se o retrato do último jogador não está no cache (primeiro acesso nesta versão da arte), já baixa as camadas
+  const last = readLastUser()
+  if (last && !cachedAvatarImage(last.avatar)) preloadAvatarAssets()
   try {
     const user = await authApi.fetchMe()
     if (!user) return leave()
