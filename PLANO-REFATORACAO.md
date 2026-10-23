@@ -1,6 +1,6 @@
 # Plano: organização do front por features
 
-Status: **aguardando aprovação**. Nada do código foi alterado.
+Status: **concluído** na branch `refactor/features` (as seis fases, incluindo a divisão do store).
 
 Branch: `refactor/features` (a `main` não é tocada).
 
@@ -111,7 +111,7 @@ shared  ←  profile  ←  auth
 | 3 | `auth/` (`AuthScreen`, `api.ts` de conta) | baixo |
 | 4 | `farm/`: primeiro `model/` + `render/` + `api.ts` (um commit), depois `components/` e os ícones de domínio (outro commit) | médio: é onde há mais arquivos e o canvas |
 | 5 | docs: README (estrutura e seção "Como funciona" corrigida), `DESIGN.md`, `PROGRESS.md`; remove o `client.ts` vazio | nenhum |
-| 6 | **opcional, só com aprovação:** dividir o store em `auth` e `farm` | alto: toca lógica |
+| 6 | dividir o store (feito junto, por decisão do dono do projeto) | alto: toca lógica; verificado no navegador |
 
 ### Detalhes das fases
 
@@ -160,3 +160,14 @@ e vale você jogar uns minutos antes do merge.
    frágeis.
 2. **Fase 6** (dividir o store): fazer **depois** de verificar as fases 1 a 5 (recomendado) ou deixar de fora?
 3. Posso criar a branch `refactor/features` e commitar por fase?
+
+## 8. O que mudou em relação ao plano
+
+- **Fase 6:** `auth` ficou **sem store** (só `api` e `AuthScreen`). O estado se dividiu em `features/farm/store.ts` (jogo, com a fila de ações intacta),
+  `features/profile/store.ts` (usuário) e `app/session.ts` (status da tela, `init`, `login`, `register`, `logout` e a queda de sessão por 401).
+  Motivo: o 401 vindo de uma ação do jogo e o `logout` (que espera a fila) precisam de uma camada acima das features, e é o `app` que pode importar todas.
+  `farm/store.ts` expõe `setUnauthorizedHandler` e `flush`; `AuthScreen` e `ProfileMenu` recebem as ações por props.
+- **Alias `@/`** adotado, como proposto.
+- **Ferramenta:** um script próprio fez cada `git mv` e reescreveu os imports (só os dos arquivos afetados).
+  As fases 1 a 5 geraram um bundle idêntico ao de antes (mesmo hash), o que confirma que foram só mudança de lugar.
+- **Verificação no navegador** (API refatorada + banco de teste, em origem isolada para não tocar na sessão nem no banco de desenvolvimento): todos os fluxos da seção 5, exceto Ctrl+clique na coluna (mesmo caminho do Shift).

@@ -42,6 +42,8 @@ Item 5. Falta o usuário testar: abrir o menu lateral (🛒), comprar sementes (
 | 2026-10-22 | Terrenos 10x10 colados (`PLOT_STEP` = `GRID_SIZE`); cerca só no lado sem terreno vizinho; terra arada emenda entre terrenos | a cerca estende o terreno em vez de separar. Cenário (árvore, fardo, pedra) que cairia em cima de um terreno novo some |
 | 2026-10-22 | Save usa `plots: [{ x, y, grid }]` no lugar de `grid`; (x, y) é a posição do terreno na malha e pode ser negativo | formato definido na API (PR de mesmo nome). Câmera, hit-test e textura da terra aceitam coordenadas globais negativas |
 
+| 2026-10-23 | Código por feature (`app`, `shared`, `features/{auth,profile,farm}`) com alias `@/`; `gameStore` dividido em `farm/store.ts` (jogo) e `profile/store.ts` (usuário), e a sessão (init, login, register, logout, 401) em `app/session.ts` | organização por domínio, como na API. Os caminhos citados nas decisões e no histórico abaixo são de antes da mudança (`game/` virou `features/farm/model/`, `render/` virou `features/farm/render/`, `ui/` foi distribuído nas features, `store/gameStore.ts` foi dividido) |
+
 ## Problemas conhecidos
 - Sem sementes não dá para plantar até a loja (item 5); jogadores antigos só têm milho (o save inicial novo traz as 3 sementes: limpe `deadHarvestPlayerId` do localStorage para criar jogador novo).
 - Se a aba ficar em segundo plano o navegador desacelera o setInterval e as plantas crescem mais devagar.
@@ -54,6 +56,7 @@ Item 5. Falta o usuário testar: abrir o menu lateral (🛒), comprar sementes (
 3. Zumbis (item 7)
 
 ## Histórico
+- 2026-10-23 – Reorganização por features (sem mudar comportamento) e divisão do store em jogo, usuário e sessão. Testado no navegador contra a API refatorada com banco de teste: cadastro, login com senha errada, recarregar mantendo a sessão, arar/plantar/colher (um tile e Shift na linha), comprar semente, vender fruta, colher árvore, comprar terreno, editar perfil, sair, esqueci minha senha e queda de sessão no meio do jogo (401 volta ao login). Sem erros no console.
 - 2026-10-22 – Fases do dia por hora do jogo (`DAY_PHASES`): madrugada 0h–5h, amanhecer 5h–6h, manhã 6h–12h, tarde 12h–17h, entardecer 17h–19h, noite 19h–0h. Card do relógio com ícone por fase (lua fria, sol nascendo, sol, sol se pondo, lua), cores da cúpula por fase, marcas no início de cada fase e dica (title) com o horário da fase no jogo e a duração real (vem da duração do dia do servidor).
 - 2026-10-22 – Relógio no estilo Stardew: céu do dia inteiro fixo na cúpula (dia embaixo, noite em cima, sol e lua parados, marcas a cada 3h) e ponteiro que gira das 5h às 5h sem encostar na borda. "Amanhecer" cabe na placa.
 - 2026-10-22 – Relógio do dia linear e sequencial (1 s real = 1 min no jogo com o dia de 24 min); fases por horário: amanhecer 5h–8h, manhã 8h–13h, tarde 13h–19h, noite 19h–5h. Cores do céu e sol/lua definidas por hora.
