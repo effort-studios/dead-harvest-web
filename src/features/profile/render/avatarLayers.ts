@@ -91,9 +91,10 @@ function loadAssets() {
     const canvas = document.createElement('canvas')
     canvas.width = canvas.height = layout.canvas
     const ctx = canvas.getContext('2d', { willReadFrequently: true })!
+    // baixa todas as camadas ao mesmo tempo; só ler os pixels é em série (usa o mesmo canvas)
+    const images = await Promise.all([...names].map(async (name) => [name, await loadImage(name)] as const))
     const pixels = new Map<string, ImageData>()
-    for (const name of names) {
-      const img = await loadImage(name)
+    for (const [name, img] of images) {
       ctx.clearRect(0, 0, layout.canvas, layout.canvas)
       ctx.drawImage(img, 0, 0)
       pixels.set(name, ctx.getImageData(0, 0, layout.canvas, layout.canvas))
