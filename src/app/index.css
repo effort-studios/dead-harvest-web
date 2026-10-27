@@ -907,7 +907,7 @@ button.hud-player:hover { background: #f6c04a; }
   .side-rail { gap: 4px; }
   .rail-btn { width: 34px; height: 34px; padding: 4px; border-width: 2px; border-radius: 8px; }
   .day-clock { top: 4px; right: 4px; transform: scale(0.5); transform-origin: top right; }
-  .hud-hotbar { bottom: 4px; padding: 3px; gap: 3px; }
+  .hud-hotbar { bottom: 4px; padding: 3px; gap: 3px; left: 4px; transform: none; } /* à esquerda: o canto direito é do botão de música */
   /* moldura mais fina (a de 9px comia o miolo); em 390px os 9 slots ainda deixam lugar para o botão de música */
   .slot { width: clamp(30px, 8vw, 40px); height: clamp(30px, 8vw, 40px); padding: 0; border-width: 6px; border-image-width: 6px; }
   .slot .svg-icon { width: 100%; height: 100%; }
