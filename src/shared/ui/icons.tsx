@@ -121,3 +121,54 @@ export function MusicOffIcon({ size }: IconProps) {
     </Svg>
   )
 }
+
+export function PlayIcon({ size }: IconProps) {
+  return (
+    <Svg size={size}>
+      <path d="M10 6.5v19l16-9.5z" fill="#fff0cc" stroke={OUTLINE} strokeWidth="2.4" />
+    </Svg>
+  )
+}
+
+export function PauseIcon({ size }: IconProps) {
+  return (
+    <Svg size={size}>
+      <rect x="7" y="6" width="7" height="20" rx="1.5" fill="#fff0cc" stroke={OUTLINE} strokeWidth="2.4" />
+      <rect x="18" y="6" width="7" height="20" rx="1.5" fill="#fff0cc" stroke={OUTLINE} strokeWidth="2.4" />
+    </Svg>
+  )
+}
+
+// Pula para a música seguinte (a anterior é a mesma figura espelhada)
+export function NextIcon({ size }: IconProps) {
+  return (
+    <Svg size={size}>
+      <path d="M6 7v18l12-9z" fill="#fff0cc" stroke={OUTLINE} strokeWidth="2.4" />
+      <rect x="21" y="7" width="5" height="18" rx="1.5" fill="#fff0cc" stroke={OUTLINE} strokeWidth="2.4" />
+    </Svg>
+  )
+}
+
+export function PrevIcon({ size }: IconProps) {
+  return (
+    <span style={{ display: 'inline-flex', transform: 'scaleX(-1)' }}>
+      <NextIcon size={size} />
+    </span>
+  )
+}
+
+export function VolumeIcon({ size, level = 2 }: IconProps & { level?: 0 | 1 | 2 }) {
+  return (
+    <Svg size={size}>
+      <path d="M5 12h5l7-6v20l-7-6H5z" fill="#fff0cc" stroke={OUTLINE} strokeWidth="2.2" />
+      {level === 0 ? (
+        <path d="M22 12l7 8M29 12l-7 8" stroke="#e5484d" strokeWidth="2.6" fill="none" />
+      ) : (
+        <>
+          <path d="M21.5 12.5a5 5 0 0 1 0 7" stroke={OUTLINE} strokeWidth="2.4" fill="none" />
+          {level === 2 && <path d="M25 9a10 10 0 0 1 0 14" stroke={OUTLINE} strokeWidth="2.4" fill="none" />}
+        </>
+      )}
+    </Svg>
+  )
+}

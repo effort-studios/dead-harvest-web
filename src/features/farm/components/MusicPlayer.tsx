@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { MusicIcon, MusicOffIcon } from '@/shared/ui/icons'
+import { CloseIcon, MusicIcon, MusicOffIcon, NextIcon, PauseIcon, PlayIcon, PrevIcon, VolumeIcon } from '@/shared/ui/icons'
 
 const PLAYLIST_ID = 'PLQwRmTwWx0ubcpv0SkHroupj1LqW5_Va5'
 const STORAGE_KEY = 'deadHarvestMusic'
@@ -154,31 +154,56 @@ export function MusicPlayer() {
   }
 
   const muted = !playing || volume === 0
+  const lastVolume = useRef(0.4)
+
+  function toggleMute() {
+    if (volume > 0) {
+      lastVolume.current = volume
+      setSettings((s) => ({ ...s, volume: 0 }))
+    } else {
+      setSettings((s) => ({ ...s, volume: lastVolume.current }))
+    }
+  }
 
   return (
     <div className="music-player">
-      <div className={`panel music-panel ${open ? '' : 'closed'}`}>
+      <section className={`panel-light music-panel ${open ? '' : 'closed'}`} aria-label="Música">
+        <h2 className="music-head">
+          <span className="panel-title">
+            <MusicIcon size={22} /> Música
+          </span>
+          <button className="panel-close" aria-label="Fechar" onClick={() => setOpen(false)}>
+            <CloseIcon size={18} />
+          </button>
+        </h2>
         <div className="music-video" ref={hostRef} />
         <div className="music-controls">
-          <button className="btn" onClick={() => playerRef.current?.previousVideo()} disabled={!ready} title="Música anterior">
-            ⏮
+          <button className="music-btn" onClick={() => playerRef.current?.previousVideo()} disabled={!ready} title="Música anterior">
+            <PrevIcon size={22} />
           </button>
-          <button className="btn" onClick={togglePlay} disabled={!ready} title={playing ? 'Pausar a música' : 'Tocar a música'}>
-            {playing ? 'Pausar' : 'Tocar'}
+          <button className="music-btn big" onClick={togglePlay} disabled={!ready} title={playing ? 'Pausar a música' : 'Tocar a música'}>
+            {playing ? <PauseIcon size={28} /> : <PlayIcon size={28} />}
           </button>
-          <button className="btn" onClick={() => playerRef.current?.nextVideo()} disabled={!ready} title="Próxima música">
-            ⏭
+          <button className="music-btn" onClick={() => playerRef.current?.nextVideo()} disabled={!ready} title="Próxima música">
+            <NextIcon size={22} />
           </button>
         </div>
-        <input
-          type="range"
-          min={0}
-          max={100}
-          value={Math.round(volume * 100)}
-          onChange={(e) => setSettings((s) => ({ ...s, volume: Number(e.target.value) / 100 }))}
-          aria-label="Volume da música"
-        />
-      </div>
+        <div className="music-volume">
+          <button className="music-mute" onClick={toggleMute} aria-label={volume === 0 ? 'Ativar o som' : 'Silenciar'} title={volume === 0 ? 'Ativar o som' : 'Silenciar'}>
+            <VolumeIcon size={22} level={volume === 0 ? 0 : volume < 0.5 ? 1 : 2} />
+          </button>
+          <input
+            type="range"
+            min={0}
+            max={100}
+            value={Math.round(volume * 100)}
+            style={{ '--fill': `${Math.round(volume * 100)}%` } as React.CSSProperties}
+            onChange={(e) => setSettings((s) => ({ ...s, volume: Number(e.target.value) / 100 }))}
+            aria-label="Volume da música"
+          />
+          <b>{Math.round(volume * 100)}%</b>
+        </div>
+      </section>
       <button className="panel music-toggle" onClick={() => setOpen((o) => !o)} aria-label="Música" title="Música">
         {muted ? <MusicOffIcon size={26} /> : <MusicIcon size={26} />}
       </button>
