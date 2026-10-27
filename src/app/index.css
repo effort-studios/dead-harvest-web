@@ -1,3 +1,8 @@
+@font-face {
+  font-family: 'Duality';
+  src: url('/assets/fonts/duality.otf') format('opentype');
+  font-display: swap;
+}
 html,
 body,
 #root {
@@ -10,7 +15,8 @@ body {
   -webkit-tap-highlight-color: transparent;
   background: #4f7f3b;
   color: #fff3d6;
-  font-family: 'Pixelify Sans', system-ui, sans-serif;
+  font-family: 'Duality', system-ui, sans-serif;
+  font-synthesis: none; /* a fonte tem um peso só: sem negrito falso borrando os pixels */
 }
 .game {
   -webkit-user-select: none; /* segurar o dedo no jogo não seleciona texto (os campos de login ficam de fora) */

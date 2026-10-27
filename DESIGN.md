@@ -94,7 +94,7 @@ Outros builds: `scripts/build_farmer_sheet.py` (folha do fazendeiro), `scripts/b
   1x nos botões e slots (o ícone de 32 px fica exato no miolo).
 - Ícones dos itens e da HUD: `PixelIcon` (`shared/ui/icons.tsx`). Prédios e animais usam o próprio sprite do mapa.
   Ícones de comando (salvar, olho, fechar) continuam em SVG.
-- Fonte: Pixelify Sans (Google Fonts).
+- Fonte: Duality (`public/assets/fonts/duality.otf`).
 
 ## Fazendeiro e avatar
 
