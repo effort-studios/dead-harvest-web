@@ -9,7 +9,10 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "start": "vite preview --host 0.0.0.0 --port ${PORT:-4173}",
-    "prepare": "git config core.hooksPath .githooks || true"
+    "prepare": "git config core.hooksPath .githooks || true",
+    "electron:dev": "concurrently -k \"vite --strictPort --port 5173\" \"wait-on http://localhost:5173 && cross-env ELECTRON_DEV_URL=http://localhost:5173 electron .\"",
+    "electron:start": "npm run build && electron .",
+    "electron:build": "npm run build && electron-builder --win"
   },
   "dependencies": {
     "react": "^19.3.1",
@@ -21,11 +24,36 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
+    "concurrently": "^10.0.6",
+    "cross-env": "^10.1.0",
+    "electron": "^45.1.0",
+    "electron-builder": "^26.18.0",
     "oxlint": "^1.88.0",
     "typescript": "~6.0.3",
-    "vite": "^8.3.4"
+    "vite": "^8.3.4",
+    "wait-on": "^9.5.1"
   },
   "engines": {
     "node": ">=22.12.0"
+  },
+  "main": "electron/main.cjs",
+  "description": "Dead Harvest",
+  "author": "Lucas Fabris",
+  "build": {
+    "appId": "com.lucasgfabris.deadharvest",
+    "productName": "Dead Harvest",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**",
+      "build/icon.png",
+      "electron/**",
+      "package.json"
+    ],
+    "artifactName": "${productName}.${ext}",
+    "win": {
+      "target": "portable"
+    }
   }
 }

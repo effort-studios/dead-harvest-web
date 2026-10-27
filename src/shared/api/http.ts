@@ -1,6 +1,7 @@
 // A API tem que ser acessada pelo MESMO host que abriu o front (localhost ou o IP da rede): o cookie de
 // sessão só vai junto quando os dois estão no mesmo "site". Por isso, sem VITE_API_URL, usa o host da página.
-const API_URL = import.meta.env.VITE_API_URL || `${location.protocol}//${location.hostname}:3333`
+// No Electron empacotado (protocolo app:) não há host da API na página; usa o localhost.
+const API_URL = import.meta.env.VITE_API_URL || (location.protocol === 'app:' ? 'http://localhost:3333' : `${location.protocol}//${location.hostname}:3333`)
 
 // Erro com o status HTTP e a mensagem que a API mandou (já em português)
 export class ApiError extends Error {
