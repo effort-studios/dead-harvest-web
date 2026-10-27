@@ -15,7 +15,8 @@ export type Plot = {
   grid: Tile[][]
 }
 
-// Tarefa do fazendeiro na fila do servidor. Só a primeira (em andamento) tem horários (ms, relógio do servidor).
+// Tarefa do fazendeiro na fila do servidor, com horários (ms, relógio do servidor) encadeados: cada uma começa
+// quando a anterior termina.
 export type FarmJob = {
   id: string
   action: 'till' | 'untill' | 'move' | 'plant' | 'harvest' | 'harvest_tree' | 'fertilize' | 'water' | 'collect_machine' | 'collect_barn' | 'refill_can'
@@ -27,9 +28,9 @@ export type FarmJob = {
   machineId: string | null
   targetRow: number // célula do mapa onde ele precisa estar
   targetCol: number
-  startsAt?: number // começa a andar
-  arriveAt?: number // chega e começa o gesto
-  endsAt?: number // termina o gesto (a ação acontece no servidor nesse instante)
+  startsAt: number // começa a andar
+  arriveAt: number // chega e começa o gesto
+  endsAt: number // termina o gesto (a ação acontece no servidor nesse instante)
 }
 
 // Onde o fazendeiro está parado antes de começar jobs[0], e a fila

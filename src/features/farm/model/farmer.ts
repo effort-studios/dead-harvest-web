@@ -33,21 +33,31 @@ const ACTION: Record<FarmJob['action'], FarmerAction | null> = {
 
 // Pose do fazendeiro no instante `now` (ms, relógio do servidor). `idleFacing` é para onde olhava na última
 // vez que se mexeu: parado, continua olhando para lá.
+// Todos os pedidos da fila têm horários, então a pose sai da fila inteira: o trajeto de um tile ao outro anima
+// sem esperar o servidor confirmar o anterior (a resposta dele demora mais que a caminhada entre tiles vizinhos).
 export function farmerPose(farmer: FarmerState, now: number, idleFacing: Pose['facing']): Pose {
-  const idle: Pose = { r: farmer.row, c: farmer.col, facing: idleFacing, walking: false, phase: 0, acting: null }
-  const job = farmer.jobs[0]
-  if (!job || job.startsAt === undefined || job.arriveAt === undefined || job.endsAt === undefined || now < job.startsAt) return idle
+  let from = { r: farmer.row, c: farmer.col }
+  let facing = idleFacing
+  for (const job of farmer.jobs) {
+    const to = { r: job.targetRow, c: job.targetCol }
+    const dr = to.r - from.r
+    const dc = to.c - from.c
+    const dist = Math.hypot(dr, dc)
+    if (dist > 0.001) facing = { dr: dr / dist, dc: dc / dist }
 
-  const dr = job.targetRow - farmer.row
-  const dc = job.targetCol - farmer.col
-  const dist = Math.hypot(dr, dc)
-  const facing = dist > 0.001 ? { dr: dr / dist, dc: dc / dist } : idleFacing
-
-  if (now < job.arriveAt) {
-    const f = (now - job.startsAt) / Math.max(job.arriveAt - job.startsAt, 1)
-    return { r: farmer.row + dr * f, c: farmer.col + dc * f, facing, walking: true, phase: dist * f * STRIDE_PER_CELL, acting: null }
+    if (now >= job.endsAt) {
+      from = to // já terminou (o servidor ainda vai confirmar): segue para o próximo
+      continue
+    }
+    if (now < job.startsAt) break
+    if (now < job.arriveAt) {
+      const f = (now - job.startsAt) / Math.max(job.arriveAt - job.startsAt, 1)
+      return { r: from.r + dr * f, c: from.c + dc * f, facing, walking: true, phase: dist * f * STRIDE_PER_CELL, acting: null }
+    }
+    // chegou: faz o gesto
+    const progress = (now - job.arriveAt) / Math.max(job.endsAt - job.arriveAt, 1)
+    const action = ACTION[job.action]
+    return { r: to.r, c: to.c, facing, walking: false, phase: 0, acting: action ? { action, progress } : null }
   }
-  // chegou: faz o gesto; passado o fim, espera o servidor confirmar (a tela busca o estado nesse instante)
-  const progress = now < job.endsAt ? (now - job.arriveAt) / Math.max(job.endsAt - job.arriveAt, 1) : null
-  return { r: job.targetRow, c: job.targetCol, facing, walking: false, phase: 0, acting: progress === null || !ACTION[job.action] ? null : { action: ACTION[job.action]!, progress } }
+  return { r: from.r, c: from.c, facing, walking: false, phase: 0, acting: null }
 }
