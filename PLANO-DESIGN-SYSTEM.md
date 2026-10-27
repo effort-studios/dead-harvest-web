@@ -52,14 +52,15 @@ Princípios:
 ### Paleta
 
 Dourado e escuros medidos nas referências; o escuro foi esquentado (marrom em vez de azul-marinho). O dourado é um
-bege-dourado sóbrio: o amarelo saturado atual (`#f2b234`) fica só para destaques (selecionado, moeda).
+bege-dourado sóbrio (tokens `--frame-*`). O amarelo vivo atual (`--gold`, `#f2b234`) fica só para destaques
+(selecionado, moeda).
 
 | Papel | Token | Hex |
 |---|---|---|
 | Contorno | `--frame-outline` | `#2a1a0e` |
-| Dourado, luz | `--gold-light` | `#fbd594` |
-| Dourado, base | `--gold` | `#c89e61` |
-| Dourado, sombra | `--gold-dark` | `#6c4620` |
+| Dourado, luz | `--frame-gold-light` | `#fbd594` |
+| Dourado, base | `--frame-gold` | `#c89e61` |
+| Dourado, sombra | `--frame-gold-dark` | `#6c4620` |
 | Interior do painel | `--panel-bg` | `#2b2118` |
 | Slot afundado | `--slot-bg` | `#1d160f` |
 | Borda do slot (luz de 1px) | `--slot-edge` | `#4a3a28` |
@@ -75,9 +76,9 @@ Cantos chanfrados de 1 a 2px, sem enfeites.
 | Anel | Largura | Cor |
 |---|---|---|
 | 1. Contorno | 1px | `--frame-outline` |
-| 2. Luz | 1px | `--gold-light` |
-| 3. Base | 2px | `--gold` |
-| 4. Sombra | 1px | `--gold-dark` |
+| 2. Luz | 1px | `--frame-gold-light` |
+| 3. Base | 2px | `--frame-gold` |
+| 4. Sombra | 1px | `--frame-gold-dark` |
 | 5. Contorno interno | 1px | `--frame-outline` |
 | Respiro até o interior | 2px | `--panel-bg` |
 
@@ -258,13 +259,13 @@ Status: `pendente`, `em andamento`, `concluída`. Atualizar a tabela junto com o
 ### Fase 1: tokens e regras (sem mudança visual)
 
 **1.1 Tokens**
-- [ ] Criar `src/shared/ui/tokens.css` com cores (movendo o `:root` do `index.css`), espaçamento, fontes, ícones,
+- [x] Criar `src/shared/ui/tokens.css` com cores (movendo o `:root` do `index.css`), espaçamento, fontes, ícones,
   escala de borda (1x/2x), z-index e sombra.
-- [ ] Criar tokens de texto claro sobre fundo escuro (o `--ink` atual é marrom escuro).
-- [ ] Importar o `tokens.css` em `app/main.tsx`.
+- [x] Criar tokens de texto claro sobre fundo escuro (o `--ink` atual é marrom escuro).
+- [x] Importar o `tokens.css` em `app/main.tsx`.
 
 **1.2 Estrutura de pastas**
-- [ ] Mover `shared/ui/icons.tsx` para `shared/ui/icons/index.tsx` (os imports `@/shared/ui/icons` continuam valendo).
+- [x] Mover `shared/ui/icons.tsx` para `shared/ui/icons/index.tsx` (os imports `@/shared/ui/icons` continuam valendo).
 - [ ] Criar `shared/ui/index.ts` (vazio por enquanto).
 
 **1.3 Regra de dependência**

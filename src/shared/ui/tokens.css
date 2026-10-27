@@ -1,0 +1,62 @@
+/* Tokens do design system da HUD. Os componentes de shared/ui só usam estas variáveis (nada de valor solto).
+   Importado uma vez, em app/main.tsx. */
+:root {
+  /* ---------- Cores atuais (HUD clara) ----------
+     Usadas pelo index.css até a migração (fase 5). --gold é o dourado vivo, que fica como cor de destaque
+     (selecionado, moeda) quando a HUD escura chegar. */
+  --outline: #4a2a12;
+  --gold: #f2b234;
+  --gold-light: #ffd75e;
+  --gold-dark: #c67d1c;
+  --plate: #f8dfa8;
+  --plate-light: #fff0cc;
+  --plate-border: #7a4416;
+  --ink: #5a3414;
+  --hard-shadow: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.35));
+
+  /* ---------- Cores da HUD escura (paleta do PLANO-DESIGN-SYSTEM.md) ---------- */
+  --frame-outline: #2a1a0e;
+  --frame-gold-light: #fbd594;
+  --frame-gold: #c89e61;
+  --frame-gold-dark: #6c4620;
+  --panel-bg: #2b2118;
+  --slot-bg: #1d160f;
+  --slot-edge: #4a3a28;
+  --text: #f3e6c8;
+  --text-muted: #b8a888;
+  --danger: #d9482b;
+
+  /* ---------- Molduras 9-slice (public/assets/ui) ----------
+     --frame-art: espessura da borda na arte, em pixels da imagem (vira 8 na fase 2, com a arte nova).
+     Em 1x a moldura ocupa --frame-art; em 2x, o dobro. O espaço entre a borda CSS e o conteúdo tem de ser
+     pelo menos o que a moldura ocupa além da borda (ver README.md desta pasta). */
+  --frame-art: 9px;
+  --frame-1x: var(--frame-art);
+  --frame-2x: calc(var(--frame-art) * 2);
+
+  /* ---------- Espaçamento (escala de 4px) ---------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+
+  /* ---------- Tipografia ---------- */
+  --font-ui: 'Duality', system-ui, sans-serif;
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-md: 16px;
+  --text-lg: 19px;
+  --text-xl: 22px;
+
+  /* ---------- Ícones ---------- */
+  --icon-sm: 18px;
+  --icon-md: 22px;
+  --icon-lg: 26px;
+
+  /* ---------- Camadas ---------- */
+  --z-tooltip: 4;
+  --z-menu: 5;
+  --z-popover: 6;
+  --z-modal: 20;
+}

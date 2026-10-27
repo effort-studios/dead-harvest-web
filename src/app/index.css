@@ -15,7 +15,7 @@ body {
   -webkit-tap-highlight-color: transparent;
   background: #4f7f3b;
   color: #fff3d6;
-  font-family: 'Duality', system-ui, sans-serif;
+  font-family: var(--font-ui);
   font-synthesis: none; /* a fonte tem um peso só: sem negrito falso borrando os pixels */
 }
 .game {
@@ -41,21 +41,10 @@ canvas:active {
   cursor: grabbing;
 }
 
-/* ---------- Paleta e molduras ----------
+/* ---------- Molduras (cores e medidas em shared/ui/tokens.css) ----------
    Molduras em pixel art (public/assets/ui, geradas na PixelLab e montadas por scripts/build_ui_frames.py),
    aplicadas como 9-slice: a borda tem 9 pixels da arte e é ampliada sem borrar (2x nos painéis, 1x nos
    botões e slots). Placas creme por dentro e sombra dura (sem desfoque). */
-:root {
-  --outline: #4a2a12;
-  --gold: #f2b234;
-  --gold-light: #ffd75e;
-  --gold-dark: #c67d1c;
-  --plate: #f8dfa8;
-  --plate-light: #fff0cc;
-  --plate-border: #7a4416;
-  --ink: #5a3414;
-  --hard-shadow: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.35));
-}
 .panel,
 .panel-light,
 .slot,
