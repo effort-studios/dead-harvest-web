@@ -17,8 +17,10 @@ export type Pose = {
 
 const STRIDE_PER_CELL = 2.6 // passos (fase) por célula andada
 
-const ACTION: Record<FarmJob['action'], FarmerAction> = {
+const ACTION: Record<FarmJob['action'], FarmerAction | null> = {
   till: 'till',
+  untill: 'till', // mesmo gesto: mexe na terra
+  move: null, // só anda
   plant: 'plant',
   harvest: 'harvest',
   harvest_tree: 'pick',
@@ -47,5 +49,5 @@ export function farmerPose(farmer: FarmerState, now: number, idleFacing: Pose['f
   }
   // chegou: faz o gesto; passado o fim, espera o servidor confirmar (a tela busca o estado nesse instante)
   const progress = now < job.endsAt ? (now - job.arriveAt) / Math.max(job.endsAt - job.arriveAt, 1) : null
-  return { r: job.targetRow, c: job.targetCol, facing, walking: false, phase: 0, acting: progress === null ? null : { action: ACTION[job.action], progress } }
+  return { r: job.targetRow, c: job.targetCol, facing, walking: false, phase: 0, acting: progress === null || !ACTION[job.action] ? null : { action: ACTION[job.action]!, progress } }
 }

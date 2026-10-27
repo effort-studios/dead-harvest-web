@@ -15,7 +15,7 @@ import {
   type Size,
   type YardBuilding,
 } from '@/features/farm/render/draw'
-import { freeSlots, placementProblem, plotCell, type ClickMode } from '@/features/farm/model/state'
+import { freeSlots, placementProblem, plotCell, tileMenu, type ClickMode } from '@/features/farm/model/state'
 import { buildingPos, growthRate, machineById } from '@/features/farm/model/production'
 import { CROPS, formatDuration, isCropId } from '@/features/farm/model/crops'
 import { farmerPose, type Pose } from '@/features/farm/model/farmer'
@@ -38,6 +38,8 @@ const WHEEL_SENSITIVITY = 0.0015
 // que estava sob o mouse)
 const DRAG_THRESHOLD = 5
 
+const moveTo = (row: number, col: number) => useFarmStore.getState().moveTo(Math.max(-100, Math.min(100, row)), Math.max(-100, Math.min(100, col)))
+
 export function GameCanvas() {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -54,6 +56,7 @@ export function GameCanvas() {
   const [size, setSize] = useState<Size>({ width: 0, height: 0 })
   const [tipTile, setTipTile] = useState<TileRef | null>(null) // tile sob o mouse (o balão mostra a planta dele)
   const tipRef = useRef<HTMLDivElement>(null)
+  const [menu, setMenu] = useState<MenuAt | null>(null) // menu do clique no chão
 
   // A câmera fica num ref (e não em state) para arrastar não re-renderizar o React a cada pixel
   const camera = useRef({ ...INITIAL_CAMERA })
@@ -154,6 +157,7 @@ export function GameCanvas() {
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') {
+        setMenu(null)
         useFarmStore.getState().setBuyingPlot(false)
         useFarmStore.getState().startPlacing(null)
       }
@@ -213,6 +217,7 @@ export function GameCanvas() {
     if (!canvas) return
     function onWheel(e: WheelEvent) {
       e.preventDefault()
+      setMenu(null)
       const rect = canvas!.getBoundingClientRect()
       const sx = e.clientX - rect.left
       const sy = e.clientY - rect.top
@@ -290,6 +295,7 @@ export function GameCanvas() {
 
   function onPointerDown(e: React.PointerEvent<HTMLCanvasElement>) {
     e.currentTarget.setPointerCapture(e.pointerId) // continua recebendo o mouse mesmo fora do canvas
+    setMenu(null)
     const world = worldAt(e)
     const building = readyTreeAt(world.x, world.y) ? null : grabBuildingAt(world.x, world.y)
     drag.current = { startX: e.clientX, startY: e.clientY, camX: camera.current.x, camY: camera.current.y, moved: false, building }
@@ -370,9 +376,22 @@ export function GameCanvas() {
       useFarmStore.getState().openBuilding(building)
       return
     }
+    const cell = tileFromWorld(world.x, world.y)
+    // Alt + clique: o fazendeiro só anda até lá, sem agir
+    if (e.altKey && !useFarmStore.getState().buyingPlot) {
+      moveTo(cell.row, cell.col)
+      return
+    }
     const target = targetAt(world.x, world.y, modeOf(e))
     if (target?.kind === 'slot') useFarmStore.getState().buyPlot(target.x, target.y)
-    else if (target) useFarmStore.getState().queueTiles(target.plot, target.row, target.col, target.mode)
+    // Shift/Ctrl + clique: age direto na linha/coluna, sem menu
+    else if (target && target.mode !== 'tile') useFarmStore.getState().queueTiles(target.plot, target.row, target.col, target.mode)
+    else if (!useFarmStore.getState().buyingPlot) {
+      // clique simples: abre o menu do que dá para fazer ali (em cima de um tile ou só no chão)
+      const rect = e.currentTarget.getBoundingClientRect()
+      setTipTile(null)
+      setMenu({ sx: e.clientX - rect.left, sy: e.clientY - rect.top, tile: target?.kind === 'tile' ? { plot: target.plot, row: target.row, col: target.col } : null, cell })
+    }
   }
 
   return (
@@ -401,6 +420,7 @@ export function GameCanvas() {
       <div ref={tipRef} className="plant-tip-anchor">
         {tipTile && <PlantTip at={tipTile} />}
       </div>
+      {menu && <TileMenu at={menu} size={size} onClose={() => setMenu(null)} />}
       {placing && (
         <div className="place-hint">
           Clique no mapa onde construir {placing.kind === 'barn' ? 'o celeiro' : placing.kind === 'well' ? 'o poço' : machineById(placing.id)?.name.toLowerCase()} · verde
@@ -414,6 +434,52 @@ export function GameCanvas() {
 }
 
 type TileRef = { plot: number; row: number; col: number }
+type MenuAt = { sx: number; sy: number; tile: TileRef | null; cell: { row: number; col: number } }
+
+const MENU_WIDTH = 190
+const MENU_ROW = 34
+
+// Menu do clique: o que dá para fazer no tile (arar, plantar, colher, regar, adubar, desfazer a aragem) e
+// "Mover para cá". Fora dos terrenos só tem o mover. Item sem condição de uso fica apagado, com o motivo na dica.
+function TileMenu({ at, size, onClose }: { at: MenuAt; size: Size; onClose: () => void }) {
+  const data = useFarmStore((s) => s.data)
+  const selected = useFarmStore((s) => s.selected)
+  const menu = data && at.tile ? tileMenu(data, at.tile.plot, at.tile.row, at.tile.col, selected) : null
+  const rows = (menu?.items.length ?? 0) + 2
+  const left = Math.max(4, Math.min(at.sx + 8, size.width - MENU_WIDTH - 8))
+  const top = Math.max(4, Math.min(at.sy + 8, size.height - rows * MENU_ROW - 40))
+  const store = useFarmStore.getState()
+
+  return (
+    <div className="panel-light ctx-menu" style={{ left, top, width: MENU_WIDTH }} onContextMenu={(e) => e.preventDefault()}>
+      <div className="ctx-title">{menu?.title ?? 'Chão'}</div>
+      {menu?.items.map((item) => (
+        <button
+          key={item.action}
+          className="ctx-item"
+          disabled={!!item.disabled}
+          title={item.disabled}
+          onClick={() => {
+            if (at.tile) store.queueTileAction(at.tile.plot, at.tile.row, at.tile.col, item.action, item.crop)
+            onClose()
+          }}
+        >
+          {item.label}
+        </button>
+      ))}
+      <button
+        className="ctx-item"
+        title="Atalho: Alt + clique"
+        onClick={() => {
+          moveTo(at.cell.row, at.cell.col)
+          onClose()
+        }}
+      >
+        Mover para cá
+      </button>
+    </div>
+  )
+}
 
 // Balão perto do mouse com a planta do tile e quanto falta para ela amadurecer (anda junto com o relógio da
 // tela; com adubo, o tempo já conta a planta crescendo mais rápido). Tile sem planta não mostra nada.

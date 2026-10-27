@@ -25,12 +25,13 @@ type Tiles = { x: number; y: number; tiles: { row: number; col: number }[] }
 
 // Arar, plantar, colher, adubar e coletar são tarefas do fazendeiro: o servidor enfileira, anda e executa uma de cada vez
 export type JobRequest =
-  | (Tiles & { action: 'till' | 'harvest' | 'fertilize' | 'water' })
+  | (Tiles & { action: 'till' | 'untill' | 'harvest' | 'fertilize' | 'water' })
   | (Tiles & { action: 'plant'; cropId: string })
   | { action: 'harvest_tree'; treeId: string }
   | { action: 'collect_machine'; machineId: string }
   | { action: 'collect_barn' }
   | { action: 'refill_can' }
+  | { action: 'move'; row: number; col: number } // só andar até a célula do mapa
 export const enqueueJob = (job: JobRequest) => post<SaveData>('/game/jobs', job)
 export const cancelJobs = () => request<SaveData>('/game/jobs', { method: 'DELETE' })
 export const buySeed = (cropId: string, quantity: number) => post<SaveData>('/game/seeds/buy', { cropId, quantity })

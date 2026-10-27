@@ -65,6 +65,7 @@ Item 5. Falta o usuário testar: abrir o menu lateral (🛒), comprar sementes (
 3. Zumbis (item 7)
 
 ## Histórico
+- 2026-10-27 – Menu do clique no chão: clicar num tile (ou no chão) abre um menu com o que dá para fazer ali (Arar, Plantar, Colher, Regar, Adubar, Desfazer aragem) e "Mover para cá"; itens sem condição ficam apagados com o motivo na dica (`tileMenu` em `model/state.ts`, `TileMenu` em `GameCanvas.tsx`). Alt + clique move o fazendeiro direto; Shift/Ctrl + clique seguem agindo na linha/coluna sem menu. Depende da API: tarefas novas `move` e `untill` na fila (migrations `move_job` e `untill_job`). Player de música com playlist do YouTube (`MusicPlayer.tsx`). Não testado no navegador.
 - 2026-10-27 – Regador e poço: Loja > Ferramentas (regador, 10 cargas) e Construções (poço 1x1, desenho novo); regador na barra com as cargas; adubo e regador valem em terra arada ou planta crescendo (Shift/Ctrl para a linha/coluna); terra regada desenhada mais escura e úmida; painel do poço com "Encher o regador"; o balão da planta mostra adubada/regada e a velocidade. Testado no Chrome headless.
 - 2026-10-27 – Balão ao passar o mouse numa planta: nome, quanto falta para amadurecer (contando o adubo) ou "pronta para colher!" (`PlantTip` em `GameCanvas.tsx`, posicionado por transform para não re-renderizar a cada pixel).
 - 2026-10-27 – Esterco: ícone novo, o painel do celeiro mostra o que cada animal solta junto, e a Composteira tem a receita de adubo com esterco. Textos do adubo com 30% mais rápido.

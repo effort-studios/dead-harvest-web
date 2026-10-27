@@ -444,9 +444,10 @@ function TipsPanel() {
       <ul>
         <li>Arraste o mapa com o mouse para se mover.</li>
         <li>Role a roda do mouse para aproximar e afastar.</li>
-        <li>Clique num tile: arar, plantar e colher.</li>
-        <li><b>Shift</b> + clique: ação na linha inteira.</li>
-        <li><b>Ctrl</b> + clique: ação na coluna inteira.</li>
+        <li>Clique no chão: abre um menu com o que dá para fazer ali (arar, desfazer a aragem, plantar, colher, regar, adubar) e <b>Mover para cá</b>.</li>
+        <li><b>Alt</b> + clique: o fazendeiro só anda até lá, sem fazer nada.</li>
+        <li><b>Shift</b> + clique: ação direta na linha inteira, sem menu.</li>
+        <li><b>Ctrl</b> + clique: ação direta na coluna inteira, sem menu.</li>
         <li>Teclas <b>1</b> a <b>9</b>: escolhem o item da barra (só aparece o que você tem).</li>
         <li>Clique numa árvore com frutas para colher.</li>
         <li>Tudo que você colhe vai para o <b>Armazém</b>: venda lá ou use nas máquinas.</li>

@@ -18,7 +18,7 @@ export type Plot = {
 // Tarefa do fazendeiro na fila do servidor. Só a primeira (em andamento) tem horários (ms, relógio do servidor).
 export type FarmJob = {
   id: string
-  action: 'till' | 'plant' | 'harvest' | 'harvest_tree' | 'fertilize' | 'water' | 'collect_machine' | 'collect_barn' | 'refill_can'
+  action: 'till' | 'untill' | 'move' | 'plant' | 'harvest' | 'harvest_tree' | 'fertilize' | 'water' | 'collect_machine' | 'collect_barn' | 'refill_can'
   plotX: number | null
   plotY: number | null
   row: number | null

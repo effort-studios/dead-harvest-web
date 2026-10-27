@@ -831,3 +831,31 @@ button.hud-player:hover { background: #f6c04a; }
   border-radius: 50%;
   box-shadow: inset 0 -2px 0 var(--gold-dark);
 }
+
+/* ---------- Menu do clique no chão ---------- */
+.ctx-menu {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 9px;
+  z-index: 5;
+}
+.ctx-title { padding: 0 4px 2px; font-size: 14px; font-weight: 700; color: var(--ink); border-bottom: 2px solid var(--plate-border); }
+.ctx-item {
+  min-height: 30px;
+  padding: 0 10px;
+  text-align: left;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--gold);
+  border: 2px solid var(--outline);
+  border-radius: 6px;
+  box-shadow: inset 0 2px 0 var(--gold-light), inset 0 -3px 0 var(--gold-dark);
+  cursor: pointer;
+}
+.ctx-item:hover:not(:disabled) { filter: brightness(1.08); }
+.ctx-item:active:not(:disabled) { transform: translateY(1px); }
+.ctx-item:disabled { filter: grayscale(0.8); opacity: 0.55; cursor: not-allowed; }

@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import * as api from '@/features/farm/api'
 import { ApiError } from '@/shared/api/http'
-import { setCrops, type CropId } from '@/features/farm/model/crops'
+import { isCropId, setCrops, type CropId } from '@/features/farm/model/crops'
 import { setDayLength } from '@/features/farm/model/daycycle'
 import * as production from '@/features/farm/model/production'
 import {
@@ -15,6 +15,8 @@ import {
   tick,
   tileCommand,
   type ClickMode,
+  type TileAction,
+  type TileCommand,
   type HotbarItem,
 } from '@/features/farm/model/state'
 import { setTrees } from '@/features/farm/model/trees'
@@ -42,6 +44,8 @@ type FarmState = {
   flush: () => Promise<void>
   sync: () => Promise<void>
   queueTiles: (plot: number, row: number, col: number, mode: ClickMode) => void // pede ao servidor: o fazendeiro vai até lá e age
+  queueTileAction: (plot: number, row: number, col: number, action: TileAction, crop?: CropId) => void // item do menu do tile
+  moveTo: (row: number, col: number) => void // o fazendeiro só anda até a célula
   queueTree: (treeId: string) => void
   cancelQueue: () => void
   select: (item: HotbarItem) => void
@@ -112,25 +116,15 @@ export const useFarmStore = create<FarmState>((set, get) => ({
   queueTiles: (plot, row, col, mode) => {
     const { data, selected } = get()
     const cmd = data && tileCommand(data, plot, row, col, mode, selected)
-    if (!data || !cmd || cmd.tiles.length === 0) return
-    const input = { x: data.plots[plot].x, y: data.plots[plot].y, tiles: cmd.tiles }
-    if (cmd.action === 'plant') {
-      if (selected === 'fertilizer') return
-      const seeds = data.inventory[selected] ?? 0
-      if (seeds < 1) return
-      run(undefined, () => api.enqueueJob({ ...input, action: 'plant', cropId: selected, tiles: input.tiles.slice(0, seeds) }))
-    } else if (cmd.action === 'fertilize') {
-      const have = data.inventory[production.FERTILIZER.itemId] ?? 0
-      if (have < 1) return
-      run(undefined, () => api.enqueueJob({ ...input, action: 'fertilize', tiles: input.tiles.slice(0, have) }))
-    } else if (cmd.action === 'water') {
-      const charges = data.canCharges ?? 0
-      if (charges < 1) return showError('O regador está vazio: encha no poço')
-      run(undefined, () => api.enqueueJob({ ...input, action: 'water', tiles: input.tiles.slice(0, charges) }))
-    } else {
-      run(undefined, () => api.enqueueJob({ ...input, action: cmd.action as 'till' | 'harvest' }))
-    }
+    if (data && cmd) sendTiles(data, cmd, isCropId(selected) ? selected : undefined)
   },
+
+  queueTileAction: (plot, row, col, action, crop) => {
+    const { data } = get()
+    if (data) sendTiles(data, { action, plot, tiles: [{ row, col }] }, crop)
+  },
+
+  moveTo: (row, col) => run(undefined, () => api.enqueueJob({ action: 'move', row, col })),
 
   queueTree: (treeId) => run(undefined, () => api.enqueueJob({ action: 'harvest_tree', treeId })),
 
@@ -205,6 +199,29 @@ export const useFarmStore = create<FarmState>((set, get) => ({
 let onUnauthorized: (() => void) | undefined
 export function setUnauthorizedHandler(handler: () => void) {
   onUnauthorized = handler
+}
+
+// Pede ao servidor as tarefas de tile: o fazendeiro vai até lá e age. Confere antes o que a tela já sabe
+// (semente, adubo e carga do regador) para não encher a fila de pedidos que o servidor recusaria.
+function sendTiles(data: SaveData, cmd: TileCommand, crop?: CropId) {
+  if (cmd.tiles.length === 0) return
+  const input = { x: data.plots[cmd.plot].x, y: data.plots[cmd.plot].y, tiles: cmd.tiles }
+  if (cmd.action === 'plant') {
+    if (!crop) return
+    const seeds = data.inventory[crop] ?? 0
+    if (seeds < 1) return
+    run(undefined, () => api.enqueueJob({ ...input, action: 'plant', cropId: crop, tiles: input.tiles.slice(0, seeds) }))
+  } else if (cmd.action === 'fertilize') {
+    const have = data.inventory[production.FERTILIZER.itemId] ?? 0
+    if (have < 1) return
+    run(undefined, () => api.enqueueJob({ ...input, action: 'fertilize', tiles: input.tiles.slice(0, have) }))
+  } else if (cmd.action === 'water') {
+    const charges = data.canCharges ?? 0
+    if (charges < 1) return showError('O regador está vazio: encha no poço')
+    run(undefined, () => api.enqueueJob({ ...input, action: 'water', tiles: input.tiles.slice(0, charges) }))
+  } else {
+    run(undefined, () => api.enqueueJob({ ...input, action: cmd.action as 'till' | 'untill' | 'harvest' }))
+  }
 }
 
 // ---------- Conversa com o servidor ----------

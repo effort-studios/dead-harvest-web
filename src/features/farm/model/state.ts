@@ -142,7 +142,7 @@ export function sellItem(data: SaveData, itemId: string, qty?: number): SaveData
 // Como o clique age: só no tile, ou em toda a linha / coluna dele
 export type ClickMode = 'tile' | 'row' | 'col'
 
-export type TileAction = 'till' | 'plant' | 'harvest' | 'fertilize' | 'water'
+export type TileAction = 'till' | 'untill' | 'plant' | 'harvest' | 'fertilize' | 'water'
 export type TileCommand = { action: TileAction; plot: number; tiles: { row: number; col: number }[] }
 
 // O que um clique pede ao servidor: a ação vem do estado do tile clicado (terra = arar, arado = plantar,
@@ -204,4 +204,45 @@ export function tick(data: SaveData): SaveData {
     time: newDay ? 0 : time,
     day: newDay ? data.day + 1 : data.day,
   }
+}
+
+// Item do menu que abre ao clicar num tile: o que dá para fazer ali. `disabled` é o motivo de não poder agora
+// (o item aparece apagado, com o motivo na dica).
+export type MenuItem = { action: TileAction; label: string; crop?: CropId; disabled?: string }
+
+export function tileMenu(data: SaveData, plot: number, row: number, col: number, selected: HotbarItem): { title: string; items: MenuItem[] } | null {
+  const tile = data.plots[plot]?.grid[row]?.[col]
+  if (!tile) return null
+  const planted = tile.state === 'planted' && isCropId(tile.crop)
+  const ripe = planted && tile.growth >= CROPS[tile.crop as CropId].growSeconds
+  const items: MenuItem[] = []
+
+  const { x, y } = data.plots[plot]
+  if (tile.state === 'soil') {
+    const built = builtCells(data).has(`${y * PLOT_STEP + row},${x * PLOT_STEP + col}`)
+    items.push({ action: 'till', label: 'Arar', disabled: built ? 'Tem um prédio aí' : undefined })
+  } else if (tile.state === 'tilled') {
+    // a semente escolhida na barra; sem uma escolhida, a primeira que o jogador tem
+    const crop = isCropId(selected) ? selected : CROP_ORDER.find((id) => (data.inventory[id] ?? 0) > 0)
+    items.push(
+      crop
+        ? { action: 'plant', label: `Plantar ${CROPS[crop].name.toLowerCase()}`, crop, disabled: (data.inventory[crop] ?? 0) < 1 ? 'Sem sementes' : undefined }
+        : { action: 'plant', label: 'Plantar', disabled: 'Sem sementes: compre na loja' },
+    )
+  } else if (ripe) {
+    items.push({ action: 'harvest', label: 'Colher' })
+  }
+
+  // adubo e regador valem na terra arada e na planta ainda crescendo
+  if (tile.state !== 'soil' && !ripe) {
+    if ((data.inventory[FERTILIZER.itemId] ?? 0) > 0 || tile.fertilized)
+      items.push({ action: 'fertilize', label: 'Adubar', disabled: tile.fertilized ? 'Já está adubado' : undefined })
+    if (data.canCharges !== null)
+      items.push({ action: 'water', label: 'Regar', disabled: tile.watered ? 'Já está regado' : data.canCharges < 1 ? 'O regador está vazio: encha no poço' : undefined })
+  }
+  // terra arada e vazia volta a ser terra
+  if (tile.state === 'tilled') items.push({ action: 'untill', label: 'Desfazer aragem' })
+
+  const title = planted ? CROPS[tile.crop as CropId].name : tile.state === 'tilled' ? 'Terra arada' : 'Terra'
+  return { title, items }
 }

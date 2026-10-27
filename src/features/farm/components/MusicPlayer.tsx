@@ -68,14 +68,13 @@ function loadSettings(): Settings {
 export function MusicPlayer() {
   const hostRef = useRef<HTMLDivElement>(null)
   const playerRef = useRef<YTPlayer | null>(null)
-  const settingsRef = useRef<Settings>(loadSettings())
-  const [{ volume, playing }, setSettings] = useState(settingsRef.current)
+  const [{ volume, playing }, setSettings] = useState(loadSettings)
+  const settingsRef = useRef<Settings>({ volume, playing }) // o que o player lê ao ficar pronto
   const [open, setOpen] = useState(true)
   const [ready, setReady] = useState(false)
 
-  settingsRef.current = { volume, playing }
-
   useEffect(() => {
+    settingsRef.current = { volume, playing }
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({ volume, playing }))
     } catch {
