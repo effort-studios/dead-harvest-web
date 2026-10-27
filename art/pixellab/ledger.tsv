@@ -1,0 +1,63 @@
+# name	kind	id	(kind: map=map-objects, obj=objects, iso=isometric-tile)
+ground	tiles	dff5bfc7-4470-42e7-9fdc-70cae6babc1b
+barn	map	87f1d0cd-ae33-45ad-9fbe-1bb646d449ef
+juicer	map	2af580c7-c299-44b3-87de-044513768388
+feed_mill	map	2dd69614-b946-4635-a1d3-225f59ab1eaa
+mill	map	c20c988e-4a3f-4345-b1cd-d02ae4c4ba85
+cannery	map	c1f401f3-f575-416e-a61c-029d9758e14a
+fryer	map	53a81a94-cbe6-4600-b62d-5ba32e85f1e0
+composter	map	f6ba6d96-cc47-48ed-bc4b-dd2b2a38dfa4
+dairy	map	e114a042-4a81-4481-8d3a-f0f2e663a513
+candy	map	bf8ef5b3-cfca-4f61-a1e3-9fd706dbf66f
+loom	map	b5ad95e1-26b6-4085-9988-819ba0cb45e6
+oven	map	000091a2-e274-4c21-80b1-18260db979a2
+ice_cream	map	32e1b541-b229-4842-9cde-8783173a2422
+kitchen	map	4a7699b4-0a3f-4063-aeb3-1f4ee638b978
+well	map	6209119c-6416-4709-95de-cdd58b268800
+tree	map	8889c815-6f73-4353-a414-2f6a0a4d309a
+hay	map	be0a0b2f-9d88-429a-80ca-82a2edeb6438
+hayStack	map	536ff9f4-3e2d-4e83-bbad-f16f8c60aa76
+platform	map	399a96fc-c848-4b26-92c5-200da84643f5
+sack	map	fe676dbe-507b-41af-ad2f-4b1b7a6e8b0c
+bush	map	1c2b1397-cd23-498c-8a7c-d2596436346e
+rock	map	dd92c75e-0fd3-4656-bdc3-1d3a30ba02cd
+chicken	map	555af5ed-601b-41bc-9b07-f2f06e1e1bc0
+cow	map	28d3b64d-24e2-485e-a3fc-31510e97ccf4
+sheep	map	ddf86d57-c673-4ecc-bdeb-030cce5ba1ba
+fence	map	738bc932-d277-443c-96e6-fb2a631dce92
+crops_a	review	28182006-4376-4d9e-a99e-1b9ed069c045
+crops_b	review	13187d32-093d-479c-bd93-223493919017
+cannery2	map	b60fb885-4509-49f9-9eb6-5e495b9e6790
+feed_mill2	map	d1c264a9-7ca7-4217-b038-adbdbf6e0700
+rock2	map	eb8fbc03-8e84-4284-8fe2-59de0d9abb29
+icons	review	b7cecfaf-8832-4ab5-99e5-78e29b080823
+farmer	char	adccf6d6-137d-458b-85af-36dabec47be3
+ui_panel_gold	ui	8e3b891c-92d2-4dc3-aa68-7a9fbbe32aee
+ui_slot	ui	b6375669-8cec-4d46-95b2-69916f398966
+# kind review: lote de candidatos; os quadros ficam em .../objects/<user>/<id>/rotations/frame_{i}.png (baixados em raw/crops_a, raw/crops_b, raw/icons)
+# kind char: fazendeiro (8 direcoes + animacoes walk, pick, till); quadros baixados em raw/farmer
+# fence.png (gerada) nao e usada: a cerca do jogo e raw/fence_drawn.png (scripts/draw_fence.py)
+# cannery/feed_mill: as versoes 2 substituiram as primeiras (diorama aberto / pequena demais)
+# restyle (edit_image_pro_flash method=reference, ref = moinho): kind img = /mcp/images/<job>/download -> raw/restyle/<name>.png
+barn	img	ba91f9fe-c8be-4f8a-846a-a4fc50a81e69
+dairy	img	2d53d930-2b02-4d5c-9bc1-75de35e49b77
+feed_mill	img	72e5f62f-f03e-4432-bdcd-98990490dda2
+cannery	img	be7558c7-a490-4df6-a659-dbab5339e608
+candy	img	2d44254a-02f2-4394-a650-d5e8895e5404
+ice_cream	img	7082dc15-9d74-49b4-8d76-0d1de343c7e8
+kitchen	img	b34627a9-5fd3-4d8a-a95e-db943ad8fe26
+well	img	fef5e049-0b92-4528-bacb-6b4d18f02cf3
+juicer	img	4832872a-9d6c-493b-914d-8f84728c8686
+fryer	img	187061ed-87e3-4aa4-b25b-06984c01bfba
+mill_anim	obj	593f8f18-9546-4872-b2b4-96247c0cda5e
+composter	img	a974c11d-8d91-41a1-ae8c-19e9822ee21b
+loom	img	5044aa13-1af2-4f50-b619-7b7309cc43de
+oven	img	7176343d-bac5-4911-99ba-a5b59729340f
+# animacoes (animate_image; get_image(job) -> quadros): moinho = animate_object sails (0..7) + interpolacao 7->0
+# mill_b (043a69de...): interpolacao 7->0 que girava ao contrario; trocada pelo giro espelhado do build
+# kitchen (3d073a51...): fumaca saia do telhado; trocada pela fumaca desenhada no build
+fryer	anim	8921e0b4-bd33-4c5e-8b4b-ac22f021f867
+chicken	anim	9c542c5f-95b0-4153-80a2-88d0b0a40a9d
+cow	anim	6a3e3835-2e44-4e36-a317-aa4934f6da57
+sheep	anim	a644b68b-d3ab-4887-abdd-28a32db79720
+# oven (c433fab8...): so brilho e deformava a pa; trocada pelas chamas desenhadas no build
