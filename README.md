@@ -1,6 +1,6 @@
 # dead-harvest-web
 
-Frontend do **Dead Harvest**: Vite + React + TypeScript, Zustand para o estado e Canvas 2D para o mundo (a partir do item 3).
+Frontend do **Dead Harvest**: Vite + React + TypeScript, Zustand para o estado e Canvas 2D para o mundo.
 
 ## Pré-requisitos
 - Node.js 22 (com o npm 10.8 do Node 20 a instalação do template falhou; no 22 funcionou)
@@ -53,11 +53,14 @@ Interface: [UI Pack – Adventure](https://kenney.nl/assets/ui-pack-adventure) p
 Arte do mundo (grama, terra, cerca, objetos, plantas) e ícones: desenhados para o jogo. Regras de estilo em [DESIGN.md](DESIGN.md).
 
 ## Controles
-- Arrastar com o mouse (ou o dedo) move o mapa; a página nunca rola.
-- Clicar num tile da plantação: arar -> plantar -> colher (só colhe se estiver madura).
-- **Shift + clique**: faz a ação em toda a linha do tile (só nos tiles no mesmo estado que o clicado). **Ctrl + clique**: o mesmo na coluna.
+- Arrastar com o mouse (ou o dedo) move o mapa; a página nunca rola. Roda do mouse ou pinça com dois dedos dá zoom.
+- **Clicar no chão ou num tile** abre um menu com o que dá para fazer ali: arar, desfazer a aragem, plantar, regar, adubar, colher e **Mover para cá**. Os botões **Linha** e **Coluna** do menu repetem a ação na linha/coluna inteira. Esc fecha o menu.
+- **Shift + clique**: faz a ação direto em toda a linha do tile (só nos tiles no mesmo estado que o clicado), sem menu. **Ctrl + clique**: o mesmo na coluna.
+- **Alt + clique**: o fazendeiro só anda até a célula, sem agir.
 - Teclas 1 a 9 (ou clique na barra): escolhe a semente ou o adubo. Com o adubo, clicar na terra arada aduba.
 - Tudo que se colhe vai para o **Armazém** (menu lateral): venda lá ou use nas máquinas.
-- **Planta**: passe o mouse em cima para ver quanto falta para amadurecer.
+- **Planta** e **árvore**: passe o mouse em cima para ver quanto falta para amadurecer.
 - **Adubo e regador**: escolha na barra e clique na terra arada ou na planta (+30% cada, somam). O regador (Loja) tem 10 cargas; encha no poço.
 - **Construir**: na Loja, escolha o prédio e clique num dos seus terrenos onde ele vai ficar (em chão sem arar) (a prévia fica verde onde pode; Esc cancela). Clique num prédio para abrir o painel dele; coletar manda o fazendeiro buscar. Arraste um prédio para mudar de lugar.
+- **Celular**: o HUD fica compacto e os gestos de toque (arrastar, pinça, toque) fazem o mesmo que o mouse.
+- **Música**: o player no canto toca uma playlist lofi do YouTube em loop, com pausar, anterior/próxima, volume e link para a faixa atual. Volume e pausa ficam salvos no navegador.
