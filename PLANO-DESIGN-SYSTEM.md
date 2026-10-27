@@ -266,11 +266,11 @@ Status: `pendente`, `em andamento`, `concluída`. Atualizar a tabela junto com o
 
 **1.2 Estrutura de pastas**
 - [x] Mover `shared/ui/icons.tsx` para `shared/ui/icons/index.tsx` (os imports `@/shared/ui/icons` continuam valendo).
-- [ ] Criar `shared/ui/index.ts` (vazio por enquanto).
+- [x] Criar `shared/ui/index.ts` (vazio por enquanto).
 
 **1.3 Regra de dependência**
-- [ ] Adicionar no `.oxlintrc.json`: `src/shared/**` não importa de `@/features/*` nem `@/app/*`.
-- [ ] Conferir que a regra falha ao importar errado e passa no código atual.
+- [x] Adicionar no `.oxlintrc.json`: `src/shared/**` não importa de `@/features/*` nem `@/app/*`.
+- [x] Conferir que a regra falha ao importar errado e passa no código atual.
 
 **1.4 Regras de encaixe das molduras**
 - [ ] Definir as variáveis por moldura (`--frame-panel-art`, `--frame-panel-pad`...).
