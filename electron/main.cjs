@@ -16,6 +16,7 @@ function createWindow() {
     height: 720,
     backgroundColor: '#000000',
     autoHideMenuBar: true,
+    icon: path.join(__dirname, '..', 'build', 'icon.png'),
     webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true },
   })
   win.setMenuBarVisibility(false)
