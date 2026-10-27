@@ -1,0 +1,6 @@
+#!/bin/sh
+# Roda antes de cada git push (ativado pelo "prepare" do npm install). Em emergência: git push --no-verify
+set -e
+
+npm run lint
+npm run build
