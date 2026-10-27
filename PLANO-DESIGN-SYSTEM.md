@@ -49,8 +49,55 @@ Princípios:
   vida, energia e inventário fazem parte do jogo e não são "depois do MVP" no desenho do sistema.
 - **Ciclo dia e noite:** a HUD pode ganhar um tom mais frio à noite, mas só depois que a base existir.
 
-A paleta final (hex) sai da fase 0. As cores atuais (`--outline #4a2a12`, `--gold #f2b234`, `--plate #f8dfa8`,
-`--ink #5a3414`, em `:root` do `index.css`) são o ponto de partida e o dourado se mantém.
+### Paleta
+
+Dourado e escuros medidos nas referências; o escuro foi esquentado (marrom em vez de azul-marinho). O dourado é um
+bege-dourado sóbrio: o amarelo saturado atual (`#f2b234`) fica só para destaques (selecionado, moeda).
+
+| Papel | Token | Hex |
+|---|---|---|
+| Contorno | `--frame-outline` | `#2a1a0e` |
+| Dourado, luz | `--gold-light` | `#fbd594` |
+| Dourado, base | `--gold` | `#c89e61` |
+| Dourado, sombra | `--gold-dark` | `#6c4620` |
+| Interior do painel | `--panel-bg` | `#2b2118` |
+| Slot afundado | `--slot-bg` | `#1d160f` |
+| Borda do slot (luz de 1px) | `--slot-edge` | `#4a3a28` |
+| Texto principal | `--text` | `#f3e6c8` |
+| Texto secundário | `--text-muted` | `#b8a888` |
+| Alerta | `--danger` | `#d9482b` |
+
+### Moldura (8px de arte)
+
+Cinco anéis visíveis, da borda para dentro. A luz fica só em cima e à esquerda; a sombra, só embaixo e à direita.
+Cantos chanfrados de 1 a 2px, sem enfeites.
+
+| Anel | Largura | Cor |
+|---|---|---|
+| 1. Contorno | 1px | `--frame-outline` |
+| 2. Luz | 1px | `--gold-light` |
+| 3. Base | 2px | `--gold` |
+| 4. Sombra | 1px | `--gold-dark` |
+| 5. Contorno interno | 1px | `--frame-outline` |
+| Respiro até o interior | 2px | `--panel-bg` |
+
+### Prompt do grupo 1 (painéis, PixelLab)
+
+Ferramenta: `create_ui_asset`, `elements: ["panel", "window"]`, 3 imagens de referência como `style_image_base64`,
+`palette` com os hex da tabela acima, `no_background: true`.
+
+```
+Pixel art game UI panel frame, thin metallic gold border with a dark warm brown interior.
+Border built from 5 flat rings, outside to inside: 1px dark outline, 1px light gold highlight
+(only on the top and left edges), 2px gold base, 1px dark brown shadow (only on the bottom and
+right edges), 1px inner dark outline. Solid flat interior, no gradient, no texture, no noise.
+Slightly chamfered corners (1-2px), perfectly symmetrical, no ornaments, no corner flourishes,
+no crown, no filigree. Clean hard pixels, limited palette, readable at small sizes, built to be
+used as a 9-slice frame. Mood: worn metal and old wood, survival farm game.
+```
+
+Variantes a pedir no mesmo estilo: painel normal e painel inativo (mesma estrutura, dourado trocado por bronze
+`#9e8976`). Se a primeira geração vier ornamentada ou com degradê, repetir com "plain, no decoration" no início.
 
 ## 3. Referências
 
@@ -197,14 +244,14 @@ Status: `pendente`, `em andamento`, `concluída`. Atualizar a tabela junto com o
 - [x] Estilo e referências escolhidos (seções 2 e 3).
 
 **0.2 Paleta**
-- [ ] Definir os hex: contorno, dourado (luz, base, sombra), interior escuro, texto claro, vermelho de alerta.
-- [ ] Anotar a paleta neste arquivo.
+- [x] Definir os hex: contorno, dourado (luz, base, sombra), interior escuro, texto claro, vermelho de alerta.
+- [x] Anotar a paleta neste arquivo (seção 2).
 
 **0.3 Moldura**
-- [ ] Definir o número de anéis (4 a 6) e a espessura de cada um dentro dos 8px.
+- [x] Definir o número de anéis (4 a 6) e a espessura de cada um dentro dos 8px (seção 2).
 
 **0.4 Prompt do grupo 1**
-- [ ] Escrever o prompt dos painéis e aprovar antes de gerar.
+- [x] Escrever o prompt dos painéis (seção 2). Aprovar o resultado só depois de gerar, na atividade 2.1.
 
 ---
 
