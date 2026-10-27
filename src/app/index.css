@@ -725,7 +725,7 @@ button.hud-player:hover { background: #f6c04a; }
   bottom: 12px;
   right: 12px;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 8px;
 }
 .music-toggle {
@@ -737,8 +737,13 @@ button.hud-player:hover { background: #f6c04a; }
 }
 .music-panel {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 10px;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
 }
-.music-panel input[type='range'] { width: 110px; accent-color: var(--outline); }
+/* fechado, o painel sai da tela mas o player continua tocando */
+.music-panel.closed { position: fixed; left: -9999px; }
+.music-video { width: 200px; height: 200px; border-radius: 6px; overflow: hidden; background: #000; }
+.music-video iframe { display: block; }
+.music-controls { display: flex; gap: 6px; justify-content: center; }
+.music-panel input[type='range'] { width: 100%; accent-color: var(--outline); }
