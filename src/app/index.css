@@ -718,3 +718,27 @@ button.hud-player:hover { background: #f6c04a; }
   filter: var(--hard-shadow);
 }
 .plant-tip small { opacity: 0.75; font-size: 12px; }
+
+/* ---------- Música ---------- */
+.music-player {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.music-toggle {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  font-size: 20px;
+  cursor: pointer;
+}
+.music-panel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+}
+.music-panel input[type='range'] { width: 110px; accent-color: var(--outline); }

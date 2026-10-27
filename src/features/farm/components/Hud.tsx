@@ -9,6 +9,7 @@ import { ProfileMenu } from '@/features/profile/components/ProfileMenu'
 import { BuildingPanel } from './BuildingPanel'
 import { DayClock } from './DayClock'
 import { SideMenu } from './SideMenu'
+import { MusicPlayer } from './MusicPlayer'
 
 const pct = (bonus: number) => `${Math.round(bonus * 100)}%`
 
@@ -51,6 +52,7 @@ export function Hud({ onLogout }: { onLogout: () => void }) {
       </div>
 
       <DayClock time={data.time} day={data.day} />
+      <MusicPlayer />
       <BuildingPanel />
 
       <div className="panel hud-hotbar">

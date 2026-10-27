@@ -97,3 +97,27 @@ export function CloseIcon({ size }: IconProps) {
     </Svg>
   )
 }
+
+export function MusicIcon({ size }: IconProps) {
+  return (
+    <Svg size={size}>
+      <path d="M12 24V8l14-3v16" fill="none" stroke={OUTLINE} strokeWidth="5" />
+      <path d="M12 24V8l14-3v16" fill="none" stroke="#ffd966" strokeWidth="2" />
+      <ellipse cx="9" cy="24" rx="5" ry="4" fill="#f7b928" stroke={OUTLINE} strokeWidth="2" />
+      <ellipse cx="23" cy="21" rx="5" ry="4" fill="#f7b928" stroke={OUTLINE} strokeWidth="2" />
+    </Svg>
+  )
+}
+
+export function MusicOffIcon({ size }: IconProps) {
+  return (
+    <Svg size={size}>
+      <path d="M12 24V8l14-3v16" fill="none" stroke={OUTLINE} strokeWidth="5" opacity="0.5" />
+      <path d="M12 24V8l14-3v16" fill="none" stroke="#c9b48a" strokeWidth="2" />
+      <ellipse cx="9" cy="24" rx="5" ry="4" fill="#c9b48a" stroke={OUTLINE} strokeWidth="2" />
+      <ellipse cx="23" cy="21" rx="5" ry="4" fill="#c9b48a" stroke={OUTLINE} strokeWidth="2" />
+      <path d="M4 4L28 28" stroke={OUTLINE} strokeWidth="5" />
+      <path d="M4 4L28 28" stroke="#e5484d" strokeWidth="2.4" />
+    </Svg>
+  )
+}
