@@ -34,6 +34,17 @@
   --frame-1x: var(--frame-art);
   --frame-2x: calc(var(--frame-art) * 2);
 
+  /* Painel (2x): a arte cobre --frame-panel-art, mas a borda CSS reserva só --frame-panel-border; o resto da
+     moldura invade o padding. Por isso o padding nunca pode ser menor que --frame-panel-pad. */
+  --frame-panel-art: var(--frame-2x);
+  --frame-panel-border: 12px;
+  --frame-panel-pad: calc(var(--frame-panel-art) - var(--frame-panel-border));
+
+  /* Botão e slot (1x): a borda CSS é do tamanho da arte, então o padding pode ser zero. */
+  --frame-small-art: var(--frame-1x);
+  --frame-small-border: var(--frame-1x);
+  --frame-small-pad: 0px;
+
   /* ---------- Espaçamento (escala de 4px) ---------- */
   --space-1: 4px;
   --space-2: 8px;

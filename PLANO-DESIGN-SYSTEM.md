@@ -222,9 +222,9 @@ revisar o resultado antes de seguir. Marcar `[x]` só depois de feito e verifica
 
 | Fase | Tema | Status |
 |---|---|---|
-| 0 | Decidir o visual | em andamento |
-| 1 | Tokens e regras | pendente |
-| 2 | Arte das molduras | pendente |
+| 0 | Decidir o visual | concluída |
+| 1 | Tokens e regras | concluída |
+| 2 | Arte das molduras | pendente (próxima) |
 | 3 | Componentes base | pendente |
 | 4 | Página `/ui-kit` | pendente |
 | 5 | Migrar a HUD | pendente |
@@ -273,11 +273,11 @@ Status: `pendente`, `em andamento`, `concluída`. Atualizar a tabela junto com o
 - [x] Conferir que a regra falha ao importar errado e passa no código atual.
 
 **1.4 Regras de encaixe das molduras**
-- [ ] Definir as variáveis por moldura (`--frame-panel-art`, `--frame-panel-pad`...).
-- [ ] Documentar em `src/shared/ui/README.md` o tamanho mínimo do miolo por moldura.
+- [x] Definir as variáveis por moldura (`--frame-panel-art`, `--frame-panel-pad`...).
+- [x] Documentar em `src/shared/ui/README.md` o tamanho mínimo do miolo por moldura.
 
 **1.5 Verificação**
-- [ ] `npm run build` e `npm run lint` passam; o jogo está igual a antes.
+- [x] `npm run build` e `npm run lint` passam; o jogo está igual a antes.
 
 ---
 
