@@ -1,0 +1,33 @@
+{
+ "cell": 64,
+ "ax": 32,
+ "ay": 52,
+ "directions": [
+  "south",
+  "south-west",
+  "west",
+  "north-west",
+  "north",
+  "north-east",
+  "east",
+  "south-east"
+ ],
+ "anims": {
+  "idle": {
+   "row": 0,
+   "frames": 1
+  },
+  "walk": {
+   "row": 8,
+   "frames": 6
+  },
+  "pick": {
+   "row": 16,
+   "frames": 2
+  },
+  "till": {
+   "row": 24,
+   "frames": 6
+  }
+ }
+}

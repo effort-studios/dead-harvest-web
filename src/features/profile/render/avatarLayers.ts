@@ -18,10 +18,10 @@ type Layout = {
 }
 
 // Paletas do escuro para o claro. null = cor original do desenho (não recolore).
-type Ramp = [number, number, number][] | null
-const hex = (...colors: string[]): Ramp => colors.map((c) => [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16)) as [number, number, number])
+export type Ramp = [number, number, number][] | null
+export const hex = (...colors: string[]): Ramp => colors.map((c) => [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16)) as [number, number, number])
 
-const SKIN: Record<Avatar['skin'], Ramp> = {
+export const SKIN: Record<Avatar['skin'], Ramp> = {
   porcelain: hex('#6b3a2e', '#b0705a', '#e8b49a', '#f8d6c0', '#fff0e6'),
   light: null,
   tan: hex('#4a2416', '#8a4a2a', '#c47a4a', '#e09a62', '#f2bc86'),
@@ -30,7 +30,7 @@ const SKIN: Record<Avatar['skin'], Ramp> = {
   dark: hex('#1c0e07', '#3a1e10', '#5a321c', '#74462a', '#90603e'),
 }
 
-const HAIR: Record<Avatar['hairColor'], Ramp> = {
+export const HAIR: Record<Avatar['hairColor'], Ramp> = {
   black: hex('#0c0c12', '#1e1e28', '#30303e', '#4a4a5c', '#6a6a80'),
   brown: null,
   auburn: hex('#2a0e08', '#5a1e12', '#8a3220', '#b04a30', '#d47250'),
@@ -49,8 +49,9 @@ const EYES: Record<Avatar['eyes'], Ramp> = {
 
 const lum = (d: Uint8ClampedArray, i: number) => 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]
 
-// Troca as cores dos pixels escolhidos pela paleta, mantendo a luminosidade relativa
-function recolor(data: Uint8ClampedArray, ramp: Ramp, pick: (i: number) => boolean) {
+// Troca as cores dos pixels escolhidos pela paleta, mantendo a luminosidade relativa (usado também no
+// fazendeiro do mapa)
+export function recolor(data: Uint8ClampedArray, ramp: Ramp, pick: (i: number) => boolean) {
   if (!ramp) return
   const values: number[] = []
   for (let i = 0; i < data.length; i += 4) if (data[i + 3] > 0 && pick(i)) values.push(lum(data, i))

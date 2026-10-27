@@ -1,12 +1,9 @@
 import { CROPS, isCropId, type CropId } from '@/features/farm/model/crops'
 import { GRID_SIZE, PLOT_STEP, tilesInMode, type ClickMode } from '@/features/farm/model/state'
 import type { Plot, Tile } from '@/features/farm/model/types'
-import { CROP_SVG_ANCHOR, CROP_SVG_SIZE } from './cropSvgs'
-import { createGrassPattern } from './grass'
-import { createSoilTiles, drawGrassFringe, drawSoilEdges, EDGE } from './soil'
-import { FRUITS, TREES } from '@/features/farm/model/trees'
+import { TREES, type FruitId } from '@/features/farm/model/trees'
 import { drawFence, drawProp, TILE_HALF, TREE_HIT, type PropKind } from './props'
-import type { SpriteName, Sprites } from './sprites'
+import { drawSprite, PX, spriteImage } from './sprites'
 import type { Pose } from '@/features/farm/model/farmer'
 import type { Avatar } from '@/features/profile/model/avatar'
 import { drawFarmer } from './farmerSprite'
@@ -113,7 +110,7 @@ type YardSpot = { r: number; c: number; target: YardBuilding; bubble: Bubble | n
 export type BuildingGhost = { target: YardBuilding; r: number; c: number; ok: boolean } // r, c = célula do prédio
 export type YardView = {
   spots: YardSpot[]
-  animals: { animalId: string; r: number; c: number; flip: boolean }[]
+  animals: { animalId: string; r: number; c: number; flip: boolean; phase: number }[]
   areas: Area[] // chão de cada prédio (os objetos do cenário embaixo somem)
   ghost: { target: YardBuilding; area: Area; ok: boolean } | null
 }
@@ -156,6 +153,7 @@ export function yardView(data: SaveData, now: number, ghost: BuildingGhost | nul
       r: barnAt.r + PADDOCK[i].dr,
       c: barnAt.c + PADDOCK[i].dc,
       flip: (i * 7 + (animalStatus(a, now).kind === 'hungry' ? 1 : 0)) % 3 === 0, // uns olham para cada lado
+      phase: i * 5, // cada um num ponto da animação
     }))
   }
   const ghostArea = ghost && footprint(ghost.target, ghost.r, ghost.c)
@@ -187,13 +185,12 @@ export function buildingCellAt(wx: number, wy: number, target: YardBuilding) {
 
 // Id da árvore sob o ponto (coordenadas do mundo), se houver; a mais da frente ganha
 export function treeAt(wx: number, wy: number, plots: Plot[]): string | null {
-  const k = 1.5 // mesma escala de PROP_SCALE.tree
   let found: { id: string; depth: number } | null = null
   for (const t of TREES) {
     if (onPlot(t, plots)) continue // árvore coberta por um terreno comprado não existe mais
     const { x, y } = cellToWorld(t.r, t.c)
-    const nx = (wx - (x + TREE_HIT.dx * k)) / (TREE_HIT.rx * k)
-    const ny = (wy - (y + TREE_HIT.dy * k)) / (TREE_HIT.ry * k)
+    const nx = (wx - (x + TREE_HIT.dx)) / TREE_HIT.rx
+    const ny = (wy - (y + TREE_HIT.dy)) / TREE_HIT.ry
     if (nx * nx + ny * ny <= 1 && (!found || t.r + t.c > found.depth)) found = { id: t.id, depth: t.r + t.c }
   }
   return found?.id ?? null
@@ -203,21 +200,21 @@ export function treeAt(wx: number, wy: number, plots: Plot[]): string | null {
 type Edge = 'N' | 'E' | 'S' | 'W'
 
 // Item a desenhar numa célula. Cada item é de um só tipo:
-// sprite (planta), soil (terra arada + máscara dos lados que dão para a grama),
+// sprite (planta), soil (terra arada),
 // fence (trecho de cerca) ou prop (objeto do cenário)
 type Item = {
   r: number
   c: number
-  sprite?: SpriteName
-  soil?: number
+  sprite?: string
+  soil?: boolean
   fertilized?: boolean
   watered?: boolean
   fence?: Edge
   prop?: PropKind
-  fruitColor?: string
+  fruit?: FruitId
   farmer?: boolean
   spot?: YardSpot
-  animal?: { animalId: string; flip: boolean }
+  animal?: { animalId: string; flip: boolean; phase: number }
 }
 
 // Objetos soltos em volta da plantação (r/c fora da grade 0..9)
@@ -238,15 +235,6 @@ function onPlot(item: { r: number; c: number }, plots: Plot[]) {
   })
 }
 
-// Tamanho e ponto de apoio (no chão) dos sprites das plantas, em coordenadas do mundo
-const CROP_SCALE = 1.2 // tamanho do SVG da planta em relação ao pixel do mundo
-const CROP_FRAME = {
-  w: CROP_SVG_SIZE * CROP_SCALE,
-  h: CROP_SVG_SIZE * CROP_SCALE,
-  ax: CROP_SVG_ANCHOR.x * CROP_SCALE,
-  ay: CROP_SVG_ANCHOR.y * CROP_SCALE,
-}
-
 function diamondPath(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) {
   ctx.beginPath()
   ctx.moveTo(x, y - h)
@@ -258,13 +246,49 @@ function diamondPath(ctx: CanvasRenderingContext2D, x: number, y: number, w: num
 
 type Rect = { left: number; top: number; right: number; bottom: number }
 
-// Grama: textura repetida cobrindo a área visível. O padrão é definido em coordenadas do
-// mundo, então acompanha o mapa quando a câmera se move.
+// Grama: tiles de grama (sprites grass_*) montados numa folha que se repete sem emenda. A escolha do tile se
+// repete a cada GRASS_CELLS células, então a malha volta a ser a mesma andando (W/2, H/2) ou (W, 0) na folha:
+// cada célula aparece em todos esses deslocamentos (a folha tem duas cópias de cada uma). O padrão é posto em
+// coordenadas do mundo, com a célula (0, 0) no lugar dela, então acompanha o mapa quando a câmera se move.
+const GRASS_CELLS = 8
 let grassPattern: CanvasPattern | null = null
+
+function createGrassPattern(ctx: CanvasRenderingContext2D) {
+  const w = GRASS_CELLS * 64
+  const h = GRASS_CELLS * 32
+  const sheet = document.createElement('canvas')
+  sheet.width = w
+  sheet.height = h
+  const sctx = sheet.getContext('2d')!
+  for (let sum = 0; sum < GRASS_CELLS * 2; sum++) {
+    for (let r = 0; r < GRASS_CELLS; r++) {
+      const c = sum - r
+      if (c < 0 || c >= GRASS_CELLS) continue
+      const hash = (r * 73 + c * 151 + r * c * 17) % 97
+      const img = spriteImage(hash < 12 ? `grass_flowers_${hash % 4}` : `grass_${hash % 4}`)
+      if (!img) continue
+      // centro da célula na folha, em todos os deslocamentos que caem nela (inclusive cortados na borda)
+      const x = (c - r) * 32
+      const y = (c + r) * 16
+      for (let i = -4; i <= 4; i++) {
+        for (let j = -4; j <= 4; j++) {
+          if ((i + j) % 2 !== 0) continue
+          const px = x + (i * w) / 2
+          const py = y + (j * h) / 2
+          if (px > -64 && px < w + 64 && py > -64 && py < h + 64) sctx.drawImage(img, px - 32, py - 32)
+        }
+      }
+    }
+  }
+  const pattern = ctx.createPattern(sheet, 'repeat')
+  pattern?.setTransform(new DOMMatrix([PX, 0, 0, PX, ORIGIN_X, ORIGIN_Y]))
+  return pattern
+}
 
 function drawGround(ctx: CanvasRenderingContext2D, view: Rect) {
   grassPattern ??= createGrassPattern(ctx)
-  ctx.fillStyle = grassPattern ?? '#69ab4d'
+  ctx.imageSmoothingEnabled = false
+  ctx.fillStyle = grassPattern ?? '#3fb829'
   ctx.fillRect(view.left - 2, view.top - 2, view.right - view.left + 4, view.bottom - view.top + 4)
 }
 
@@ -274,47 +298,24 @@ function stageOf(crop: CropId, growth: number): 0 | 1 | 2 {
   return progress >= 1 ? 2 : progress >= 0.4 ? 1 : 0
 }
 
-// Sprite da planta no tile (SVGs de src/render/cropSvgs.ts)
+// Sprite da planta no tile
 function cropItem(r: number, c: number, crop: CropId, growth: number): Item {
   return { r, c, sprite: `${crop}_${stageOf(crop, growth)}` }
 }
 
-// Terrenos por posição ("x,y"), para olhar o tile vizinho mesmo que seja de outro terreno
+// Terrenos por posição ("x,y"), para saber se há outro terreno colado (e não pôr cerca entre eles)
 type PlotMap = Map<string, Tile[][]>
-
-// Tile na posição global (r, c) do mapa, ou undefined se não há terreno ali
-function tileAt(plotMap: PlotMap, r: number, c: number) {
-  const x = Math.floor(c / PLOT_STEP)
-  const y = Math.floor(r / PLOT_STEP)
-  return plotMap.get(`${x},${y}`)?.[r - y * PLOT_STEP][c - x * PLOT_STEP]
-}
-
-const tilled = (plotMap: PlotMap, r: number, c: number) => (tileAt(plotMap, r, c)?.state ?? 'soil') !== 'soil'
-
-// Quais lados do tile não têm terra arada ao lado (viram borda com a grama)
-function soilEdges(plotMap: PlotMap, r: number, c: number) {
-  let mask = 0
-  if (!tilled(plotMap, r - 1, c)) mask |= EDGE.north
-  if (!tilled(plotMap, r, c + 1)) mask |= EDGE.east
-  if (!tilled(plotMap, r + 1, c)) mask |= EDGE.south
-  if (!tilled(plotMap, r, c - 1)) mask |= EDGE.west
-  return mask
-}
-
-// Terra arada: desenhada por código (soil.ts) uma vez, em alta resolução
-const SOIL_GEO = { halfW: HALF_W, halfH: HALF_H }
-let soilTiles: HTMLCanvasElement[] | null = null
 
 // Lista tudo que fica de pé sobre o mapa, na ordem em que cada item deve ser desenhado
 function buildItems(plots: Plot[], readyTrees: ReadonlySet<string>, farmer: Pose | null, yard: YardView): Item[] {
   const underBuilding = (item: Item) => yard.areas.some((a) => overlaps(a, { r0: item.r, r1: item.r, c0: item.c, c1: item.c }))
   const items: Item[] = DECOR.filter((item) => !onPlot(item, plots) && !underBuilding(item))
   for (const spot of yard.spots) items.push({ r: spot.r, c: spot.c, spot })
-  for (const a of yard.animals) items.push({ r: a.r, c: a.c, animal: { animalId: a.animalId, flip: a.flip } })
+  for (const a of yard.animals) items.push({ r: a.r, c: a.c, animal: { animalId: a.animalId, flip: a.flip, phase: a.phase } })
   // árvores frutíferas: mostram as frutas só quando há o que colher
   for (const t of TREES) {
     if (onPlot(t, plots)) continue
-    items.push({ r: t.r, c: t.c, prop: 'tree', fruitColor: readyTrees.has(t.id) ? FRUITS[t.fruit].color : undefined })
+    items.push({ r: t.r, c: t.c, prop: 'tree', fruit: readyTrees.has(t.id) ? t.fruit : undefined })
   }
   const last = GRID_SIZE - 1
   const plotMap: PlotMap = new Map(plots.map((p) => [`${p.x},${p.y}`, p.grid]))
@@ -330,7 +331,7 @@ function buildItems(plots: Plot[], readyTrees: ReadonlySet<string>, farmer: Pose
         const r = y * PLOT_STEP + lr
         const c = x * PLOT_STEP + lc
         // terra sem arar continua sendo grama; só a arada (ou plantada) mostra terra
-        if (tile.state !== 'soil') items.push({ r, c, soil: soilEdges(plotMap, r, c), fertilized: tile.fertilized, watered: tile.watered })
+        if (tile.state !== 'soil') items.push({ r, c, soil: true, fertilized: tile.fertilized, watered: tile.watered })
         // cerca nas bordas da plantação; as de trás (cima/esquerda) vêm antes da planta
         if (fenceN && lr === 0) items.push({ r, c, fence: 'N' })
         if (fenceW && lc === 0) items.push({ r, c, fence: 'W' })
@@ -348,23 +349,7 @@ function buildItems(plots: Plot[], readyTrees: ReadonlySet<string>, farmer: Pose
   return items.sort((a, b) => a.r + a.c - (b.r + b.c))
 }
 
-// Terra regada: molhada, mais escura e com um brilho azulado
-function drawWater(ctx: CanvasRenderingContext2D, x: number, y: number) {
-  ctx.save()
-  diamondPath(ctx, x, y, HALF_W - 4, HALF_H - 2)
-  ctx.fillStyle = 'rgba(20, 30, 60, 0.3)'
-  ctx.fill()
-  ctx.strokeStyle = 'rgba(150, 200, 255, 0.35)'
-  ctx.lineWidth = 2
-  ctx.beginPath()
-  ctx.ellipse(x - 10, y - 2, 9, 3, 0, 0, Math.PI * 2)
-  ctx.moveTo(x + 18, y + 4)
-  ctx.ellipse(x + 12, y + 4, 6, 2, 0, 0, Math.PI * 2)
-  ctx.stroke()
-  ctx.restore()
-}
-
-// Terra adubada: mais escura e com grãozinhos claros (o desenho muda de tile para tile pela posição)
+// Terra adubada: mais escura e com grãozinhos claros, em pixels (o desenho muda de tile para tile pela posição)
 function drawFertilizer(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, c: number) {
   ctx.save()
   diamondPath(ctx, x, y, HALF_W - 6, HALF_H - 3)
@@ -375,10 +360,10 @@ function drawFertilizer(ctx: CanvasRenderingContext2D, x: number, y: number, r: 
   for (let i = 0; i < 9; i++) {
     const u = rand() - 0.5
     const v = rand() - 0.5
-    ctx.fillStyle = i % 3 === 0 ? 'rgba(146, 223, 98, 0.85)' : 'rgba(255, 240, 200, 0.75)'
-    ctx.beginPath()
-    ctx.arc(x + (u - v) * (HALF_W - 14), y + (u + v) * (HALF_H - 7), 1.6, 0, Math.PI * 2)
-    ctx.fill()
+    ctx.fillStyle = i % 3 === 0 ? 'rgba(146, 223, 98, 0.9)' : 'rgba(255, 240, 200, 0.85)'
+    const px = Math.round((u - v) * (HALF_W - 14) / PX) * PX
+    const py = Math.round((u + v) * (HALF_H - 7) / PX) * PX
+    ctx.fillRect(x + px, y + py, PX * 2, PX)
   }
   ctx.restore()
 }
@@ -386,7 +371,6 @@ function drawFertilizer(ctx: CanvasRenderingContext2D, x: number, y: number, r: 
 // pixelRatio = resolução real da tela (telas retina têm 2 ou mais pixels por pixel CSS)
 export function drawWorld(
   ctx: CanvasRenderingContext2D,
-  sprites: Sprites,
   plots: Plot[],
   readyTrees: ReadonlySet<string>,
   cam: Camera,
@@ -412,20 +396,12 @@ export function drawWorld(
 
   const items = buildItems(plots, readyTrees, farmer?.pose ?? null, yard)
   // 1ª passada: a terra, que é chão. Assim ela nunca cobre plantas ou cercas de outros tiles.
-  soilTiles ??= createSoilTiles(SOIL_GEO, 3, (w, h) => {
-    const canvas = document.createElement('canvas')
-    canvas.width = w
-    canvas.height = h
-    return canvas
-  })
+  // Do fundo para a frente, para a borda de baixo de cada tile ficar por cima do vizinho de trás.
   for (const { r, c, soil, fertilized, watered } of items) {
-    if (soil === undefined) continue
+    if (!soil) continue
     const { x, y } = cellToWorld(r, c)
-    ctx.drawImage(soilTiles[(((r * 7 + c * 13) % soilTiles.length) + soilTiles.length) % soilTiles.length], x - HALF_W, y - HALF_H, HALF_W * 2, HALF_H * 2)
-    if (watered) drawWater(ctx, x, y)
+    drawSprite(ctx, `${watered ? 'soil_wet' : 'soil'}_${(((r * 7 + c * 13) % 2) + 2) % 2}`, x, y)
     if (fertilized) drawFertilizer(ctx, x, y, r, c)
-    drawSoilEdges(ctx, x, y, SOIL_GEO, soil)
-    drawGrassFringe(ctx, x, y, SOIL_GEO, soil)
   }
   // Chão do prédio sendo arrastado: verde se dá para soltar ali, vermelho se não
   if (yard.ghost) {
@@ -460,7 +436,7 @@ export function drawWorld(
     ctx.setLineDash([])
   }
   // 2ª passada: tudo que fica de pé, do fundo para a frente
-  for (const { r, c, sprite, fence, prop: kind, fruitColor, farmer: isFarmer, spot, animal } of items) {
+  for (const { r, c, sprite, fence, prop: kind, fruit, farmer: isFarmer, spot, animal } of items) {
     const { x, y } = cellToWorld(r, c)
     if (spot) {
       const lit = hoverBuilding !== null && sameBuilding(hoverBuilding, spot.target)
@@ -477,7 +453,7 @@ export function drawWorld(
       ctx.filter = 'none'
       ctx.globalAlpha = 1
     } else if (animal) {
-      drawAnimal(ctx, animal.animalId, x, y, animal.flip)
+      drawAnimal(ctx, animal.animalId, x, y, animal.flip, animal.phase)
     } else if (isFarmer && farmer) {
       drawFarmer(ctx, farmer.pose, farmer.avatar, x, y)
     } else if (fence) {
@@ -489,9 +465,9 @@ export function drawWorld(
       const [a, b] = { N: [top, right], E: [right, bottom], S: [bottom, left], W: [left, top] }[fence]
       drawFence(ctx, a[0], a[1], b[0], b[1])
     } else if (kind) {
-      drawProp(ctx, kind, x, y, fruitColor)
+      drawProp(ctx, kind, x, y, fruit)
     } else if (sprite) {
-      ctx.drawImage(sprites[sprite], x - CROP_FRAME.ax, y - CROP_FRAME.ay, CROP_FRAME.w, CROP_FRAME.h)
+      drawSprite(ctx, sprite, x, y + 4)
     }
   }
 

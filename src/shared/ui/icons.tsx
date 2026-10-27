@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 
-// Ícones do jogo desenhados em SVG, no mesmo estilo do UI Pack: contorno marrom grosso,
-// cores chapadas e um brilho simples. Todos usam a caixa 32x32 e escalam pelo `size`.
+// Ícones do jogo. Os de coisas do jogo são pixel art (PixelIcon); os de comando (salvar, olho, fechar)
+// continuam em SVG: contorno marrom grosso, cores chapadas, caixa 32x32 que escala pelo `size`.
 export const OUTLINE = '#4a2a12'
 
 export type IconProps = { size?: number }
@@ -22,37 +22,23 @@ export function Svg({ size = 24, children }: { size?: number; children: ReactNod
   )
 }
 
-export function CoinIcon({ size }: IconProps) {
+// Ícone em pixel art (public/assets/icons/<nome>.png, 32x32, gerado na PixelLab): ampliado sem borrar
+export function PixelIcon({ name, size = 24, src }: { name: string; size?: number; src?: string }) {
   return (
-    <Svg size={size}>
-      <circle cx="16" cy="16" r="13" fill="#f7b928" stroke={OUTLINE} strokeWidth="2" />
-      <circle cx="16" cy="16" r="9" fill="#ffd966" stroke="#c98412" strokeWidth="1.6" />
-      {/* brotinho no centro da moeda */}
-      <path d="M16 22v-7" stroke="#7a4a12" strokeWidth="2" fill="none" />
-      <path d="M16 15c0-3-2-4.6-4.6-4.6 0 2.8 1.8 4.6 4.6 4.6zM16 15c0-3 2-4.6 4.6-4.6 0 2.8-1.8 4.6-4.6 4.6z" fill="#6bb04a" stroke="#3f7a2a" strokeWidth="1" />
-      <path d="M7.6 12a9 9 0 0 1 5-4.6" stroke="#fff3d6" strokeWidth="2" fill="none" opacity="0.9" />
-    </Svg>
+    <img
+      className="svg-icon pixel-icon"
+      src={src ?? `/assets/icons/${name}.png`}
+      width={size}
+      height={size}
+      alt=""
+      draggable={false}
+      aria-hidden="true"
+    />
   )
 }
 
-export function FarmerIcon({ size }: IconProps) {
-  return (
-    <Svg size={size}>
-      <path d="M5 31c0-6.5 5-9.5 11-9.5s11 3 11 9.5z" fill="#4f86c6" stroke={OUTLINE} strokeWidth="2" />
-      <path d="M12 22v4M20 22v4" stroke="#2f5c96" strokeWidth="2" fill="none" />
-      <circle cx="16" cy="16.5" r="7" fill="#f4c795" stroke={OUTLINE} strokeWidth="2" />
-      <circle cx="13.2" cy="17.2" r="1" fill={OUTLINE} />
-      <circle cx="18.8" cy="17.2" r="1" fill={OUTLINE} />
-      <circle cx="11.4" cy="19.4" r="1.3" fill="#ec8f7c" opacity="0.7" />
-      <circle cx="20.6" cy="19.4" r="1.3" fill="#ec8f7c" opacity="0.7" />
-      <path d="M13.6 20.2q2.4 1.8 4.8 0" stroke={OUTLINE} strokeWidth="1.4" fill="none" />
-      {/* chapéu de palha */}
-      <path d="M9.6 12c0-6 3-8.6 6.4-8.6s6.4 2.6 6.4 8.6z" fill="#f0cd62" stroke={OUTLINE} strokeWidth="2" />
-      <path d="M9.9 10.4h12.2" stroke="#d94b3a" strokeWidth="2.4" fill="none" />
-      <ellipse cx="16" cy="12.4" rx="11.5" ry="3.2" fill="#f0cd62" stroke={OUTLINE} strokeWidth="2" />
-    </Svg>
-  )
-}
+export const CoinIcon = ({ size }: IconProps) => <PixelIcon name="coin" size={size} />
+export const FarmerIcon = ({ size }: IconProps) => <PixelIcon name="farmer" size={size} />
 
 export function SaveIcon({ size }: IconProps) {
   return (

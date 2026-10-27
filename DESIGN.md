@@ -1,59 +1,108 @@
 # Design system do Dead Harvest
 
 Regras para tudo ter cara de "feito pela mesma mão". Antes de criar um objeto novo, leia isto.
-Os valores de cor e contorno dos objetos estão em [src/features/farm/render/style.ts](src/features/farm/render/style.ts).
 
-## Princípios
+## Estilo
 
-1. **Cartoon limpo, sem textura fotográfica.** Cores chapadas com degradê suave. Nada de ruído granulado, nada de render 3D.
-2. **Luz vem da esquerda e de cima.** Faces e superfícies voltadas para a esquerda/topo são mais claras; a direita/baixo, mais escuras.
-3. **Degradê de baixo para cima.** Folhas e plantas são escuras na base e claras na ponta. Objetos de madeira vão do tom médio ao escuro, de cima para baixo.
-4. **Terreno não tem contorno; objetos têm.** Grama e terra são "chão". Tudo que fica em pé (cerca, fardo, árvore, planta) leva contorno marrom bem escuro e fino.
-5. **Todo objeto tem sombra no chão:** uma elipse suave, deslocada para a direita.
-6. **Formas arredondadas.** Cantos e pontas levemente arredondados (`lineJoin: round`), nada de cantos vivos.
-7. **Detalhe pequeno ajuda:** um brilho (traço claro e fino no lado da luz), pregos, nervuras de folha, cordas. Pouco, e sempre discreto.
+**Pixel art de fazenda aconchegante**, gerada na [PixelLab](https://pixellab.ai) e montada por scripts
+(`scripts/`). Cores saturadas, contorno escuro de uma cor, sombreamento médio, luz vinda da esquerda e de cima.
+Nada é desenhado por código no mapa, exceto a cerca (precisa encaixar exatamente na aresta do tile) e as
+marcações da interface (seleção, prévia de construção, balões).
 
-## Projeção
+## Escala e projeção
 
-Isométrica 2:1. Cada tile é um losango de 96 × 48 unidades do mundo. A célula (linha `r`, coluna `c`)
-fica em `x = ORIGEM_X + (c - r) * 48` e `y = ORIGEM_Y + (c + r) * 24`.
-Os itens são desenhados do fundo para a frente, ordenados por `r + c`.
+- Isométrica 2:1. No **mundo**, cada tile é um losango de 96 × 48 unidades; no **desenho**, de 64 × 32 pixels.
+  Logo, **1 pixel da arte = 1,5 unidade do mundo** (`PX` em `render/sprites.ts`). Todo sprite do mapa usa essa
+  escala, para os pixels terem o mesmo tamanho na tela. Não amplie um sprite à parte: gere no tamanho certo.
+- A célula (linha `r`, coluna `c`) fica em `x = ORIGEM_X + (c - r) * 48` e `y = ORIGEM_Y + (c + r) * 24`.
+  Os itens são desenhados do fundo para a frente, ordenados por `r + c`.
+- Os sprites são desenhados com `imageSmoothingEnabled = false` (canvas) e `image-rendering: pixelated` (CSS).
 
-## Paleta (objetos)
+## Tamanho de cada coisa (pixels da arte)
 
-| Material | Claro | Médio | Escuro |
-|---|---|---|---|
-| Contorno | `#3b2412` | | |
-| Madeira | `#d6a064` | `#b4753f` | `#7e4a27` |
-| Feno | `#f7da7c` | `#e3b34a` | `#b8872a` (corda `#8f5a2a`) |
-| Juta (saco) | `#ead0a0` | `#cfa96c` | `#a37b43` |
-| Pedra | `#d4cfc3` | `#aaa498` | `#7c776d` |
-| Folhas | `#92df62` | `#51ae4a` | `#2a7a3a` |
-
-Terreno: grama de `#1f6a34` (fundo) a `#96de5c` (pontas); terra de `#64401f` (vale do sulco) a `#c58a54` (topo do sulco).
-
-## Receitas por elemento
-
-| Elemento | Onde | Como é feito |
+| Coisa | Canvas na PixelLab | Ocupa |
 |---|---|---|
-| Grama | `render/grass.ts` | Textura procedural: fundo escuro + ~560 tufos de folhas com degradê, de trás para frente. Repetida sem emenda. |
-| Terra arada | `render/soil.ts` | Sulcos com degradê que emendam entre tiles, torrões, pedrinhas. Bordas com contorno suave e tufos de grama. |
-| Cerca, fardo, plataforma, saco, arbusto, pedra, árvore | `render/props.ts` | Desenhados em canvas com `isoBox` (caixa isométrica) ou formas livres. Contorno + degradê + sombra. |
-| Celeiro, máquinas, animais, balões | `render/buildings.ts` | Mesmas regras dos objetos: `isoBox`, `gableRoof` (telhado de duas águas) e `cylinder` com contorno, degradê e sombra; desenhados num tamanho só e ampliados (`MACHINE_SCALE`, `BARN_SCALE`) para cada prédio ter o tamanho dele no mapa; paleta dos prédios em `style.ts` (`BARN_RED`, `TRIM`, `ROOF`, `METAL`, `COPPER`, `BRICK`, `CLAY`, `FIRE`). |
-| Ícones dos itens, máquinas e animais | `components/itemIcons.tsx` | SVG 32x32 no estilo dos outros ícones; produtos usam um modelo (pote, garrafa, saco, prato...) pintado com a cor do produto. |
-| Plantas (milho, tomate, abóbora) | `render/cropSvgs.ts` | SVG com 3 estágios: broto, crescendo, madura. Sombra, nervuras, brilho. |
-| Interface | `index.css`, `public/assets/ui` | Molduras 9-patch do UI Pack Adventure (Kenney, CC0) + ícones SVG próprios em `ui/Icons.tsx`. Fonte Fredoka. |
+| Tile de chão | 64 × 64 (losango 64 × 32 no meio) | 1 célula |
+| Celeiro | 200 × 200 | 3 × 3 |
+| Máquina grande (moinho, laticínios...) | 128 × 144 a 128 × 176 | 2 × 2 |
+| Máquina pequena (prensa, forno...), poço | 64 × 80 | 1 × 1 |
+| Árvore | 96 × 112 | 1 × 1 |
+| Fardo, palete, arbusto, pedra, saco | 40 a 64 | 1 × 1 |
+| Planta (3 estágios) | 64 × 64 | 1 × 1 |
+| Animais | 32 (galinha) a 56 (vaca) | — |
+| Fazendeiro | 48 × 48 (folha em células de 64) | — |
+| Ícone da interface | 32 × 32 | — |
 
-## Como criar um objeto novo
+## Ferramentas da PixelLab por tipo
 
-1. Desenhe a sombra (`shadow`) primeiro.
-2. Preencha com degradê usando os tons do material (claro no topo/esquerda).
-3. Aplique o contorno (`outline`) em cada forma.
-4. Acrescente 1 ou 2 detalhes pequenos (brilho, prego, nervura).
-5. Teste ao lado da grama, da terra e de um objeto existente. Se ele "salta aos olhos", falta contorno, sombra ou degradê.
+| Tipo | Ferramenta | Observação |
+|---|---|---|
+| Chão (grama, terra) | `create_tiles_pro` (isometric, tile 64, ângulo 30, profundidade 0) | grama sem a beirada escura de baixo (o build tira) |
+| Prédios, máquinas, objetos, animais | `create_map_object` (view `high top-down`, `single color outline`, `medium shading`) | descreva "isometric ..., corner facing viewer, cozy farm game, bright colors" |
+| Plantas e ícones | `create_1_direction_object` com `item_descriptions` (16 por vez em 64 px, 64 por vez em 32 px) | sai um lote coerente; escolha os quadros |
+| Fazendeiro | `create_character` (v3, 48 px) + `animate_character` | andar e abaixar por template; enxada em v3 |
+| Molduras da interface | `create_ui_asset` | vêm com cada pixel em 3 × 3; o build reduz |
+
+O registro do que foi gerado (ids) está em `art/pixellab/ledger.tsv`; as imagens originais, em `art/pixellab/raw`.
+
+### Prédios: o moinho é a referência
+
+Todos os prédios seguem o acabamento do moinho (`raw/mill.png`): textura de material desenhada pixel a pixel
+(pedra, tábuas, telhas gastas), contorno marrom escuro, brilhos suaves, **sem base de grama ou terra embaixo**.
+Para fazer um prédio novo: gere com `create_map_object` e depois redesenhe com `edit_image_pro_flash`
+(`method: reference`, referência = recorte do moinho que caiba no canvas: `raw/restyle/mill_ref_big.png` para
+2x2 e 3x3, `mill_ref_small.png` para 1x1), pedindo para **manter a forma e as cores originais** e só trocar o
+acabamento. Sem "mantenha as cores", ele puxa tudo para o marrom do moinho. O resultado vai para `raw/restyle`.
+
+## Animação
+
+- Sprites animados são tiras (`<nome>_anim.png`) com os quadros lado a lado; `<nome>.png` é o quadro parado,
+  usado nos ícones. O atlas guarda `frames` e `fps`; `drawSprite` escolhe o quadro pelo relógio, e `phase`
+  desencontra cópias do mesmo sprite (os animais não pastam em sincronia).
+- Sem fazendeiro andando, a cena é redesenhada a 8 quadros por segundo (`SCENE_FPS`); com ele, a cada frame.
+- Gere com `animate_image` usando o sprite parado como primeiro **e** último quadro: o loop fecha sozinho, e o
+  último quadro (igual ao primeiro) fica de fora. Serve para movimentos que vão e voltam (animais pastando,
+  óleo borbulhando).
+- O que o modelo não acerta é montado no build, a partir do sprite:
+  - **Giro (moinho):** o modelo só gira as pás 45° e, pedindo para fechar o ciclo, ele volta para trás. O build
+    separa a torre das pás (cor mais comum de cada pixel entre os quadros) e continua o giro espelhando as pás
+    em torno do eixo (`MILL_HUB`), em ordem reversa. Com 4 pás, 90° é uma volta inteira: o giro é contínuo.
+  - **Fumaça (cozinha):** o modelo soltava a fumaça do telhado. O build desenha baforadas saindo de `CHIMNEY`,
+    subindo, crescendo e sumindo em pontilhado.
+  - **Fogo (forno):** em chamas pequenas o modelo só muda o brilho. O build desenha línguas de fogo dentro da
+    boca (`OVEN_MOUTH`), do vermelho na base ao amarelo na ponta, com alturas que sobem e descem.
+- Animados hoje: moinho (pás), cozinha (fumaça), tacho (óleo e fogo), forno (fogo), galinha (bica o chão),
+  vaca e ovelha (pastam).
+
+## Como acrescentar ou trocar uma arte
+
+1. Gere com a ferramenta da tabela, com a mesma descrição de estilo e o tamanho da tabela de tamanhos.
+2. Salve o PNG em `art/pixellab/raw` e registre no `SPRITES`/`CROPS`/`ICONS` de `scripts/build_world_sprites.py`.
+3. Rode `python3 scripts/build_world_sprites.py`: ele limpa restos soltos, recorta, acha o ponto de apoio no chão
+   (meio do losango da base, ou o pé) e grava `public/assets/world`, `public/assets/icons` e
+   `src/features/farm/render/worldAtlas.json`.
+4. No jogo, desenhe com `drawSprite(ctx, nome, x, y)`, com (x, y) no centro da célula.
+5. Teste ao lado da grama, da terra e de um objeto existente.
+
+Outros builds: `scripts/build_farmer_sheet.py` (folha do fazendeiro), `scripts/build_ui_frames.py` (molduras),
+`scripts/draw_fence.py` (cerca) e `scripts/build_avatar_layers.py` (camadas do retrato).
+
+## Interface
+
+- Molduras 9-slice em pixel art (`public/assets/ui`): `panel.png` (dourada), `panel_light.png` (dourada com
+  miolo creme, para janelas) e `slot.png` (madeira com miolo creme). A borda da arte tem 9 pixels: 2x nos painéis,
+  1x nos botões e slots (o ícone de 32 px fica exato no miolo).
+- Ícones dos itens e da HUD: `PixelIcon` (`shared/ui/icons.tsx`). Prédios e animais usam o próprio sprite do mapa.
+  Ícones de comando (salvar, olho, fechar) continuam em SVG.
+- Fonte: Pixelify Sans (Google Fonts).
+
+## Fazendeiro e avatar
+
+O fazendeiro é desenhado de macacão azul, pele clara e cabelo castanho; a roupa, a pele e a cor do cabelo do
+avatar entram recolorindo esses pixels em tempo de execução (`render/farmerSprite.ts`, mesma troca por
+luminosidade do retrato em `profile/render/avatarLayers.ts`). Chapéu, barba e penteado aparecem só no retrato.
 
 ## O que ainda falta padronizar
 
-- As cores da grama, da terra e das plantas estão escritas direto nos arquivos, não em `style.ts`.
-- As cores da interface (CSS) não usam variáveis; estão repetidas em `index.css`.
-- Não há ainda regras de animação (vento na grama, balanço das plantas) nem de iluminação do ciclo dia/noite.
+- Grama, plantas e árvores não se mexem (vento); não há sprites de dia/noite.
+- O "pegar" do fazendeiro usa só o abaixar (o quadro do meio da animação gerada saiu quebrado).

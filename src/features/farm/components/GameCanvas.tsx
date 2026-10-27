@@ -22,7 +22,8 @@ import { FRUITS, TREES } from '@/features/farm/model/trees'
 import { farmerPose, type Pose } from '@/features/farm/model/farmer'
 import { useProfileStore } from '@/features/profile/store'
 import { skyTint } from '@/features/farm/model/daycycle'
-import { loadSprites, type Sprites } from '@/features/farm/render/sprites'
+import { loadSprites, SCENE_FPS } from '@/features/farm/render/sprites'
+import { loadFarmerSheet } from '@/features/farm/render/farmerSprite'
 import { serverNow, useFarmStore } from '../store'
 
 // Shift = ação na linha inteira, Ctrl = na coluna inteira, nenhum = só no tile
@@ -53,7 +54,7 @@ export function GameCanvas() {
   const placing = useFarmStore((s) => s.placing)
   const animating = useFarmStore((s) => (s.data?.farmer.jobs.length ?? 0) > 0) // há fila: o personagem se mexe
   const time = useFarmStore((s) => s.data?.time ?? 0)
-  const [sprites, setSprites] = useState<Sprites | null>(null)
+  const [sprites, setSprites] = useState(false) // imagens do mundo carregadas
   const [size, setSize] = useState<Size>({ width: 0, height: 0 })
   const [tipTile, setTipTile] = useState<TileRef | null>(null) // tile sob o mouse (o balão mostra a planta dele)
   const tipRef = useRef<HTMLDivElement>(null)
@@ -90,7 +91,7 @@ export function GameCanvas() {
   const facing = useRef<Pose['facing']>({ dr: 1, dc: 0 }) // para onde o fazendeiro olhava na última vez que se mexeu
 
   useEffect(() => {
-    loadSprites().then(setSprites)
+    Promise.all([loadSprites(), loadFarmerSheet()]).then(() => setSprites(true))
   }, [])
 
   // O canvas sempre tem o tamanho da área do jogo (acompanha a janela)
@@ -121,7 +122,7 @@ export function GameCanvas() {
     if (pose.walking || pose.acting) facing.current = pose.facing
     const queued = data.farmer.jobs.filter((j) => j.row !== null).map((j) => ({ r: j.targetRow, c: j.targetCol }))
     drawWorld(
-      ctx, sprites, data.plots, ready, { x, y, zoom: fitZoom(size) * userZoom.current }, size, dpr, hover.current,
+      ctx, data.plots, ready, { x, y, zoom: fitZoom(size) * userZoom.current }, size, dpr, hover.current,
       buyingPlot ? freeSlots(data) : [], avatar ? { pose, avatar, queued } : null,
       yardView(data, serverNow(), ghost.current), ghost.current?.target ?? buildingHover.current,
       { hover: treeHover.current, queued: data.farmer.jobs.filter((j) => j.treeId !== null).map((j) => j.treeId!) },
@@ -143,9 +144,13 @@ export function GameCanvas() {
 
   drawRef.current = draw
 
-  // Com fila no servidor, redesenha a cada frame para o personagem andar suave; sem fila, não gasta nada
+  // Com fila no servidor, redesenha a cada frame para o personagem andar suave. Sem fila, só no ritmo das
+  // animações do cenário (moinho, animais...), que têm poucos quadros por segundo.
   useEffect(() => {
-    if (!animating) return
+    if (!animating) {
+      const id = setInterval(() => drawRef.current(), 1000 / SCENE_FPS)
+      return () => clearInterval(id)
+    }
     let id = 0
     const frameStep = () => {
       drawRef.current()
