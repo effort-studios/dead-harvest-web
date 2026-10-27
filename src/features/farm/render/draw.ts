@@ -45,6 +45,7 @@ const ORIGIN_Y = 254 // posição do tile (0,0)
 // Câmera: ponto do mundo que aparece no centro da tela, mais o zoom
 export type Camera = { x: number; y: number; zoom: number }
 // Sob o mouse: um tile de um terreno (plot = índice em plots) ou, na compra, um terreno livre
+export type TreeMarks = { hover: string | null; queued: string[] }
 export type Hover = { kind: 'tile'; plot: number; row: number; col: number; mode: ClickMode } | { kind: 'slot'; x: number; y: number }
 export type Slot = { x: number; y: number }
 export type Size = { width: number; height: number }
@@ -396,6 +397,7 @@ export function drawWorld(
   farmer: { pose: Pose; avatar: Avatar; queued: { r: number; c: number }[] } | null, // fazendeiro e as células da fila
   yard: YardView,
   hoverBuilding: YardBuilding | null, // prédio sob o mouse (ganha um contorno claro)
+  trees: TreeMarks, // árvore sob o mouse e as que o fazendeiro vai colher
 ) {
   // Transformação: mundo -> tela. Daqui em diante desenhamos em coordenadas do mundo.
   const k = cam.zoom * pixelRatio
@@ -439,6 +441,23 @@ export function drawWorld(
         ctx.stroke()
       }
     }
+  }
+  // Marca no chão das árvores: cheia sob o mouse, tracejada nas que estão na fila do fazendeiro (por baixo das
+  // árvores, que são desenhadas na passada seguinte)
+  for (const t of TREES) {
+    const hovered = trees.hover === t.id
+    if ((!hovered && !trees.queued.includes(t.id)) || onPlot(t, plots)) continue
+    const { x, y } = cellToWorld(t.r, t.c)
+    diamondPath(ctx, x, y, HALF_W * 1.15, HALF_H * 1.15)
+    if (hovered) {
+      ctx.fillStyle = 'rgba(255,255,255,0.22)'
+      ctx.fill()
+    }
+    ctx.strokeStyle = hovered ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.6)'
+    ctx.lineWidth = hovered ? 3 : 2
+    ctx.setLineDash(hovered ? [] : [8, 6])
+    ctx.stroke()
+    ctx.setLineDash([])
   }
   // 2ª passada: tudo que fica de pé, do fundo para a frente
   for (const { r, c, sprite, fence, prop: kind, fruitColor, farmer: isFarmer, spot, animal } of items) {

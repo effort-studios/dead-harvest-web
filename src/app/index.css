@@ -6,11 +6,15 @@ body,
   overflow: hidden; /* a página nunca rola: só o mapa se move, por arrasto */
 }
 body {
+  overscroll-behavior: none; /* puxar a tela no celular não recarrega a página */
+  -webkit-tap-highlight-color: transparent;
   background: #4f7f3b;
   color: #fff3d6;
   font-family: 'Fredoka', system-ui, sans-serif;
 }
 .game {
+  -webkit-user-select: none; /* segurar o dedo no jogo não seleciona texto (os campos de login ficam de fora) */
+  user-select: none;
   position: relative;
   width: 100%;
   height: 100%;
@@ -739,6 +743,8 @@ button.hud-player:hover { background: #f6c04a; }
   display: flex;
   flex-direction: column;
   gap: 10px;
+  width: 250px;
+  box-sizing: border-box;
   padding: 9px 9px 11px;
 }
 /* fechado, o painel sai da tela mas o player continua tocando */
@@ -757,7 +763,7 @@ button.hud-player:hover { background: #f6c04a; }
   display: flex;
   align-items: center;
   gap: 10px;
-  width: 200px;
+  width: 100%;
   box-sizing: border-box;
   padding: 10px;
   background: var(--plate-light);
@@ -868,3 +874,24 @@ button.hud-player:hover { background: #f6c04a; }
 .ctx-item:hover:not(:disabled) { filter: brightness(1.08); }
 .ctx-item:active:not(:disabled) { transform: translateY(1px); }
 .ctx-item:disabled { filter: grayscale(0.8); opacity: 0.55; cursor: not-allowed; }
+.ctx-sub { margin-top: -2px; padding: 0 4px; font-size: 13px; opacity: 0.8; color: var(--ink); }
+.ctx-line { display: flex; gap: 4px; }
+.ctx-line .ctx-item { flex: 1; text-align: center; font-size: 14px; }
+
+/* ---------- Celular ---------- */
+/* Toque: alvos maiores (o dedo é menos preciso que o mouse) */
+@media (pointer: coarse) {
+  .ctx-item { min-height: 44px; font-size: 16px; }
+  .ctx-line .ctx-item { font-size: 15px; }
+  .btn { min-height: 42px; }
+  .btn.small { min-height: 36px; }
+  .panel-close { padding: 8px; }
+  .music-btn { height: 44px; }
+  .music-toggle { width: 46px; height: 46px; }
+}
+/* Telas estreitas: relógio menor, painel do prédio vira uma folha na parte de baixo */
+@media (max-width: 600px) {
+  .day-clock { transform: scale(0.62); }
+  .building-panel { top: auto; bottom: 130px; left: 8px; right: 8px; width: auto; max-height: 42vh; }
+  .side-panel { width: calc(100vw - 100px); }
+}

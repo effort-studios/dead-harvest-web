@@ -1,5 +1,5 @@
 import { dayLengthSeconds } from './daycycle'
-import { CROP_ORDER, CROPS, isCropId, type CropId } from './crops'
+import { CROP_ORDER, CROPS, formatDuration, isCropId, type CropId } from './crops'
 import { buildingAreas, FERTILIZER, footprint, growthRate, ITEMS, overlaps, type BuildingRef } from './production'
 import { TREES } from './trees'
 import type { SaveData, Tile } from './types'
@@ -210,7 +210,13 @@ export function tick(data: SaveData): SaveData {
 // (o item aparece apagado, com o motivo na dica).
 export type MenuItem = { action: TileAction; label: string; crop?: CropId; disabled?: string }
 
-export function tileMenu(data: SaveData, plot: number, row: number, col: number, selected: HotbarItem): { title: string; items: MenuItem[] } | null {
+export function tileMenu(
+  data: SaveData,
+  plot: number,
+  row: number,
+  col: number,
+  selected: HotbarItem,
+): { title: string; subtitle?: string; items: MenuItem[] } | null {
   const tile = data.plots[plot]?.grid[row]?.[col]
   if (!tile) return null
   const planted = tile.state === 'planted' && isCropId(tile.crop)
@@ -244,5 +250,11 @@ export function tileMenu(data: SaveData, plot: number, row: number, col: number,
   if (tile.state === 'tilled') items.push({ action: 'untill', label: 'Desfazer aragem' })
 
   const title = planted ? CROPS[tile.crop as CropId].name : tile.state === 'tilled' ? 'Terra arada' : 'Terra'
-  return { title, items }
+  // planta: quanto falta (a mesma informação do balão do mouse, que no celular não existe)
+  let subtitle: string | undefined
+  if (planted) {
+    const left = Math.ceil(Math.max(0, CROPS[tile.crop as CropId].growSeconds - tile.growth) / growthRate(tile))
+    subtitle = ripe ? 'pronta para colher!' : `falta ${formatDuration(left)}`
+  }
+  return { title, subtitle, items }
 }
