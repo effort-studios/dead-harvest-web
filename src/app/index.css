@@ -895,3 +895,46 @@ button.hud-player:hover { background: #f6c04a; }
   .building-panel { top: auto; bottom: 130px; left: 8px; right: 8px; width: auto; max-height: 42vh; }
   .side-panel { width: calc(100vw - 100px); }
 }
+
+/* ---------- Celular: HUD compacta e colada nas bordas ----------
+   Vale para telas baixas (celular deitado) e estreitas (celular em pé). No computador nada muda. */
+@media (max-height: 500px), (max-width: 600px) {
+  .hud-left { top: 4px; left: 4px; gap: 4px; }
+  .hud-player { gap: 5px; padding: 3px 6px 3px 3px; }
+  .hud-player .avatar-img { width: 40px; height: 40px; }
+  .hud-player .portrait { border-width: 1px; border-radius: 4px; }
+  .player-info { min-width: 76px; gap: 2px; }
+  .plate { height: 18px; border-width: 1px; }
+  .player-name { font-size: 11px; padding: 0 5px; }
+  .money { height: 20px; padding: 0 5px; font-size: 13px; gap: 4px; }
+  .money .svg-icon { width: 15px; height: 15px; }
+  .hud-player .select-caret { transform: scale(0.75); }
+  .side-rail { gap: 4px; }
+  .rail-btn { width: 34px; height: 34px; padding: 4px; border-width: 2px; border-radius: 8px; }
+  .day-clock { top: 4px; right: 4px; transform: scale(0.5); transform-origin: top right; }
+  .hud-hotbar { bottom: 4px; padding: 3px; gap: 3px; }
+  .slot { width: clamp(28px, 5vw, 40px); height: clamp(28px, 5vw, 40px); padding: 2px; }
+  .slot-key { font-size: 8px; }
+  .slot-qty { font-size: 10px; }
+  .hud-save { bottom: 4px; left: 4px; }
+  .music-player { bottom: 4px; right: 4px; }
+  .music-toggle { width: 36px; height: 36px; }
+  .music-toggle .svg-icon { width: 22px; height: 22px; }
+  .place-hint { top: 4px; padding: 5px 10px; font-size: 13px; }
+}
+/* Celular deitado: os painéis ocupam a lateral e deixam a barra de itens livre */
+@media (max-height: 500px) and (min-width: 601px) {
+  .building-panel { top: 56px; right: 4px; width: 270px; max-height: calc(100vh - 116px); }
+  .side-panel { width: 290px; max-height: calc(100vh - 100px); font-size: 14px; }
+}
+@media (max-height: 500px), (max-width: 600px) {
+  .hud-save .btn { min-height: 32px; font-size: 12px; padding: 0 8px; }
+}
+/* menu do clique menor na tela compacta (ainda com alvo de toque confortável) */
+@media (max-height: 500px), (max-width: 600px) {
+  .ctx-menu { padding: 7px; gap: 3px; }
+  .ctx-title { font-size: 13px; }
+  .ctx-sub { font-size: 12px; }
+  .ctx-item { min-height: 34px; font-size: 14px; padding: 0 8px; }
+  .ctx-line .ctx-item { font-size: 13px; }
+}
