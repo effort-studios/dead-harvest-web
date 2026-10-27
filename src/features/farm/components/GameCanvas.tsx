@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
+  buildingAt,
+  buildingCellAt,
   clampCamera,
   drawWorld,
   fitZoom,
@@ -7,10 +9,15 @@ import {
   screenToWorld,
   tileFromWorld,
   treeAt,
+  yardView,
+  type BuildingGhost,
   type Hover,
   type Size,
+  type YardBuilding,
 } from '@/features/farm/render/draw'
-import { freeSlots, plotCell, type ClickMode } from '@/features/farm/model/state'
+import { freeSlots, placementProblem, plotCell, type ClickMode } from '@/features/farm/model/state'
+import { buildingPos, growthRate, machineById } from '@/features/farm/model/production'
+import { CROPS, formatDuration, isCropId } from '@/features/farm/model/crops'
 import { farmerPose, type Pose } from '@/features/farm/model/farmer'
 import { useProfileStore } from '@/features/profile/store'
 import { skyTint } from '@/features/farm/model/daycycle'
@@ -27,7 +34,8 @@ const MIN_USER_ZOOM = 0.5
 const MAX_USER_ZOOM = 3
 const WHEEL_SENSITIVITY = 0.0015
 
-// Movimento menor que isso (em px) conta como clique; maior, como arrasto do mapa
+// Movimento menor que isso (em px) conta como clique; maior, como arrasto (do mapa ou do prédio comprado
+// que estava sob o mouse)
 const DRAG_THRESHOLD = 5
 
 export function GameCanvas() {
@@ -36,18 +44,37 @@ export function GameCanvas() {
   const plots = useFarmStore((s) => s.data?.plots)
   const buyingPlot = useFarmStore((s) => s.buyingPlot)
   const readyTrees = useFarmStore((s) => s.readyTrees)
+  const readyBuildings = useFarmStore((s) => s.readyBuildings)
+  const machines = useFarmStore((s) => s.data?.machines)
+  const barn = useFarmStore((s) => s.data?.barn)
+  const placing = useFarmStore((s) => s.placing)
   const animating = useFarmStore((s) => (s.data?.farmer.jobs.length ?? 0) > 0) // há fila: o personagem se mexe
   const time = useFarmStore((s) => s.data?.time ?? 0)
   const [sprites, setSprites] = useState<Sprites | null>(null)
   const [size, setSize] = useState<Size>({ width: 0, height: 0 })
+  const [tipTile, setTipTile] = useState<TileRef | null>(null) // tile sob o mouse (o balão mostra a planta dele)
+  const tipRef = useRef<HTMLDivElement>(null)
 
   // A câmera fica num ref (e não em state) para arrastar não re-renderizar o React a cada pixel
   const camera = useRef({ ...INITIAL_CAMERA })
-  const drag = useRef<{ startX: number; startY: number; camX: number; camY: number; moved: boolean } | null>(null)
+  // building: começou em cima de um prédio comprado; offset = célula do prédio - célula sob o mouse no começo
+  // (o prédio não pula para o ponteiro)
+  const drag = useRef<{
+    startX: number
+    startY: number
+    camX: number
+    camY: number
+    moved: boolean
+    building: { target: YardBuilding; dr: number; dc: number } | null
+  } | null>(null)
+  // Prévia do prédio: o que está sendo arrastado ou o escolhido na loja para construir; onde ele ficaria e se pode
+  const ghost = useRef<BuildingGhost | null>(null)
+  const dragging = useRef(false) // a prévia é de um arrasto (soltar move o prédio)
   const userZoom = useRef(1) // controlado pela roda do mouse
   const frame = useRef(0)
   const hover = useRef<Hover | null>(null) // o que está sob o mouse
   const treeHover = useRef<string | null>(null) // árvore com frutas sob o mouse (vira cursor de mãozinha)
+  const buildingHover = useRef<YardBuilding | null>(null) // prédio (ou lote à venda) sob o mouse
   const mode = useRef<ClickMode>('tile') // alterado por Shift/Ctrl
   const drawRef = useRef<() => void>(() => {})
   const facing = useRef<Pose['facing']>({ dr: 1, dc: 0 }) // para onde o fazendeiro olhava na última vez que se mexeu
@@ -86,14 +113,22 @@ export function GameCanvas() {
     drawWorld(
       ctx, sprites, data.plots, ready, { x, y, zoom: fitZoom(size) * userZoom.current }, size, dpr, hover.current,
       buyingPlot ? freeSlots(data) : [], avatar ? { pose, avatar, queued } : null,
+      yardView(data, serverNow(), ghost.current), ghost.current?.target ?? buildingHover.current,
     )
   }, [sprites, size, readyTrees])
 
-  // Redesenha quando os terrenos, as imagens ou o tamanho da janela mudam
+  // Redesenha quando os terrenos, os prédios, as imagens ou o tamanho da janela mudam
   useEffect(() => {
     hover.current = null
     draw()
-  }, [draw, plots, buyingPlot])
+  }, [draw, plots, buyingPlot, machines, barn, readyBuildings])
+
+  // Escolheu (ou cancelou) um prédio na loja: a prévia aparece no próximo movimento do mouse
+  useEffect(() => {
+    if (dragging.current) return
+    ghost.current = null
+    drawRef.current()
+  }, [placing])
 
   drawRef.current = draw
 
@@ -118,7 +153,10 @@ export function GameCanvas() {
   // Apertar ou soltar Shift/Ctrl com o mouse parado também muda o destaque
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') useFarmStore.getState().setBuyingPlot(false)
+      if (e.key === 'Escape') {
+        useFarmStore.getState().setBuyingPlot(false)
+        useFarmStore.getState().startPlacing(null)
+      }
       const next = modeOf(e)
       if (next === mode.current) return
       mode.current = next
@@ -139,6 +177,13 @@ export function GameCanvas() {
     const rect = e.currentTarget.getBoundingClientRect()
     const cam = { ...camera.current, zoom: fitZoom(size) * userZoom.current }
     return screenToWorld(e.clientX - rect.left, e.clientY - rect.top, cam, size)
+  }
+
+  // Prédio sob o ponto (fora da compra de terreno e da escolha de lugar para construir)
+  function buildingUnder(wx: number, wy: number): YardBuilding | null {
+    const { data, buyingPlot, placing } = useFarmStore.getState()
+    if (!data || buyingPlot || placing) return null
+    return buildingAt(wx, wy, yardView(data, serverNow()))
   }
 
   // Árvore com frutas sob o ponto (fora do modo de compra de terreno)
@@ -190,15 +235,33 @@ export function GameCanvas() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [size])
 
+  // Escolhendo onde construir: a prévia do prédio fica sob o mouse, verde onde pode e vermelha onde não
+  function updatePlacing(e: React.PointerEvent<HTMLCanvasElement>) {
+    const { data, placing } = useFarmStore.getState()
+    if (!data || !placing) return
+    const world = worldAt(e)
+    const { r, c } = buildingCellAt(world.x, world.y, placing)
+    const old = ghost.current
+    if (old && old.r === r && old.c === c) return
+    ghost.current = { target: placing, r, c, ok: placementProblem(data, placing, r, c) === null }
+    e.currentTarget.style.cursor = 'crosshair'
+    scheduleDraw()
+  }
+
   function updateHover(e: React.PointerEvent<HTMLCanvasElement>) {
+    if (useFarmStore.getState().placing) return updatePlacing(e)
     const world = worldAt(e)
     const ready = readyTreeAt(world.x, world.y)
-    if (ready !== treeHover.current) {
+    const building = ready ? null : buildingUnder(world.x, world.y)
+    const buildingChanged = JSON.stringify(building) !== JSON.stringify(buildingHover.current)
+    if (ready !== treeHover.current || buildingChanged) {
       treeHover.current = ready
-      e.currentTarget.style.cursor = ready ? 'pointer' : ''
+      buildingHover.current = building
+      // prédio dá para arrastar (mãozinha de pegar); árvore só se clica
+      e.currentTarget.style.cursor = ready ? 'pointer' : building ? 'grab' : ''
     }
     const newMode = modeOf(e)
-    const next = ready ? null : targetAt(world.x, world.y, newMode) // sobre a árvore não destaca tile
+    const next = ready || building ? null : targetAt(world.x, world.y, newMode) // sobre a árvore ou o prédio não destaca tile
     const old = hover.current
     const same =
       next?.kind === 'slot'
@@ -206,15 +269,52 @@ export function GameCanvas() {
         : next?.kind === 'tile'
           ? old?.kind === 'tile' && old.plot === next.plot && old.row === next.row && old.col === next.col && newMode === mode.current
           : old === null
-    if (same) return // nada mudou
+    moveTip(e)
+    if (same && !buildingChanged) return // nada mudou
+    setTipTile(next?.kind === 'tile' ? { plot: next.plot, row: next.row, col: next.col } : null)
     hover.current = next
     mode.current = newMode
     scheduleDraw()
   }
 
+  // Prédio sob o ponto, para arrastar: com a distância entre a célula dele e a que o mouse "segura" (assim ele
+  // não pula para o ponteiro)
+  function grabBuildingAt(wx: number, wy: number) {
+    const { data } = useFarmStore.getState()
+    const target = buildingUnder(wx, wy)
+    const at = data && target && buildingPos(data, target)
+    if (!target || !at) return null
+    const cell = buildingCellAt(wx, wy, target)
+    return { target, dr: at.r - cell.r, dc: at.c - cell.c }
+  }
+
   function onPointerDown(e: React.PointerEvent<HTMLCanvasElement>) {
     e.currentTarget.setPointerCapture(e.pointerId) // continua recebendo o mouse mesmo fora do canvas
-    drag.current = { startX: e.clientX, startY: e.clientY, camX: camera.current.x, camY: camera.current.y, moved: false }
+    const world = worldAt(e)
+    const building = readyTreeAt(world.x, world.y) ? null : grabBuildingAt(world.x, world.y)
+    drag.current = { startX: e.clientX, startY: e.clientY, camX: camera.current.x, camY: camera.current.y, moved: false, building }
+  }
+
+  // Arrastando um prédio: ele segue o mouse de célula em célula
+  function dragBuilding(e: React.PointerEvent<HTMLCanvasElement>, grab: { target: YardBuilding; dr: number; dc: number }) {
+    const { data } = useFarmStore.getState()
+    if (!data) return
+    const world = worldAt(e)
+    const cell = buildingCellAt(world.x, world.y, grab.target)
+    const r = cell.r + grab.dr
+    const c = cell.c + grab.dc
+    const old = ghost.current
+    if (old && old.r === r && old.c === c) return
+    dragging.current = true
+    ghost.current = { target: grab.target, r, c, ok: placementProblem(data, grab.target, r, c) === null }
+    e.currentTarget.style.cursor = 'grabbing'
+    scheduleDraw()
+  }
+
+  // O balão da planta acompanha o mouse (direto no estilo, sem re-renderizar o React a cada pixel)
+  function moveTip(e: React.PointerEvent<HTMLCanvasElement>) {
+    const rect = e.currentTarget.getBoundingClientRect()
+    if (tipRef.current) tipRef.current.style.transform = `translate(${e.clientX - rect.left + 18}px, ${e.clientY - rect.top + 14}px)`
   }
 
   function onPointerMove(e: React.PointerEvent<HTMLCanvasElement>) {
@@ -223,24 +323,51 @@ export function GameCanvas() {
       updateHover(e) // mouse solto: só atualiza o contorno do tile
       return
     }
+    setTipTile(null) // arrastando: sem balão
     const dx = e.clientX - d.startX
     const dy = e.clientY - d.startY
     if (!d.moved && Math.hypot(dx, dy) < DRAG_THRESHOLD) return
     d.moved = true
+    if (d.building) {
+      dragBuilding(e, d.building)
+      return
+    }
     // arrastar o mapa para a direita = câmera vai para a esquerda
     const zoom = fitZoom(size) * userZoom.current
     camera.current = { ...clampCamera(d.camX - dx / zoom, d.camY - dy / zoom, useFarmStore.getState().data?.plots ?? []) }
+    if (useFarmStore.getState().placing) updatePlacing(e) // a prévia acompanha o mouse enquanto o mapa anda
     scheduleDraw()
   }
 
   function onPointerUp(e: React.PointerEvent<HTMLCanvasElement>) {
     const d = drag.current
     drag.current = null
+    if (dragging.current && ghost.current) {
+      // soltou o prédio: o store confere o lugar (e avisa se não pode); a tela volta ao normal
+      const dropped = ghost.current
+      ghost.current = null
+      dragging.current = false
+      e.currentTarget.style.cursor = ''
+      useFarmStore.getState().moveBuilding(dropped.target, dropped.r, dropped.c)
+      scheduleDraw()
+      return
+    }
     if (!d || d.moved) return // foi um arrasto, não um clique
+    if (useFarmStore.getState().placing) {
+      // clicou onde construir: o store confere o lugar (e avisa se não pode, continuando a escolha)
+      updatePlacing(e)
+      if (ghost.current) useFarmStore.getState().placeBuilding(ghost.current.r, ghost.current.c)
+      return
+    }
     const world = worldAt(e)
     const tree = readyTreeAt(world.x, world.y)
     if (tree) {
       useFarmStore.getState().queueTree(tree)
+      return
+    }
+    const building = buildingUnder(world.x, world.y)
+    if (building) {
+      useFarmStore.getState().openBuilding(building)
       return
     }
     const target = targetAt(world.x, world.y, modeOf(e))
@@ -256,14 +383,56 @@ export function GameCanvas() {
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
-        onPointerCancel={() => (drag.current = null)}
+        onPointerCancel={() => {
+          drag.current = null
+          if (dragging.current) ghost.current = null
+          dragging.current = false
+          scheduleDraw()
+        }}
         onPointerLeave={() => {
+          setTipTile(null)
           hover.current = null
+          buildingHover.current = null
+          if (!dragging.current) ghost.current = null // a prévia de construir some fora do mapa
           scheduleDraw()
         }}
       />
+      {/* sempre na tela (vazio sem planta) para o canvas poder mover antes do balão aparecer */}
+      <div ref={tipRef} className="plant-tip-anchor">
+        {tipTile && <PlantTip at={tipTile} />}
+      </div>
+      {placing && (
+        <div className="place-hint">
+          Clique no mapa onde construir {placing.kind === 'barn' ? 'o celeiro' : placing.kind === 'well' ? 'o poço' : machineById(placing.id)?.name.toLowerCase()} · verde
+          pode, vermelho não · <button onClick={() => useFarmStore.getState().startPlacing(null)}>Cancelar (Esc)</button>
+        </div>
+      )}
       {/* Luz do dia: cobre só o mapa (a HUD fica de fora) e muda aos poucos com a hora */}
       <div className="sky-tint" style={{ backgroundColor: skyTint(time) }} />
+    </div>
+  )
+}
+
+type TileRef = { plot: number; row: number; col: number }
+
+// Balão perto do mouse com a planta do tile e quanto falta para ela amadurecer (anda junto com o relógio da
+// tela; com adubo, o tempo já conta a planta crescendo mais rápido). Tile sem planta não mostra nada.
+function PlantTip({ at }: { at: TileRef }) {
+  const tile = useFarmStore((s) => s.data?.plots[at.plot]?.grid[at.row]?.[at.col])
+  if (tile?.state !== 'planted' || !isCropId(tile.crop)) return null
+  const crop = CROPS[tile.crop]
+  const left = Math.ceil(Math.max(0, crop.growSeconds - tile.growth) / growthRate(tile))
+  const boosts = [tile.fertilized && 'adubada', tile.watered && 'regada'].filter(Boolean)
+  const faster = Math.round((growthRate(tile) - 1) * 100)
+  return (
+    <div className="plant-tip">
+      <b>{crop.name}</b>
+      {left === 0 ? <span className="ready-text">pronta para colher!</span> : <span>falta {formatDuration(left)}</span>}
+      {boosts.length > 0 && (
+        <small>
+          {boosts.join(' e ')} ({faster}% mais rápido)
+        </small>
+      )}
     </div>
   )
 }

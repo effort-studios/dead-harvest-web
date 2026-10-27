@@ -39,6 +39,8 @@ Terreno: grama de `#1f6a34` (fundo) a `#96de5c` (pontas); terra de `#64401f` (va
 | Grama | `render/grass.ts` | Textura procedural: fundo escuro + ~560 tufos de folhas com degradê, de trás para frente. Repetida sem emenda. |
 | Terra arada | `render/soil.ts` | Sulcos com degradê que emendam entre tiles, torrões, pedrinhas. Bordas com contorno suave e tufos de grama. |
 | Cerca, fardo, plataforma, saco, arbusto, pedra, árvore | `render/props.ts` | Desenhados em canvas com `isoBox` (caixa isométrica) ou formas livres. Contorno + degradê + sombra. |
+| Celeiro, máquinas, animais, balões | `render/buildings.ts` | Mesmas regras dos objetos: `isoBox`, `gableRoof` (telhado de duas águas) e `cylinder` com contorno, degradê e sombra; desenhados num tamanho só e ampliados (`MACHINE_SCALE`, `BARN_SCALE`) para cada prédio ter o tamanho dele no mapa; paleta dos prédios em `style.ts` (`BARN_RED`, `TRIM`, `ROOF`, `METAL`, `COPPER`, `BRICK`, `CLAY`, `FIRE`). |
+| Ícones dos itens, máquinas e animais | `components/itemIcons.tsx` | SVG 32x32 no estilo dos outros ícones; produtos usam um modelo (pote, garrafa, saco, prato...) pintado com a cor do produto. |
 | Plantas (milho, tomate, abóbora) | `render/cropSvgs.ts` | SVG com 3 estágios: broto, crescendo, madura. Sombra, nervuras, brilho. |
 | Interface | `index.css`, `public/assets/ui` | Molduras 9-patch do UI Pack Adventure (Kenney, CC0) + ícones SVG próprios em `ui/Icons.tsx`. Fonte Fredoka. |
 

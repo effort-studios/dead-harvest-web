@@ -56,4 +56,8 @@ Arte do mundo (grama, terra, cerca, objetos, plantas) e ícones: desenhados para
 - Arrastar com o mouse (ou o dedo) move o mapa; a página nunca rola.
 - Clicar num tile da plantação: arar -> plantar -> colher (só colhe se estiver madura).
 - **Shift + clique**: faz a ação em toda a linha do tile (só nos tiles no mesmo estado que o clicado). **Ctrl + clique**: o mesmo na coluna.
-- Teclas 1, 2, 3 (ou clique na barra): escolhe a semente.
+- Teclas 1 a 9 (ou clique na barra): escolhe a semente ou o adubo. Com o adubo, clicar na terra arada aduba.
+- Tudo que se colhe vai para o **Armazém** (menu lateral): venda lá ou use nas máquinas.
+- **Planta**: passe o mouse em cima para ver quanto falta para amadurecer.
+- **Adubo e regador**: escolha na barra e clique na terra arada ou na planta (+30% cada, somam). O regador (Loja) tem 10 cargas; encha no poço.
+- **Construir**: na Loja, escolha o prédio e clique num dos seus terrenos onde ele vai ficar (em chão sem arar) (a prévia fica verde onde pode; Esc cancela). Clique num prédio para abrir o painel dele; coletar manda o fazendeiro buscar. Arraste um prédio para mudar de lugar.

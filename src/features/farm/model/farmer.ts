@@ -17,7 +17,17 @@ export type Pose = {
 
 const STRIDE_PER_CELL = 2.6 // passos (fase) por célula andada
 
-const ACTION: Record<FarmJob['action'], FarmerAction> = { till: 'till', plant: 'plant', harvest: 'harvest', harvest_tree: 'pick' }
+const ACTION: Record<FarmJob['action'], FarmerAction> = {
+  till: 'till',
+  plant: 'plant',
+  harvest: 'harvest',
+  harvest_tree: 'pick',
+  fertilize: 'plant', // espalhar o adubo é o mesmo gesto de semear
+  water: 'plant', // regar também: abaixado, sobre o tile
+  collect_machine: 'pick',
+  collect_barn: 'pick',
+  refill_can: 'pick',
+}
 
 // Pose do fazendeiro no instante `now` (ms, relógio do servidor). `idleFacing` é para onde olhava na última
 // vez que se mexeu: parado, continua olhando para lá.

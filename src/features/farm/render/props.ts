@@ -9,7 +9,7 @@ export type PropKind = 'hay' | 'hayStack' | 'platform' | 'sack' | 'bush' | 'rock
 const HW = 48
 const HH = 24
 
-function outline(ctx: CanvasRenderingContext2D, width = OUTLINE_W) {
+export function outline(ctx: CanvasRenderingContext2D, width = OUTLINE_W) {
   ctx.strokeStyle = OUTLINE
   ctx.lineWidth = width
   ctx.lineJoin = 'round'
@@ -17,14 +17,14 @@ function outline(ctx: CanvasRenderingContext2D, width = OUTLINE_W) {
   ctx.stroke()
 }
 
-function shadow(ctx: CanvasRenderingContext2D, x: number, y: number, rx: number, ry: number) {
+export function shadow(ctx: CanvasRenderingContext2D, x: number, y: number, rx: number, ry: number) {
   ctx.fillStyle = SHADOW
   ctx.beginPath()
   ctx.ellipse(x + rx * 0.18, y, rx, ry, 0, 0, Math.PI * 2)
   ctx.fill()
 }
 
-function gradient(ctx: CanvasRenderingContext2D, x0: number, y0: number, x1: number, y1: number, a: string, b: string) {
+export function gradient(ctx: CanvasRenderingContext2D, x0: number, y0: number, x1: number, y1: number, a: string, b: string) {
   const g = ctx.createLinearGradient(x0, y0, x1, y1)
   g.addColorStop(0, a)
   g.addColorStop(1, b)
@@ -32,10 +32,10 @@ function gradient(ctx: CanvasRenderingContext2D, x0: number, y0: number, x1: num
 }
 
 // ---------- Caixa isométrica: base de qualquer coisa "quadrada" (fardo, plataforma) ----------
-type BoxColors = { top: [string, string]; left: [string, string]; right: [string, string] }
+export type BoxColors = { top: [string, string]; left: [string, string]; right: [string, string] }
 
 // (x, y) = centro da base; hw/hh = meia largura/altura do losango da base; h = altura da caixa
-function isoBox(ctx: CanvasRenderingContext2D, x: number, y: number, hw: number, hh: number, h: number, c: BoxColors) {
+export function isoBox(ctx: CanvasRenderingContext2D, x: number, y: number, hw: number, hh: number, h: number, c: BoxColors) {
   const T = [x, y - hh], R = [x + hw, y], B = [x, y + hh], L = [x - hw, y]
   const up = (p: number[]) => [p[0], p[1] - h]
   // face esquerda (iluminada) e direita (na sombra)
@@ -55,11 +55,11 @@ function isoBox(ctx: CanvasRenderingContext2D, x: number, y: number, hw: number,
 }
 
 // Ponto do topo da caixa em coordenadas u, v de -0.5 a 0.5 (mesmo espaço da terra arada)
-function topPoint(x: number, y: number, hw: number, hh: number, h: number, u: number, v: number) {
+export function topPoint(x: number, y: number, hw: number, hh: number, h: number, u: number, v: number) {
   return [x + (u - v) * hw, y - h + (u + v) * hh]
 }
 
-function line(ctx: CanvasRenderingContext2D, a: number[], b: number[], color: string, width: number, alpha = 1) {
+export function line(ctx: CanvasRenderingContext2D, a: number[], b: number[], color: string, width: number, alpha = 1) {
   ctx.save()
   ctx.globalAlpha = alpha
   ctx.strokeStyle = color
@@ -73,7 +73,7 @@ function line(ctx: CanvasRenderingContext2D, a: number[], b: number[], color: st
 }
 
 // ---------- Fardo de feno ----------
-function hayBale(ctx: CanvasRenderingContext2D, x: number, y: number, hw: number, hh: number, h: number) {
+export function hayBale(ctx: CanvasRenderingContext2D, x: number, y: number, hw: number, hh: number, h: number) {
   isoBox(ctx, x, y, hw, hh, h, {
     top: [HAY.light, HAY.mid],
     left: [HAY.mid, HAY.dark],
@@ -128,7 +128,7 @@ function platform(ctx: CanvasRenderingContext2D, x: number, y: number) {
 }
 
 // ---------- Saco de grãos ----------
-function sack(ctx: CanvasRenderingContext2D, x: number, y: number) {
+export function sack(ctx: CanvasRenderingContext2D, x: number, y: number) {
   shadow(ctx, x, y, 12, 4.5)
   ctx.beginPath()
   ctx.moveTo(x - 8, y - 1)
