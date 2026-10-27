@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { CloseIcon, MusicIcon, MusicOffIcon, NextIcon, PauseIcon, PlayIcon, PrevIcon, VolumeIcon } from '@/shared/ui/icons'
+import { CloseIcon, ExternalIcon, MusicIcon, MusicOffIcon, NextIcon, PauseIcon, PlayIcon, PrevIcon, VolumeIcon } from '@/shared/ui/icons'
 
 const PLAYLIST_ID = 'PLQwRmTwWx0ubcpv0SkHroupj1LqW5_Va5'
 const STORAGE_KEY = 'deadHarvestMusic'
@@ -13,6 +13,9 @@ type YTPlayer = {
   setVolume(volume: number): void
   setLoop(loop: boolean): void
   getPlayerState(): number
+  getVideoData(): { title?: string; author?: string; video_id?: string }
+  getPlaylistIndex(): number
+  getPlaylist(): string[] | null
   destroy(): void
 }
 type YTNamespace = {
@@ -49,6 +52,7 @@ function loadYouTubeApi(): Promise<YTNamespace> {
 }
 
 type Settings = { volume: number; playing: boolean }
+type Track = { title: string; author: string; index: number; total: number; url: string }
 
 function loadSettings(): Settings {
   try {
@@ -62,15 +66,16 @@ function loadSettings(): Settings {
   }
 }
 
-// Playlist de lofi do YouTube em loop, com pausar, próxima/anterior e volume. O player do YouTube precisa
-// ficar visível (regra do embed), por isso o painel começa aberto. Os navegadores bloqueiam som antes de o
-// jogador interagir com a página: se o play automático falhar, começa no primeiro clique ou tecla.
+// Playlist de lofi do YouTube em loop, com pausar, próxima/anterior e volume. O vídeo do YouTube fica fora da
+// tela (só o áudio importa) e o painel mostra a faixa que está tocando, lida pela API. Os navegadores bloqueiam
+// som antes de o jogador interagir com a página: se o play automático falhar, começa no primeiro clique ou tecla.
 export function MusicPlayer() {
   const hostRef = useRef<HTMLDivElement>(null)
   const playerRef = useRef<YTPlayer | null>(null)
   const [{ volume, playing }, setSettings] = useState(loadSettings)
   const settingsRef = useRef<Settings>({ volume, playing }) // o que o player lê ao ficar pronto
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(false) // o painel começa fechado; a música toca do mesmo jeito
+  const [track, setTrack] = useState<Track | null>(null)
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
@@ -89,6 +94,13 @@ export function MusicPlayer() {
     let cancelled = false
     const target = document.createElement('div')
     host.appendChild(target)
+
+    // Faixa que está tocando (título e canal só chegam depois que o vídeo carrega)
+    function readTrack(player: YTPlayer) {
+      const { title, author, video_id } = player.getVideoData()
+      if (!title) return
+      setTrack({ title, author: author ?? '', index: player.getPlaylistIndex() + 1, total: player.getPlaylist()?.length ?? 0, url: `https://www.youtube.com/watch?v=${video_id}&list=${PLAYLIST_ID}` })
+    }
 
     function unlock() {
       removeUnlock()
@@ -122,6 +134,7 @@ export function MusicPlayer() {
           onStateChange: (e) => {
             if (e.data === YT_PLAYING) {
               removeUnlock()
+              readTrack(player)
               setSettings((s) => (s.playing ? s : { ...s, playing: true }))
             } else if (e.data === YT_PAUSED) {
               setSettings((s) => (s.playing ? { ...s, playing: false } : s))
@@ -175,7 +188,24 @@ export function MusicPlayer() {
             <CloseIcon size={18} />
           </button>
         </h2>
-        <div className="music-video" ref={hostRef} />
+        <div className="music-now">
+          <MusicIcon size={26} />
+          <div className="music-now-text">
+            <b title={track?.title}>{track ? track.title : ready ? 'Toque para começar' : 'Carregando…'}</b>
+            {track && (
+              <small>
+                {track.author}
+                {track.total > 0 && ` · ${track.index}/${track.total}`}
+              </small>
+            )}
+          </div>
+          {track?.url && (
+            <a className="music-link" href={track.url} target="_blank" rel="noopener noreferrer" title="Abrir no YouTube" aria-label="Abrir no YouTube">
+              <ExternalIcon size={18} />
+            </a>
+          )}
+        </div>
+        <div className="music-video" ref={hostRef} aria-hidden="true" />
         <div className="music-controls">
           <button className="music-btn" onClick={() => playerRef.current?.previousVideo()} disabled={!ready} title="Música anterior">
             <PrevIcon size={22} />

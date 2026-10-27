@@ -172,3 +172,14 @@ export function VolumeIcon({ size, level = 2 }: IconProps & { level?: 0 | 1 | 2 
     </Svg>
   )
 }
+
+// Seta saindo da caixa: abre o link em outra aba
+export function ExternalIcon({ size }: IconProps) {
+  return (
+    <Svg size={size}>
+      <path d="M13 7H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6" fill="none" stroke={OUTLINE} strokeWidth="2.6" />
+      <path d="M19 5h8v8M27 5L14 18" fill="none" stroke={OUTLINE} strokeWidth="5" />
+      <path d="M19 5h8v8M27 5L14 18" fill="none" stroke="#fff0cc" strokeWidth="2.2" />
+    </Svg>
+  )
+}
