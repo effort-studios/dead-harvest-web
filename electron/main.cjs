@@ -1,4 +1,4 @@
-const { app, BrowserWindow, protocol, net, shell } = require('electron')
+const { app, BrowserWindow, protocol, net, session, shell } = require('electron')
 const path = require('node:path')
 const { pathToFileURL } = require('node:url')
 
@@ -8,6 +8,7 @@ protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true } },
 ])
 
+const YOUTUBE_REFERER = 'https://deadharvest.game/'
 const DIST = path.join(__dirname, '..', 'dist')
 
 function createWindow() {
@@ -31,6 +32,12 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  // O embed do YouTube recusa (erro 153) páginas sem um Referer http(s) válido, e o app roda em app://.
+  // Manda um Referer https nas requisições do player.
+  session.defaultSession.webRequest.onBeforeSendHeaders({ urls: ['https://*.youtube.com/*', 'https://*.youtube-nocookie.com/*'] }, (details, callback) => {
+    details.requestHeaders.Referer = YOUTUBE_REFERER
+    callback({ requestHeaders: details.requestHeaders })
+  })
   protocol.handle('app', (req) => {
     const { pathname } = new URL(req.url)
     const file = path.join(DIST, pathname === '/' ? 'index.html' : decodeURIComponent(pathname))
