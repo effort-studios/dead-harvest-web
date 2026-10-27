@@ -1,0 +1,48 @@
+name: CI/CD
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  ci:
+    name: Lint e build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - run: npm ci
+      - run: npm run lint
+      # tsc -b + vite build
+      - run: npm run build
+
+  deploy:
+    name: Deploy na Railway
+    needs: ci
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Um deploy por vez; um push novo espera o anterior terminar
+    concurrency:
+      group: railway-production
+      cancel-in-progress: false
+    environment: production
+    container: ghcr.io/railwayapp/cli:latest
+    env:
+      # Project token do ambiente de produção (Project Settings → Tokens)
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: railway up --ci --service "${{ vars.RAILWAY_SERVICE }}"
