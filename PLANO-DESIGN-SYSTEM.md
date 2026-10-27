@@ -284,7 +284,7 @@ Status: `pendente`, `em andamento`, `concluída`. Atualizar a tabela junto com o
 ### Fase 2: arte das molduras
 
 **2.1 Grupo 1: painéis**
-- [ ] Gerar `panel` e `window` na PixelLab, com as referências como `style_image_base64` e a paleta fixa.
+- [x] Gerar `panel` e `window` na PixelLab, com a referência como `style_image_base64` e a paleta fixa (v1: job `f6296597-9886-4500-b7b1-5cb173cd6388`, 10 gerações).
 - [ ] Aprovar (4 a 6 anéis de tons vizinhos, sem faixas grossas nem degradê). Só então gastar crédito nos outros.
 
 **2.2 Grupo 2: botões**
