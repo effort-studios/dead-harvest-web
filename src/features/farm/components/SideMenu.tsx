@@ -1,15 +1,34 @@
 import { useEffect, useRef, useState } from 'react'
 import { CROP_ORDER, CROPS, formatDuration, type CropId } from '@/features/farm/model/crops'
-import { FRUIT_ORDER, FRUITS, TREES } from '@/features/farm/model/trees'
+import { TREES } from '@/features/farm/model/trees'
 import { GRID_SIZE, plotPrice } from '@/features/farm/model/state'
-import { useFarmStore } from '../store'
+import {
+  BARN,
+  barnReadyCount,
+  GROWTH_BONUS,
+  WATERING_CAN,
+  WELL,
+  FERTILIZER,
+  ITEM_ORDER,
+  itemName,
+  ITEMS,
+  MACHINES,
+  machineReadyCount,
+  sameBuilding,
+  type BuildingRef,
+  type ItemKind,
+} from '@/features/farm/model/production'
+import { serverNow, useFarmStore } from '../store'
 import { CloseIcon, CoinIcon } from '@/shared/ui/icons'
-import { BulbIcon, CropIcon, FruitIcon, PlotIcon, ShopIcon } from './icons'
+import { BulbIcon, CropIcon, PlotIcon, ShopIcon } from './icons'
+import { BarnIcon, BuildingIcon, CanIcon, ItemIcon, MachineIcon, WellIcon } from './itemIcons'
 
-type Section = 'shop' | 'tips'
+type Section = 'shop' | 'storage' | 'yard' | 'tips'
 
 const SECTIONS: { id: Section; Icon: (props: { size?: number }) => React.JSX.Element; title: string }[] = [
   { id: 'shop', Icon: ShopIcon, title: 'Loja' },
+  { id: 'storage', Icon: (p) => <ItemIcon itemId="cornmeal" {...p} />, title: 'Armazém' },
+  { id: 'yard', Icon: BarnIcon, title: 'Construções' },
   { id: 'tips', Icon: BulbIcon, title: 'Dicas' },
 ]
 
@@ -25,6 +44,15 @@ export function SideMenu() {
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [])
+
+  // Escolheu um prédio para construir (aqui ou no painel do prédio): fecha o painel para o mapa ficar livre
+  useEffect(
+    () =>
+      useFarmStore.subscribe((s, prev) => {
+        if (s.placing && !prev.placing) setOpen(null)
+      }),
+    [],
+  )
 
   const current = SECTIONS.find((s) => s.id === open)
 
@@ -56,6 +84,8 @@ export function SideMenu() {
           </h2>
           <div className="side-body">
             {open === 'shop' && <ShopPanel />}
+            {open === 'storage' && <StoragePanel />}
+            {open === 'yard' && <YardPanel />}
             {open === 'tips' && <TipsPanel />}
           </div>
         </section>
@@ -66,29 +96,17 @@ export function SideMenu() {
 
 function ShopPanel() {
   const money = useFarmStore((s) => s.data?.money ?? 0)
-  const [tab, setTab] = useState<'buy' | 'sell'>('buy')
 
   return (
     <>
       <p className="muted">
         Seu dinheiro: <CoinIcon size={16} /> {money}
       </p>
-      <div className="tabs" role="tablist">
-        <button role="tab" aria-selected={tab === 'buy'} className={tab === 'buy' ? 'active' : ''} onClick={() => setTab('buy')}>
-          Sementes
-        </button>
-        <button role="tab" aria-selected={tab === 'sell'} className={tab === 'sell' ? 'active' : ''} onClick={() => setTab('sell')}>
-          Vender frutas
-        </button>
-      </div>
-      {tab === 'buy' ? (
-        <>
-          <BuySeeds />
-          <BuyPlot />
-        </>
-      ) : (
-        <SellFruits />
-      )}
+      <BuySeeds />
+      <BuyPlot />
+      <BuyTools />
+      <BuyBuildings />
+      <p className="muted">Para vender a colheita, abra o Armazém. Para usar o que você construiu, clique no prédio no mapa.</p>
     </>
   )
 }
@@ -162,7 +180,7 @@ function BuySeeds() {
         <CropIcon crop={crop} size={52} />
         <ul>
           <li>Amadurece em <b>{formatDuration(info.growSeconds)}</b></li>
-          <li>Vende por <CoinIcon size={13} /> <b>{info.sellPrice}</b> (lucro <b>{info.sellPrice - info.seedPrice}</b>)</li>
+          <li>A colheita vale <CoinIcon size={13} /> <b>{info.sellPrice}</b> (lucro <b>{info.sellPrice - info.seedPrice}</b>)</li>
           <li>Você tem <b>{inventory[crop] ?? 0}</b> semente(s)</li>
         </ul>
       </div>
@@ -209,33 +227,74 @@ function BuyPlot() {
   )
 }
 
-function SellFruits() {
+const KIND_TITLE: Record<ItemKind, string> = {
+  crop: 'Colheitas',
+  fruit: 'Frutas',
+  animal_product: 'Dos animais',
+  product: 'Das máquinas',
+}
+
+// Armazém: tudo que o jogador tem (menos sementes), por tipo, com o botão de vender
+function StoragePanel() {
   const inventory = useFarmStore((s) => s.data?.inventory ?? {})
-  const sellFruit = useFarmStore((s) => s.sellFruit)
+  const sellItem = useFarmStore((s) => s.sellItem)
   const readyTrees = useFarmStore((s) => s.readyTrees)
   const ready = readyTrees ? readyTrees.split(',').length : 0
-  const owned = FRUIT_ORDER.filter((id) => (inventory[id] ?? 0) > 0)
+  const owned = ITEM_ORDER.filter((id) => (inventory[id] ?? 0) > 0)
+  const kinds = (Object.keys(KIND_TITLE) as ItemKind[]).filter((k) => owned.some((id) => ITEMS[id].kind === k))
+  const total = owned.reduce((sum, id) => sum + (ITEMS[id].sellPrice ?? 0) * (inventory[id] ?? 0), 0)
 
   return (
     <>
-      {owned.length === 0 && <p className="muted">Você não tem frutas. Clique nas árvores com frutas no mapa para colher.</p>}
-      {owned.map((id) => {
-        const qty = inventory[id] ?? 0
-        return (
-          <div className="shop-row" key={id}>
-            <FruitIcon fruit={id} size={40} />
-            <div className="shop-info">
-              <b>{FRUITS[id].name}</b> <span className="muted">(você tem {qty})</span>
-              <small>
-                <CoinIcon size={13} /> {FRUITS[id].sellPrice} cada
-              </small>
-            </div>
-            <button className="btn" onClick={() => sellFruit(id)}>
-              Vender tudo · <CoinIcon size={15} /> {FRUITS[id].sellPrice * qty}
-            </button>
-          </div>
-        )
-      })}
+      {owned.length === 0 ? (
+        <p className="muted">O armazém está vazio. Colha as plantas maduras e as árvores com frutas; o que você colhe vem para cá.</p>
+      ) : (
+        <p className="muted">
+          Tudo junto vale <CoinIcon size={13} /> <b>{total}</b>. Venda aqui ou use nas máquinas.
+        </p>
+      )}
+      {kinds.map((kind) => (
+        <div key={kind}>
+          <h3>{KIND_TITLE[kind]}</h3>
+          {owned
+            .filter((id) => ITEMS[id].kind === kind)
+            .map((id) => {
+              const qty = inventory[id] ?? 0
+              const price = ITEMS[id].sellPrice
+              return (
+                <div className="shop-row" key={id}>
+                  <ItemIcon itemId={id} size={40} />
+                  <div className="shop-info">
+                    <b>{ITEMS[id].name}</b> <span className="muted">({qty})</span>
+                    <small>
+                      {price != null ? (
+                        <>
+                          <CoinIcon size={13} /> {price} cada
+                        </>
+                      ) : id === FERTILIZER.itemId ? (
+                        'escolha na barra e clique na terra arada'
+                      ) : (
+                        'para os animais do celeiro'
+                      )}
+                    </small>
+                  </div>
+                  {price != null && (
+                    <div className="sell-buttons">
+                      {qty > 1 && (
+                        <button className="btn small" onClick={() => sellItem(id, 1)} title="Vender 1">
+                          ×1
+                        </button>
+                      )}
+                      <button className="btn" onClick={() => sellItem(id)} title="Vender todos">
+                        Tudo · <CoinIcon size={15} /> {price * qty}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+        </div>
+      ))}
       <p className="muted">
         Árvores com frutas agora: {ready}/{TREES.length}.
         {TREES[0] && ` Cada colheita dá ${TREES[0].fruitsPerHarvest} frutas e a árvore repõe depois de ${formatDuration(TREES[0].regrowMs / 1000)}.`}
@@ -243,6 +302,141 @@ function SellFruits() {
     </>
   )
 }
+
+// Ferramentas: o regador (compra uma vez; enche no poço)
+function BuyTools() {
+  const money = useFarmStore((s) => s.data?.money ?? 0)
+  const charges = useFarmStore((s) => s.data?.canCharges ?? null)
+  const hasWell = useFarmStore((s) => !!s.data?.well)
+  const buyCan = useFarmStore((s) => s.buyCan)
+  return (
+    <div className="build-shop">
+      <p className="muted buy-label">Ferramentas:</p>
+      <div className="shop-row">
+        <CanIcon size={40} />
+        <span className="shop-info">
+          <b>Regador</b>
+          <small>
+            {charges === null
+              ? `${WATERING_CAN.charges} cargas · a planta regada cresce ${Math.round(GROWTH_BONUS.water * 100)}% mais rápido`
+              : `${charges}/${WATERING_CAN.charges} cargas${hasWell ? ' · encha no poço' : ' · construa um poço para encher'}`}
+          </small>
+        </span>
+        {charges === null ? (
+          <button className="btn" disabled={money < WATERING_CAN.price} onClick={buyCan}>
+            <CoinIcon size={14} /> {WATERING_CAN.price}
+          </button>
+        ) : (
+          <span className="muted">comprado</span>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// Loja de prédios: o que ainda não foi construído, com o preço. Construir põe a prévia no mapa para o jogador
+// clicar onde ele vai ficar; clicar no resto da linha mostra o que o prédio faz.
+function BuyBuildings() {
+  const data = useFarmStore((s) => s.data)
+  const placing = useFarmStore((s) => s.placing)
+  const { startPlacing, openBuilding } = useFarmStore.getState()
+  if (!data) return null
+  const items: { ref: BuildingRef; name: string; price: number; detail: string }[] = [
+    ...(data.barn.capacity === 0 ? [{ ref: { kind: 'barn' as const }, name: 'Celeiro', price: BARN.price, detail: 'galinhas, vacas e ovelhas' }] : []),
+    ...(!data.well ? [{ ref: { kind: 'well' as const }, name: 'Poço', price: WELL.price, detail: '1x1 · enche o regador' }] : []),
+    ...MACHINES.filter((m) => !data.machines[m.id]).map((m) => ({
+      ref: { kind: 'machine' as const, id: m.id },
+      name: m.name,
+      price: m.buyPrice,
+      detail: `${m.size}x${m.size} · ${m.recipes.map((r) => itemName(r.outputItemId).toLowerCase()).join(', ')}`,
+    })),
+  ]
+  return (
+    <div className="build-shop">
+      <p className="muted buy-label">Construções:</p>
+      {items.length === 0 && <p className="muted">Você já construiu tudo.</p>}
+      {items.map((b) => {
+        const active = placing !== null && sameBuilding(placing, b.ref)
+        return (
+          <div className="shop-row" key={b.name}>
+            <button className="build-info" onClick={() => openBuilding(b.ref)} title="Ver o que faz">
+              <BuildingIcon target={b.ref} size={40} />
+              <span className="shop-info">
+                <b>{b.name}</b>
+                <small>{b.detail}</small>
+              </span>
+            </button>
+            <button
+              className={`btn ${active ? 'danger' : ''}`}
+              disabled={!active && data.money < b.price}
+              onClick={() => startPlacing(active ? null : b.ref)}
+            >
+              {active ? 'Cancelar' : <><CoinIcon size={14} /> {b.price}</>}
+            </button>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+// Prédios construídos: o estado de cada um; clicar abre o painel (o mesmo de clicar no mapa)
+function YardPanel() {
+  const data = useFarmStore((s) => s.data)
+  const openBuilding = useFarmStore((s) => s.openBuilding)
+  useFarmStore((s) => s.readyBuildings) // atualiza quando algo fica pronto
+  if (!data) return null
+  const now = serverNow()
+  const barnReady = barnReadyCount(data.barn, now)
+  const built = MACHINES.filter((m) => data.machines[m.id])
+
+  return (
+    <>
+      <p className="muted">Clique num prédio (aqui ou no mapa) para usar. No mapa, arraste para mudar de lugar. Para construir, vá na Loja.</p>
+      {data.barn.capacity === 0 && !data.well && built.length === 0 && <p className="muted">Nada construído ainda.</p>}
+      {data.well && (
+        <button className="shop-row yard-row" onClick={() => openBuilding({ kind: 'well' })}>
+          <WellIcon size={40} />
+          <span className="shop-info">
+            <b>Poço</b>
+            <small>{data.canCharges === null ? 'compre o regador na Loja' : `regador: ${data.canCharges}/${WATERING_CAN.charges} cargas`}</small>
+          </span>
+        </button>
+      )}
+      {data.barn.capacity > 0 && (
+        <button className="shop-row yard-row" onClick={() => openBuilding({ kind: 'barn' })}>
+          <BarnIcon size={40} />
+          <span className="shop-info">
+            <b>Celeiro</b>
+            <small>{`${data.barn.animals.length}/${data.barn.capacity} animais${barnReady > 0 ? ` · ${barnReady} pronto(s)` : ''}`}</small>
+          </span>
+        </button>
+      )}
+      {built.map((m) => {
+        const state = data.machines[m.id]
+        const ready = machineReadyCount(data, m.id, now)
+        return (
+          <button key={m.id} className="shop-row yard-row" onClick={() => openBuilding({ kind: 'machine', id: m.id })}>
+            <MachineIcon machineId={m.id} size={40} />
+            <span className="shop-info">
+              <b>{m.name}</b>
+              <small>
+                {ready > 0 ? (
+                  <span className="ready-text">{ready} pronto(s)</span>
+                ) : state.jobs.length > 0 ? (
+                  `trabalhando (${state.jobs.length}/${m.queueSize})`
+                ) : (
+                  'parada'
+                )}
+              </small>
+            </span>
+          </button>
+        )
+      })}
+    </>
+  )
+}
+
 function TipsPanel() {
   return (
     <>
@@ -254,13 +448,19 @@ function TipsPanel() {
         <li><b>Shift</b> + clique: ação na linha inteira.</li>
         <li><b>Ctrl</b> + clique: ação na coluna inteira.</li>
         <li>Teclas <b>1</b> a <b>9</b>: escolhem o item da barra (só aparece o que você tem).</li>
-        <li>Clique numa árvore com frutas para colher; venda na Loja.</li>
+        <li>Clique numa árvore com frutas para colher.</li>
+        <li>Tudo que você colhe vai para o <b>Armazém</b>: venda lá ou use nas máquinas.</li>
+        <li>Na <b>Loja</b>, escolha um prédio e clique no mapa onde construir. Clique num prédio para usar; arraste para mudar de lugar.</li>
+        <li>Máquinas: escolha a receita, espere e mande o fazendeiro coletar. A fila tem 2 lugares.</li>
+        <li>Celeiro: os animais comem a ração da Fábrica de ração e produzem ovos, leite e lã.</li>
+        <li>Adubo (da Composteira): escolha na barra e clique na terra arada. A planta cresce 30% mais rápido. Dá para fazer de tomate ou do esterco da galinha e da vaca. Vale antes ou depois de plantar.</li>
+        <li>Regador (Loja): escolha na barra e clique na terra arada ou na planta: mais 30%, somando com o adubo. Gasta 1 carga por tile; encha no poço.</li>
         <li><b>Esc</b> fecha este menu.</li>
       </ul>
       <h3>Plantas</h3>
       <table className="crops">
         <thead>
-          <tr><th>Planta</th><th>Cresce</th><th>Semente</th><th>Venda</th></tr>
+          <tr><th>Planta</th><th>Cresce</th><th>Semente</th><th>Colheita</th></tr>
         </thead>
         <tbody>
           {CROP_ORDER.map((id) => (
@@ -273,7 +473,7 @@ function TipsPanel() {
           ))}
         </tbody>
       </table>
-      <p className="muted">Só dá para colher quando a planta está madura.</p>
+      <p className="muted">Só dá para colher quando a planta está madura. A colheita vai para o armazém.</p>
     </>
   )
 }

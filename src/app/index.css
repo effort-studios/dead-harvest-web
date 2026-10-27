@@ -434,9 +434,60 @@ table.crops th, table.crops td { text-align: left; padding: 3px 4px; border-bott
 .plot-buy { width: 100%; justify-content: center; font-size: 15px; }
 .plot-hint { margin: 6px 0 0; text-align: center; }
 
+/* ---------- Armazém, quintal e painel do prédio ---------- */
+/* Painel do prédio clicado: à direita, abaixo do relógio, sem bloquear o mapa */
+.building-panel {
+  position: absolute;
+  top: 190px;
+  right: 12px;
+  left: auto;
+  width: 350px;
+  max-height: calc(100vh - 300px);
+}
+.btn.wide { width: 100%; justify-content: center; margin: 8px 0 2px; }
+.btn.small { min-height: 30px; padding: 0 8px; font-size: 13px; }
+.center { text-align: center; }
+.sell-buttons { display: flex; gap: 4px; }
+.queue-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-top: 2px dashed #c9a66b; }
+.queue-row:first-of-type { border-top: none; }
+.progress {
+  display: block;
+  height: 8px;
+  margin: 4px 0 2px;
+  background: #ecd3a1;
+  border: 2px solid var(--plate-border);
+  border-radius: 5px;
+  overflow: hidden;
+}
+.progress span { display: block; height: 100%; background: linear-gradient(#9be072, #4ea03a); transition: width 1s linear; }
+.ready-text { color: #3f8a2a; font-weight: 600; }
+.hungry-text { color: #c0581a; font-weight: 600; }
+.recipe { padding: 8px 0; border-top: 2px dashed #c9a66b; }
+.recipe-head { display: flex; align-items: center; gap: 10px; }
+.recipe-inputs { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0 0 48px; }
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 7px 1px 3px;
+  font-size: 13px;
+  background: rgba(255, 255, 255, 0.45);
+  border: 2px solid #c9a66b;
+  border-radius: 12px;
+}
+.chip.lacking { border-color: #c0392b; color: #a33a2a; }
+.chip-have { opacity: 0.7; font-size: 12px; }
+.buy-row.two { grid-template-columns: repeat(2, 1fr); margin-bottom: 6px; }
+.yard-row { width: 100%; text-align: left; font: inherit; color: inherit; background: none; border-left: none; border-right: none; border-bottom: none; cursor: pointer; border-radius: 6px; }
+.yard-row:hover { background: rgba(255, 255, 255, 0.35); }
+.machine-icon { position: relative; display: inline-block; flex-shrink: 0; }
+.machine-icon .svg-icon { display: block; }
+.machine-icon-item { position: absolute; right: -2px; bottom: -2px; }
+
 /* Telas estreitas: barra de itens sobe para não cobrir o botão Salvar */
 @media (max-width: 900px) {
   .hud-hotbar { bottom: 60px; }
+  .building-panel { top: 150px; width: 300px; max-height: calc(100vh - 260px); }
   .day-clock { transform: scale(0.8); transform-origin: top right; }
 }
 
@@ -619,3 +670,51 @@ button.hud-player:hover { background: #f6c04a; }
 .editor-preview { padding: 0; background: none; border-color: #2a170a; border-radius: 10px; overflow: hidden; }
 
 .loading-screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
+
+/* ---------- Construir ---------- */
+/* Loja de prédios: a parte da esquerda da linha mostra o que o prédio faz; o botão escolhe o lugar no mapa */
+.build-shop { margin-top: 14px; }
+.build-info { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; text-align: left; font: inherit; color: inherit; background: none; border: none; padding: 0; cursor: pointer; }
+.build-info:hover b { text-decoration: underline; }
+.build-shop .btn { white-space: nowrap; }
+/* Aviso no topo do mapa enquanto o jogador escolhe onde construir */
+.place-hint {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: calc(100% - 32px);
+  padding: 8px 14px;
+  background: var(--plate);
+  border: 3px solid var(--outline);
+  border-radius: 12px;
+  color: var(--ink);
+  font-size: 15px;
+  text-align: center;
+  filter: var(--hard-shadow);
+  z-index: 5;
+}
+.place-hint button { font: inherit; font-weight: 600; color: var(--ink); background: var(--gold); border: 2px solid var(--outline); border-radius: 8px; padding: 1px 8px; margin-left: 4px; cursor: pointer; }
+
+/* Balão da planta sob o mouse (o canvas move a âncora com transform) */
+.plant-tip-anchor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none; /* os cliques passam para o mapa */
+  z-index: 4;
+}
+.plant-tip {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 5px 10px;
+  background: var(--plate-light);
+  border: 2px solid var(--outline);
+  border-radius: 10px;
+  color: var(--ink);
+  font-size: 14px;
+  white-space: nowrap;
+  filter: var(--hard-shadow);
+}
+.plant-tip small { opacity: 0.75; font-size: 12px; }

@@ -3,19 +3,25 @@ import * as api from '@/features/farm/api'
 import { ApiError } from '@/shared/api/http'
 import { setCrops, type CropId } from '@/features/farm/model/crops'
 import { setDayLength } from '@/features/farm/model/daycycle'
+import * as production from '@/features/farm/model/production'
 import {
   buyPlot,
   buySeed,
-  pickSeed,
+  pickItem,
+  placementProblem,
   readyTreeIds,
-  sellFruit,
+  sellItem,
   setPlotPrice,
   tick,
   tileCommand,
   type ClickMode,
+  type HotbarItem,
 } from '@/features/farm/model/state'
-import { setTrees, type FruitId } from '@/features/farm/model/trees'
+import { setTrees } from '@/features/farm/model/trees'
 import type { SaveData } from '@/features/farm/model/types'
+
+// Prédio aberto no painel da direita (clicado no mapa ou aberto pela loja)
+export type OpenBuilding = production.BuildingRef | null
 
 // O servidor é a fonte da verdade. Toda ação do jogador vai para a API, que valida e devolve o estado
 // novo; enquanto a resposta não chega, a tela mostra uma previsão (model/state.ts) para responder na hora.
@@ -26,8 +32,11 @@ type FarmState = {
   error: string | null // motivo de uma ação recusada ou de falha de conexão (some sozinho)
   data: SaveData | null
   readyTrees: string // ids das árvores com frutas, em texto; muda quando alguma árvore repõe ou é colhida (redesenha o mapa)
-  selectedSeed: CropId // semente escolhida na barra de itens (só da tela)
+  readyBuildings: string // máquinas e celeiro com algo pronto (production.readyKey); muda = redesenha os balões
+  selected: HotbarItem // semente (ou adubo) escolhida na barra de itens (só da tela)
   buyingPlot: boolean // true = o mapa mostra as posições livres para o jogador escolher
+  building: OpenBuilding
+  placing: production.BuildingRef | null // prédio escolhido na loja: a prévia segue o mouse até o clique no mapa
   start: () => Promise<void>
   reset: () => void
   flush: () => Promise<void>
@@ -35,12 +44,24 @@ type FarmState = {
   queueTiles: (plot: number, row: number, col: number, mode: ClickMode) => void // pede ao servidor: o fazendeiro vai até lá e age
   queueTree: (treeId: string) => void
   cancelQueue: () => void
-  selectSeed: (crop: CropId) => void
+  select: (item: HotbarItem) => void
   tick: () => void
   buySeed: (crop: CropId, qty?: number) => void
-  sellFruit: (fruit: FruitId, qty?: number) => void
+  sellItem: (itemId: string, qty?: number) => void
   setBuyingPlot: (on: boolean) => void
   buyPlot: (x: number, y: number) => void
+  openBuilding: (building: OpenBuilding) => void
+  startPlacing: (building: production.BuildingRef | null) => void // null cancela
+  placeBuilding: (r: number, c: number) => void // clicou no mapa: constrói ali (se pode)
+  startRecipe: (recipeId: string) => void
+  collectMachine: (machineId: string) => void // o fazendeiro vai até a máquina e pega o que ficou pronto
+  expandBarn: () => void
+  buyAnimal: (animalId: string) => void
+  feedAnimals: () => void
+  collectBarn: () => void
+  buyCan: () => void
+  refillCan: () => void // o fazendeiro vai até o poço e enche o regador
+  moveBuilding: (building: production.BuildingRef, r: number, c: number) => void // soltou o prédio arrastado ali
 }
 
 export const useFarmStore = create<FarmState>((set, get) => ({
@@ -48,24 +69,28 @@ export const useFarmStore = create<FarmState>((set, get) => ({
   error: null,
   data: null,
   readyTrees: '',
-  selectedSeed: 'corn',
+  readyBuildings: '',
+  selected: 'corn',
   buyingPlot: false,
+  building: null,
+  placing: null,
 
   // Carrega as regras (catálogo) e o estado do jogador logado; lança o erro da API se falhar
   start: async () => {
     const [catalog, data] = await Promise.all([api.fetchCatalog(), api.loadState()])
     setCrops(catalog.crops)
     setTrees(catalog.fruits, catalog.trees)
+    production.setProduction(catalog)
     setPlotPrice(catalog.plotPrice)
     setDayLength(catalog.dayLengthSeconds)
-    set({ active: true, error: null, buyingPlot: false, selectedSeed: 'corn' })
+    set({ active: true, error: null, buyingPlot: false, building: null, placing: null, selected: 'corn' })
     applyServerState(data)
   },
 
   // Sai do jogo (logout ou sessão que caiu): some com o estado do jogador
   reset: () => {
     clearTimeout(farmerTimer)
-    set({ active: false, data: null, error: null, buyingPlot: false })
+    set({ active: false, data: null, error: null, buyingPlot: false, building: null, placing: null })
   },
 
   // Espera as ações que estão a caminho chegarem ao servidor (antes de sair)
@@ -85,14 +110,23 @@ export const useFarmStore = create<FarmState>((set, get) => ({
 
   // O front só pede; quem enfileira, anda e age é o servidor (e continua com o jogo fechado)
   queueTiles: (plot, row, col, mode) => {
-    const { data, selectedSeed } = get()
-    const cmd = data && tileCommand(data, plot, row, col, mode)
+    const { data, selected } = get()
+    const cmd = data && tileCommand(data, plot, row, col, mode, selected)
     if (!data || !cmd || cmd.tiles.length === 0) return
     const input = { x: data.plots[plot].x, y: data.plots[plot].y, tiles: cmd.tiles }
     if (cmd.action === 'plant') {
-      const seeds = data.inventory[selectedSeed] ?? 0
+      if (selected === 'fertilizer') return
+      const seeds = data.inventory[selected] ?? 0
       if (seeds < 1) return
-      run(undefined, () => api.enqueueJob({ ...input, action: 'plant', cropId: selectedSeed, tiles: input.tiles.slice(0, seeds) }))
+      run(undefined, () => api.enqueueJob({ ...input, action: 'plant', cropId: selected, tiles: input.tiles.slice(0, seeds) }))
+    } else if (cmd.action === 'fertilize') {
+      const have = data.inventory[production.FERTILIZER.itemId] ?? 0
+      if (have < 1) return
+      run(undefined, () => api.enqueueJob({ ...input, action: 'fertilize', tiles: input.tiles.slice(0, have) }))
+    } else if (cmd.action === 'water') {
+      const charges = data.canCharges ?? 0
+      if (charges < 1) return showError('O regador está vazio: encha no poço')
+      run(undefined, () => api.enqueueJob({ ...input, action: 'water', tiles: input.tiles.slice(0, charges) }))
     } else {
       run(undefined, () => api.enqueueJob({ ...input, action: cmd.action as 'till' | 'harvest' }))
     }
@@ -102,26 +136,68 @@ export const useFarmStore = create<FarmState>((set, get) => ({
 
   cancelQueue: () => run(undefined, api.cancelJobs),
 
-  selectSeed: (crop) => set({ selectedSeed: crop }),
+  select: (item) => set({ selected: item }),
 
   // 1 segundo na tela: o relógio e as plantas andam até o próximo estado do servidor
   tick: () =>
     set((s) => {
       if (!s.data) return s
-      // as frutas voltam com o tempo real; readyTrees só muda (e redesenha) se alguma árvore mudou
-      const readyTrees = readyTreeIds(s.data, serverNow()).join()
-      return { data: tick(s.data), readyTrees }
+      // as frutas e as máquinas ficam prontas com o tempo real; readyTrees/readyBuildings só mudam (e
+      // redesenham o mapa) quando algo mudou
+      const now = serverNow()
+      return { data: tick(s.data), readyTrees: readyTreeIds(s.data, now).join(), readyBuildings: production.readyKey(s.data, now) }
     }),
 
   buySeed: (crop, qty = 1) => run((d) => buySeed(d, crop, qty), () => api.buySeed(crop, qty)),
 
-  sellFruit: (fruit, qty) => run((d) => sellFruit(d, fruit, qty), () => api.sellFruit(fruit, qty)),
+  sellItem: (itemId, qty) => run((d) => sellItem(d, itemId, qty), () => api.sellItem(itemId, qty)),
 
-  setBuyingPlot: (on) => set({ buyingPlot: on }),
+  setBuyingPlot: (on) => set({ buyingPlot: on, placing: null }),
 
   buyPlot: (x, y) => {
     set({ buyingPlot: false })
     run((d) => buyPlot(d, x, y), () => api.buyPlot(x, y))
+  },
+
+  openBuilding: (building) => set({ building }),
+
+  startPlacing: (building) => set({ placing: building, buyingPlot: false, building: null }),
+
+  placeBuilding: (r, c) => {
+    const { data, placing } = get()
+    if (!data || !placing) return
+    const problem = placementProblem(data, placing, r, c)
+    if (problem) return showError(problem) // continua escolhendo
+    set({ placing: null })
+    if (placing.kind === 'barn') run((d) => production.buyBarn(d, r, c), () => api.buyBarn(r, c))
+    else if (placing.kind === 'well') run((d) => production.buyWell(d, r, c), () => api.buyWell(r, c))
+    else run((d) => production.buyMachine(d, placing.id, r, c), () => api.buyMachine(placing.id, r, c))
+  },
+
+  startRecipe: (recipeId) => run((d) => production.startRecipe(d, recipeId, serverNow()), () => api.startRecipe(recipeId)),
+
+  collectMachine: (machineId) => run(undefined, () => api.enqueueJob({ action: 'collect_machine', machineId })),
+
+  expandBarn: () => run(production.expandBarn, api.expandBarn),
+
+  buyAnimal: (animalId) => run((d) => production.buyAnimal(d, animalId, serverNow()), () => api.buyAnimal(animalId)),
+
+  feedAnimals: () => run((d) => production.feedAnimals(d, serverNow()), api.feedAnimals),
+
+  collectBarn: () => run(undefined, () => api.enqueueJob({ action: 'collect_barn' })),
+
+  buyCan: () => run(production.buyCan, api.buyCan),
+
+  refillCan: () => run(undefined, () => api.enqueueJob({ action: 'refill_can' })),
+
+  moveBuilding: (building, r, c) => {
+    const { data } = get()
+    if (!data) return
+    const at = production.buildingPos(data, building)
+    if (!at || (at.r === r && at.c === c)) return
+    const problem = placementProblem(data, building, r, c)
+    if (problem) return showError(problem)
+    run((d) => production.moveBuilding(d, building, r, c), () => api.moveBuilding(building, r, c))
   },
 }))
 
@@ -148,8 +224,9 @@ function applyServerState(data: SaveData) {
   scheduleFarmerSync(data)
   useFarmStore.setState((s) => ({
     data,
-    selectedSeed: pickSeed(data.inventory, s.selectedSeed), // a semente pode ter acabado
+    selected: pickItem(data, s.selected), // a semente pode ter acabado
     readyTrees: readyTreeIds(data, serverNow()).join(),
+    readyBuildings: production.readyKey(data, serverNow()),
   }))
 }
 
@@ -189,8 +266,9 @@ function run(predict: ((data: SaveData) => SaveData) | undefined, send: () => Pr
     if (predicted === data) return // nem a previsão muda nada (sem dinheiro, sem semente...): não pede
     useFarmStore.setState((s) => ({
       data: predicted,
-      selectedSeed: pickSeed(predicted.inventory, s.selectedSeed),
+      selected: pickItem(predicted, s.selected),
       readyTrees: readyTreeIds(predicted, serverNow()).join(),
+      readyBuildings: production.readyKey(predicted, serverNow()),
     }))
   }
 
