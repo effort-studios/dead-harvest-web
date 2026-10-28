@@ -57,8 +57,7 @@
     },
     "mac": {
       "target": [
-        "dmg",
-        "zip"
+        "dmg"
       ],
       "category": "public.app-category.games",
       "icon": "build/icon.icns",

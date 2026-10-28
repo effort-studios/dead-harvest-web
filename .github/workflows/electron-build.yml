@@ -36,7 +36,6 @@ jobs:
           path: |
             release/*.exe
             release/*.dmg
-            release/*.zip
             release/*.AppImage
 
   # só em tag: junta os três artifacts numa GitHub Release
