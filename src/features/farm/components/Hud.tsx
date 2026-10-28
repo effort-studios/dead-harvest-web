@@ -5,6 +5,7 @@ import { harvestables, hotbarCount, hotbarItems, type HotbarItem } from '@/featu
 import { serverNow, useFarmStore } from '../store'
 import { CropIcon } from './icons'
 import { CanIcon, ItemIcon } from './itemIcons'
+import { Button, Panel, Slot } from '@/shared/ui'
 import { ProfileMenu } from '@/features/profile/components/ProfileMenu'
 import { BuildingPanel } from './BuildingPanel'
 import { DayClock } from './DayClock'
@@ -57,36 +58,36 @@ export function Hud({ onLogout }: { onLogout: () => void }) {
       <MusicPlayer />
       <BuildingPanel />
 
-      <div className="panel hud-hotbar">
+      <Panel className="hud-hotbar">
         {Array.from({ length: HOTBAR_SLOTS }, (_, i) => {
           const item = owned[i]
           return (
-            <button
+            <Slot
               key={i}
-              className={`slot ${item && item === selected ? 'selected' : ''}`}
+              hotkey={i + 1}
+              count={item ? hotbarCount(data, item) : undefined}
+              selected={!!item && item === selected}
               disabled={!item}
               onClick={() => item && select(item)}
               title={item ? slotTitle(item) : undefined}
             >
-              <span className="slot-key">{i + 1}</span>
               {item && (item === 'fertilizer' ? <ItemIcon itemId={FERTILIZER.itemId} size={34} /> : item === 'can' ? <CanIcon size={34} /> : <CropIcon crop={item} size={34} />)}
-              {item && <span className="slot-qty">{hotbarCount(data, item)}</span>}
-            </button>
+            </Slot>
           )
         })}
-      </div>
+      </Panel>
 
       {(error || data.farmer.jobs.length > 0 || readyCount > 0) && (
         <div className="hud-save">
           {readyCount > 0 && (
-            <button className="btn" onClick={harvestAll} title="O fazendeiro colhe tudo que está pronto: plantas e árvores">
+            <Button onClick={harvestAll} title="O fazendeiro colhe tudo que está pronto: plantas e árvores">
               Colher tudo ({readyCount})
-            </button>
+            </Button>
           )}
           {data.farmer.jobs.length > 0 && (
-            <button className="btn danger" onClick={cancelQueue} title="Cancela as tarefas que ele ainda não fez; ele para onde está">
+            <Button variant="danger" onClick={cancelQueue} title="Cancela as tarefas que ele ainda não fez; ele para onde está">
               Parar fazendeiro ({data.farmer.jobs.length})
-            </button>
+            </Button>
           )}
           {error && <span className="error">{error}</span>}
         </div>
