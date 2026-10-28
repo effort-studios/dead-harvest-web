@@ -1,16 +1,18 @@
 import { useEffect, useRef } from 'react'
 import { farmerPose, farmerWalkSpeed, type FreeWalkState } from '@/features/farm/model/farmer'
 import { heldDirection, isWalkKey, stepWalk } from '@/features/farm/model/freeWalk'
+import type { WalkPhase } from '@/features/farm/api'
 import { serverNow, setLivePosition, settled, useFarmStore } from '@/features/farm/store'
 
-// Andar livre com W A S D: o fazendeiro anda quadro a quadro aqui, sem esperar o servidor, e avisa a posição
-// de tempos em tempos (e ao parar). O servidor confere a velocidade. Devolve a posição de quem está andando
+// Andar livre com W A S D: o fazendeiro anda quadro a quadro aqui, sem esperar o servidor. Avisa o servidor
+// ao começar (marca o horário), ao parar (posição final) e, no meio, de tempos em tempos para não perder
+// o caminho se a aba fechar. O servidor confere a velocidade pelo tempo desde o aviso anterior. Devolve a posição de quem está andando
 // (null = o desenho usa a pose do servidor).
 //
 // Com fila de tarefas, andar cancela a fila. Se uma tarefa entra na fila enquanto anda (clique no mapa), a
 // tarefa vence: a caminhada para e só volta quando todas as teclas forem soltas.
 
-const SYNC_MS = 400 // de quanto em quanto tempo avisa a posição enquanto anda
+const SYNC_MS = 3000 // de quanto em quanto tempo avisa a posição enquanto anda
 const MAX_FRAME_S = 0.1 // aba em segundo plano / travada: não dá um salto de uma vez
 
 export function useFreeWalk(onFrame: () => void) {
@@ -29,7 +31,7 @@ export function useFreeWalk(onFrame: () => void) {
     let suppressed = false // uma tarefa tomou o lugar da caminhada: espera soltar as teclas
 
     const store = () => useFarmStore.getState()
-    const send = (w: FreeWalkState) => store().walkTo(w.r, w.c)
+    const send = (w: FreeWalkState, phase: WalkPhase) => store().walkTo(w.r, w.c, phase)
 
     function abort() {
       suppressed = true
@@ -58,7 +60,7 @@ export function useFreeWalk(onFrame: () => void) {
       setLivePosition({ row: here.r, col: here.c })
       if (now - lastSync >= SYNC_MS) {
         lastSync = now
-        send(here)
+        send(here, 'move')
       }
       onFrameRef.current()
       raf = requestAnimationFrame(frame)
@@ -73,6 +75,7 @@ export function useFreeWalk(onFrame: () => void) {
         walk.current = { r: pose.r, c: pose.c, facing: pose.facing, moving: false, walked: 0 }
       }
       if (data.farmer.jobs.length > 0) store().cancelQueue()
+      send(walk.current, 'start')
       session++
       last = performance.now()
       lastSync = last
@@ -85,7 +88,7 @@ export function useFreeWalk(onFrame: () => void) {
       const w = walk.current
       if (!w) return
       w.moving = false
-      store().walkTo(w.r, w.c) // posição final: o servidor passa a ser quem sabe onde ele parou
+      send(w, 'end') // posição final: o servidor passa a ser quem sabe onde ele parou
       setLivePosition(null)
       const mine = session
       void settled().then(() => {

@@ -448,7 +448,7 @@ function TipsPanel() {
         <li>Role a roda do mouse para aproximar e afastar.</li>
         <li><b>W A S D</b>: o fazendeiro anda para cima, esquerda, baixo e direita da tela (segure para continuar).</li>
         <li>Clique esquerdo no chão: o fazendeiro anda até lá.</li>
-        <li>Clique direito no chão: abre um menu com o que dá para fazer ali (arar, desfazer a aragem, plantar, colher, regar, adubar) e <b>Mover para cá</b>. No celular, é só tocar.</li>
+        <li>Clique direito num tile: abre um menu com o que dá para fazer ali (arar, desfazer a aragem, plantar, colher, regar, adubar). No celular, é só tocar no tile.</li>
         <li><b>Shift</b> + clique: ação direta na linha inteira, sem menu.</li>
         <li><b>Ctrl</b> + clique: ação direta na coluna inteira, sem menu.</li>
         <li>Teclas <b>1</b> a <b>9</b>: escolhem o item da barra (só aparece o que você tem).</li>

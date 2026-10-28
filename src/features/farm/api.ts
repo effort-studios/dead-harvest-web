@@ -34,8 +34,10 @@ export type JobRequest =
   | { action: 'refill_can' }
   | { action: 'move'; row: number; col: number } // só andar até a célula do mapa
 export const enqueueJob = (job: JobRequest) => post<SaveData>('/game/jobs', job)
-// Andar livre (WASD): avisa onde o fazendeiro está; o servidor limita pela velocidade
-export const walkTo = (row: number, col: number) => post<SaveData>('/game/farmer/position', { row, col })
+// Andar livre (WASD): avisa onde o fazendeiro está; o servidor limita pela velocidade desde o 'start'.
+// start = apertou a 1ª tecla, move = aviso no meio do caminho, end = soltou todas
+export type WalkPhase = 'start' | 'move' | 'end'
+export const walkTo = (row: number, col: number, phase: WalkPhase) => post<SaveData>('/game/farmer/position', { row, col, phase })
 export const cancelJobs = () => request<SaveData>('/game/jobs', { method: 'DELETE' })
 export const buySeed = (cropId: string, quantity: number) => post<SaveData>('/game/seeds/buy', { cropId, quantity })
 export const sellItem = (itemId: string, quantity?: number) => post<SaveData>('/game/items/sell', { itemId, quantity })

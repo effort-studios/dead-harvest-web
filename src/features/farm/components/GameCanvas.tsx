@@ -500,24 +500,24 @@ export function GameCanvas() {
     // Shift/Ctrl + clique: age direto na linha/coluna, sem menu
     else if (target && target.mode !== 'tile') useFarmStore.getState().queueTiles(target.plot, target.row, target.col, target.mode)
     else if (!useFarmStore.getState().buyingPlot) {
-      if (secondary) openMenu(e, world)
-      else {
-        // clique esquerdo simples: o fazendeiro anda até lá
+      // clique esquerdo simples: o fazendeiro anda até lá (no toque, em cima de um tile abre o menu)
+      if (!secondary || !openMenu(e, world)) {
         const cell = tileFromWorld(world.x, world.y)
         moveTo(cell.row, cell.col)
       }
     }
   }
 
-  // Menu do que dá para fazer ali (em cima de um tile ou só no chão)
+  // Menu do que dá para fazer no tile sob o mouse; devolve false se não há tile ali (fora dos terrenos)
   function openMenu(e: React.PointerEvent<HTMLCanvasElement>, world: { x: number; y: number }) {
-    if (useFarmStore.getState().buyingPlot) return
-    const cell = tileFromWorld(world.x, world.y)
+    if (useFarmStore.getState().buyingPlot) return false
     const target = targetAt(world.x, world.y, 'tile')
+    if (target?.kind !== 'tile') return false
     const rect = e.currentTarget.getBoundingClientRect()
     setTipTile(null)
     setTipTree(null)
-    setMenu({ sx: e.clientX - rect.left, sy: e.clientY - rect.top, tile: target?.kind === 'tile' ? { plot: target.plot, row: target.row, col: target.col } : null, cell })
+    setMenu({ sx: e.clientX - rect.left, sy: e.clientY - rect.top, tile: { plot: target.plot, row: target.row, col: target.col } })
+    return true
   }
 
   return (
@@ -564,25 +564,25 @@ export function GameCanvas() {
 }
 
 type TileRef = { plot: number; row: number; col: number }
-type MenuAt = { sx: number; sy: number; tile: TileRef | null; cell: { row: number; col: number } }
+type MenuAt = { sx: number; sy: number; tile: TileRef }
 
 const MENU_WIDTH = 210
 const MENU_ROW = 38
 
-// Menu do clique: o que dá para fazer no tile (arar, plantar, colher, regar, adubar, desfazer a aragem) e
-// "Mover para cá". Fora dos terrenos só tem o mover. Item sem condição de uso fica apagado, com o motivo na dica.
+// Menu do clique direito: o que dá para fazer no tile (arar, plantar, colher, regar, adubar, desfazer a aragem).
+// Item sem condição de uso fica apagado, com o motivo na dica.
 function TileMenu({ at, size, onClose }: { at: MenuAt; size: Size; onClose: () => void }) {
   const data = useFarmStore((s) => s.data)
   const selected = useFarmStore((s) => s.selected)
-  const menu = data && at.tile ? tileMenu(data, at.tile.plot, at.tile.row, at.tile.col, selected) : null
-  const rows = (menu?.items.length ?? 0) + (menu?.subtitle ? 4 : 3)
+  const menu = data ? tileMenu(data, at.tile.plot, at.tile.row, at.tile.col, selected) : null
+  const rows = (menu?.items.length ?? 0) + (menu?.subtitle ? 3 : 2)
   const left = Math.max(4, Math.min(at.sx + 8, size.width - MENU_WIDTH - 8))
   const top = Math.max(4, Math.min(at.sy + 8, size.height - rows * MENU_ROW - 40))
   const store = useFarmStore.getState()
 
   return (
     <Panel className="ctx-menu" style={{ left, top, width: MENU_WIDTH }} onContextMenu={(e) => e.preventDefault()}>
-      <div className="ctx-title">{menu?.title ?? 'Chão'}</div>
+      <div className="ctx-title">{menu?.title}</div>
       {menu?.subtitle && <div className="ctx-sub">{menu.subtitle}</div>}
       {menu?.items.map((item) => (
         <Button
@@ -591,14 +591,14 @@ function TileMenu({ at, size, onClose }: { at: MenuAt; size: Size; onClose: () =
           disabled={!!item.disabled}
           title={item.disabled}
           onClick={() => {
-            if (at.tile) store.queueTileAction(at.tile.plot, at.tile.row, at.tile.col, item.action, item.crop)
+            store.queueTileAction(at.tile.plot, at.tile.row, at.tile.col, item.action, item.crop)
             onClose()
           }}
         >
           {item.label}
         </Button>
       ))}
-      {at.tile && menu?.items.some((i) => !i.disabled && i.action !== 'untill') && (
+      {menu?.items.some((i) => !i.disabled && i.action !== 'untill') && (
         <div className="ctx-line">
           {(['row', 'col'] as const).map((mode) => (
             <Button
@@ -606,7 +606,7 @@ function TileMenu({ at, size, onClose }: { at: MenuAt; size: Size; onClose: () =
               size="sm"
               title={`Mesma ação na ${mode === 'row' ? 'linha' : 'coluna'} inteira (Shift ou Ctrl + clique)`}
               onClick={() => {
-                store.queueTiles(at.tile!.plot, at.tile!.row, at.tile!.col, mode)
+                store.queueTiles(at.tile.plot, at.tile.row, at.tile.col, mode)
                 onClose()
               }}
             >
@@ -615,16 +615,6 @@ function TileMenu({ at, size, onClose }: { at: MenuAt; size: Size; onClose: () =
           ))}
         </div>
       )}
-      <Button
-        size="sm"
-        title="Atalho: clique esquerdo no chão"
-        onClick={() => {
-          moveTo(at.cell.row, at.cell.col)
-          onClose()
-        }}
-      >
-        Mover para cá
-      </Button>
     </Panel>
   )
 }

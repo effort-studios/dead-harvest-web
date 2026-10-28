@@ -51,7 +51,7 @@ type FarmState = {
   queueTree: (treeId: string) => void
   harvestAll: () => void // pede a colheita de tudo que está pronto (plantas e árvores)
   cancelQueue: () => void
-  walkTo: (row: number, col: number) => void // andar livre: avisa a posição (só vale sem fila de tarefas)
+  walkTo: (row: number, col: number, phase: api.WalkPhase) => void // andar livre: avisa a posição (só vale sem fila de tarefas)
   select: (item: HotbarItem) => void
   tick: () => void
   buySeed: (crop: CropId, qty?: number) => void
@@ -155,11 +155,11 @@ export const useFarmStore = create<FarmState>((set, get) => ({
       api.cancelJobs,
     ),
 
-  walkTo: (row, col) => {
+  walkTo: (row, col, phase) => {
     const { data, active } = useFarmStore.getState()
     if (!data || !active || data.farmer.jobs.length > 0) return
     useFarmStore.setState({ data: { ...data, farmer: { ...data.farmer, row, col } } })
-    submit(() => api.walkTo(row, col))
+    submit(() => api.walkTo(row, col, phase))
   },
 
   select: (item) => set({ selected: item }),
@@ -332,7 +332,7 @@ function run(predict: ((data: SaveData) => SaveData) | undefined, send: () => Pr
 
   if (livePosition) {
     const { row, col } = livePosition
-    submit(() => api.walkTo(row, col))
+    submit(() => api.walkTo(row, col, 'move'))
   }
   submit(send)
 }
