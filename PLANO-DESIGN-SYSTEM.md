@@ -224,7 +224,7 @@ revisar o resultado antes de seguir. Marcar `[x]` só depois de feito e verifica
 |---|---|---|
 | 0 | Decidir o visual | concluída |
 | 1 | Tokens e regras | concluída |
-| 2 | Arte das molduras | em andamento |
+| 2 | Arte das molduras | pendente (próxima) |
 | 3 | Componentes base | pendente |
 | 4 | Página `/ui-kit` | pendente |
 | 5 | Migrar a HUD | pendente |
@@ -283,26 +283,32 @@ Status: `pendente`, `em andamento`, `concluída`. Atualizar a tabela junto com o
 
 ### Fase 2: arte das molduras
 
-Método: **molduras desenhadas por script** (`scripts/draw_ui_frames.py`), pixel a pixel, com a paleta e os anéis da
-seção 2. Uma geração de teste na PixelLab (job `f6296597-9886-4500-b7b1-5cb173cd6388`, 10 gerações) saiu com cantos
-aparafusados, uma aba extra e anéis simétricos, e cada job devolve uma imagem só; o script sai exatamente nos hex e
-na espessura definidos, sem crédito. A PixelLab fica para o que pedir arte de verdade (ícones, peças de combate).
-As peças novas saem em `public/assets/ui/v2/`; as atuais só trocam na fase 5.
+**2.1 Grupo 1: painéis**
+- [x] Gerar `panel` e `window` na PixelLab, com a referência como `style_image_base64` e a paleta fixa (v1: job `f6296597-9886-4500-b7b1-5cb173cd6388`, 10 gerações).
+- [ ] Aprovar (4 a 6 anéis de tons vizinhos, sem faixas grossas nem degradê). Só então gastar crédito nos outros.
 
-**2.1 Molduras**
-- [x] Painel (`panel.png`) e painel inativo em bronze (`panel_inactive.png`): 8px de arte, 6 anéis + 2px de respiro.
-- [x] Slot afundado (`slot.png`).
-- [x] Botão (`button.png`), pressionado (`button_pressed.png`) e perigo (`button_danger.png`).
-- [x] Folha de conferência em `art/ui_frames_preview.png`.
-- [ ] Aprovar o visual (luz, sombra, cantos, contraste do contorno interno com o fundo).
+**2.2 Grupo 2: botões**
+- [ ] Gerar `button`, `icon_button` e `tab`.
+- [ ] Aprovar.
 
-**2.2 Ajustes de acabamento**
-- [ ] Ajustar anéis, cores ou cantos conforme a aprovação.
-- [ ] Decidir se hover e desabilitado são filtro CSS ou PNG próprio.
+**2.3 Grupo 3: barra de itens**
+- [ ] Gerar `toolbar`, de onde sai o slot.
+- [ ] Aprovar.
 
-**2.3 Pipeline**
-- [ ] Definir a `slice` de cada peça em um único lugar (variáveis da fase 1): painel 8, botão 3, slot 2.
-- [ ] Conferir as PNGs no navegador, com hard reload, em escala 1x e 2x.
+**2.4 Grupo 4: barras**
+- [ ] Gerar `health_bar`, molde da barra de progresso e da vida.
+- [ ] Aprovar.
+
+**2.5 Pipeline de arte**
+- [ ] Guardar as saídas cruas em `art/pixellab/raw/ui`.
+- [ ] Atualizar `scripts/build_ui_frames.py`: cortar cada peça, reduzir o 3x, limpar o miolo (liso, porque o 9-slice
+  estica) e produzir `panel.png`, `slot.png` e `button.png` (e variantes).
+- [ ] Ajustar `slice` e as variáveis da fase 1 em um único lugar.
+
+**2.6 Verificação**
+- [ ] Conferir as PNGs e o resultado no navegador (hard reload).
+
+---
 
 ### Fase 3: componentes base
 Cada componente: `Nome.tsx` + `Nome.module.css`, variações por prop (`variant`, `size`), estados normal, hover,
