@@ -350,22 +350,47 @@ table.crops th, table.crops td { text-align: left; padding: 3px 4px; border-bott
   inset: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 16px;
+  justify-content: flex-end;
+  padding: 0 7vw;
   overflow-y: auto;
-  background: radial-gradient(ellipse at center, #3f8f3a 0%, #1f5a2a 70%, #153d1e 100%);
+  background: #0b1028;
 }
+/* título no alto à esquerda, por cima da cena */
+.auth-hero {
+  position: absolute;
+  left: 6vw;
+  top: 9vh;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 52vw;
+}
+.auth-hero h1 {
+  margin: 0;
+  font-size: clamp(44px, 7vw, 96px);
+  line-height: 0.95;
+  color: var(--frame-gold-light);
+  text-shadow: 0 4px 0 var(--frame-gold-dark), 0 8px 0 rgba(0, 0, 0, 0.45), -2px 0 0 var(--frame-outline), 2px 0 0 var(--frame-outline), 0 -2px 0 var(--frame-outline);
+}
+.auth-hero h1 span { color: #f0735a; }
+.auth-hero p { margin: 0; font-size: clamp(16px, 2vw, 26px); color: var(--text); text-shadow: 0 2px 0 rgba(0, 0, 0, 0.7); }
 .auth-screen .auth-card {
-  width: 380px;
+  position: relative;
+  z-index: 1;
+  width: 400px;
   max-width: 100%;
-  padding: 12px 16px 16px;
+  padding: 16px 22px 22px;
   font-size: 15px;
 }
-.auth-logo { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 6px; }
-.auth-logo h1 { margin: 0; font-size: 28px; color: var(--frame-gold); }
-.auth-card h2 { margin: 6px 0 10px; font-size: 18px; }
-.auth-card form > * + * { margin-top: 10px; }
-.auth-submit { width: 100%; justify-content: center; margin-top: 14px; font-size: 17px; }
+.auth-card h2 { margin: 0 0 4px; font-size: 22px; color: var(--frame-gold-light); }
+@media (max-width: 900px) {
+  .auth-screen { justify-content: center; align-items: flex-end; padding: 0 16px 5vh; }
+  .auth-hero { left: 0; right: 0; top: 5vh; max-width: none; align-items: center; text-align: center; }
+}
+.auth-card form > * + * { margin-top: 14px; }
+.auth-submit {
+  min-height: 48px; width: 100%; justify-content: center; margin-top: 14px; font-size: 17px; }
 .auth-error { margin: 10px 0 0; padding: 6px 10px; color: var(--danger); background: rgba(217, 72, 43, 0.15); border: 2px solid var(--danger); }
 .auth-notice { margin: 0 0 4px; padding: 6px 10px; color: #7fcf5a; background: rgba(127, 207, 90, 0.12); border: 2px solid #7fcf5a; }
 .auth-links { display: flex; justify-content: space-between; gap: 8px; margin-top: 12px; }

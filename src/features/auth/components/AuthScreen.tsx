@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { forgotPassword, resetPassword } from '../api'
+import { AuthScene } from './AuthScene'
 import { Button, Field, Input, Panel } from '@/shared/ui'
 import { EyeIcon, EyeOffIcon, FarmerIcon } from '@/shared/ui/icons'
 
@@ -63,14 +64,19 @@ export function AuthScreen({ onLogin, onRegister }: Props) {
 
   return (
     <div className="auth-screen">
+      <AuthScene />
+      <header className="auth-hero">
+        <FarmerIcon size={96} />
+        <h1>
+          <span>Dead</span> Harvest
+        </h1>
+        <p>Plante de dia. Sobreviva à noite.</p>
+      </header>
       <Panel className="auth-card">
       <form onSubmit={submit}>
-        <div className="auth-logo">
-          <FarmerIcon size={48} />
-          <h1>Dead Harvest</h1>
-        </div>
         {/* entrar e criar conta: o botão já diz o que faz; só a recuperação de senha precisa de título */}
         {(mode === 'forgot' || mode === 'reset') && <h2>{TITLES[mode]}</h2>}
+        {(mode === 'login' || mode === 'register') && <h2>{mode === 'login' ? 'Bem-vindo de volta' : 'Comece sua fazenda'}</h2>}
 
         {notice && <p className="auth-notice">{notice}</p>}
 

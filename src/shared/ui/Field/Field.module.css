@@ -18,7 +18,17 @@
   font-size: var(--text-md);
 }
 .control::placeholder { color: var(--text-muted); }
-.control:focus-visible { outline: 2px solid var(--frame-gold-light); outline-offset: 1px; }
+/* foco: contorno de pixels dourados que segue o formato da moldura (um outline reto desenharia um retângulo por fora) */
+.control:focus-visible {
+  outline: none;
+  filter: drop-shadow(2px 0 0 var(--frame-gold-light)) drop-shadow(-2px 0 0 var(--frame-gold-light)) drop-shadow(0 2px 0 var(--frame-gold-light)) drop-shadow(0 -2px 0 var(--frame-gold-light));
+}
+/* preenchimento automático do Chrome pinta o texto de preto: mantém a cor do campo */
+.control:-webkit-autofill {
+  -webkit-text-fill-color: var(--text);
+  caret-color: var(--text);
+  transition: background-color 600000s 0s;
+}
 .control:disabled { filter: grayscale(0.8) brightness(0.8); cursor: not-allowed; }
 /* Select: sem a seta do navegador; a seta é um triângulo de pixels (na cor do texto) por cima da moldura */
 .selectWrap { position: relative; display: block; }
