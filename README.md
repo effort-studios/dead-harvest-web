@@ -49,7 +49,7 @@ de verdade (`features/farm/store.ts`). O formato (`SaveData`) está em `src/feat
 ser igual ao da API.
 
 ## Créditos
-Arte (mundo, fazendeiro, ícones e molduras da interface): pixel art gerada na [PixelLab](https://pixellab.ai) e montada pelos scripts em `scripts/` (originais em `art/pixellab`). Fonte: Pixelify Sans (Google Fonts, carregada pela internet). Regras de estilo em [DESIGN.md](DESIGN.md).
+Arte (mundo, fazendeiro, ícones e molduras da interface): pixel art gerada na [PixelLab](https://pixellab.ai) e montada pelos scripts em `scripts/` (originais em `art/pixellab`). Fonte: Duality (`public/assets/fonts/duality.otf`). Regras de estilo em [DESIGN.md](DESIGN.md).
 
 ## Controles
 - Arrastar com o mouse (ou o dedo) move o mapa; a página nunca rola. Roda do mouse ou pinça com dois dedos dá zoom.

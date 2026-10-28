@@ -94,7 +94,7 @@ export function drawBubble(ctx: CanvasRenderingContext2D, x: number, y: number, 
     ctx.stroke()
     if (bubble.count > 1) {
       ctx.fillStyle = OUTLINE
-      ctx.font = '600 13px "Pixelify Sans", system-ui, sans-serif'
+      ctx.font = '13px Duality, system-ui, sans-serif'
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
       ctx.fillText(`${bubble.count}`, x + 9, cy + 0.5)

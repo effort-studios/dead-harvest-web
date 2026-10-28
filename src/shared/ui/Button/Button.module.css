@@ -1,0 +1,38 @@
+/* Moldura de 3 pixels da arte (button.png); apertado ou ligado troca para button_pressed.png */
+.button {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  padding: 0 var(--space-1);
+  border: calc(var(--frame-button-slice) * var(--px)) solid transparent;
+  border-image: url('/assets/ui/button.png') var(--frame-button-slice) fill / calc(var(--frame-button-slice) * var(--px)) stretch;
+  image-rendering: pixelated;
+  background: none;
+  color: var(--frame-outline);
+  font: inherit;
+  font-size: var(--text-md);
+  cursor: pointer;
+}
+.md { min-height: 40px; }
+.sm { min-height: 32px; font-size: var(--text-sm); }
+.icon { min-width: 40px; padding: 0; }
+.icon.sm { min-width: 32px; }
+
+.button:hover:not(:disabled) { filter: brightness(1.1); }
+.button:active:not(:disabled),
+.on {
+  border-image-source: url('/assets/ui/button_pressed.png');
+  padding-top: var(--px); /* o texto desce junto com a moldura */
+}
+.button:disabled { filter: grayscale(0.8) brightness(0.8); cursor: not-allowed; }
+
+.danger {
+  border-image-source: url('/assets/ui/button_danger.png');
+  color: var(--text);
+}
+.danger:active:not(:disabled) {
+  border-image-source: url('/assets/ui/button_pressed.png');
+  filter: hue-rotate(-38deg) saturate(1.6);
+}

@@ -1,0 +1,59 @@
+/* Tokens do design system da HUD. Os componentes de shared/ui só usam estas variáveis (nada de valor solto).
+   Importado uma vez, em app/main.tsx. */
+:root {
+  /* ---------- Cores de destaque ----------
+     O dourado vivo (selecionado, moeda, energia) e a sombra dura dos elementos soltos sobre o mapa. */
+  --gold: #f2b234;
+  --gold-light: #ffd75e;
+  --gold-dark: #c67d1c;
+  --hard-shadow: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.35));
+
+  /* ---------- Cores da HUD (paleta do PLANO-DESIGN-SYSTEM.md) ---------- */
+  --frame-outline: #2a1a0e;
+  --frame-gold-light: #fbd594;
+  --frame-gold: #c89e61;
+  --frame-gold-dark: #6c4620;
+  --panel-bg: #2b2118;
+  --slot-bg: #1d160f;
+  --slot-edge: #4a3a28;
+  --text: #f3e6c8;
+  --text-muted: #b8a888;
+  --danger: #d9482b;
+
+  /* ---------- Molduras 9-slice (public/assets/ui) ----------
+     --px: tamanho de um pixel da arte na tela (as peças são desenhadas em tamanho real e ampliadas sem borrar).
+     --frame-*-slice: pixels da arte que cada peça reserva em cada lado (a borda do 9-slice). Na tela a borda
+     ocupa slice x --px. As peças foram geradas na PixelLab e montadas por scripts/build_ui_frames.py. */
+  --px: 2px;
+  --frame-panel-slice: 5;
+  --frame-plate-slice: 4;
+  --frame-bar-slice: 5;
+  --frame-slot-slice: 2;
+  --frame-button-slice: 3;
+
+  /* ---------- Espaçamento (escala de 4px) ---------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+
+  /* ---------- Tipografia ---------- */
+  --font-ui: 'Duality', system-ui, sans-serif;
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-md: 16px;
+  --text-lg: 19px;
+  --text-xl: 22px;
+
+  /* ---------- Ícones ---------- */
+  --icon-sm: 18px;
+  --icon-md: 22px;
+  --icon-lg: 26px;
+
+  /* ---------- Camadas ---------- */
+  --z-tooltip: 4;
+  --z-menu: 5;
+  --z-popover: 6;
+  --z-modal: 20;
+}

@@ -1,0 +1,13 @@
+/* Só CSS: borda lisa de 2px na paleta, sem moldura de arte */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px var(--space-1);
+  border: 2px solid var(--frame-gold-dark);
+  background: var(--slot-bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+}
+.lacking { border-color: var(--danger); color: var(--danger); }

@@ -175,6 +175,26 @@ export function tileCommand(data: SaveData, plot: number, row: number, col: numb
   return { action, plot, tiles }
 }
 
+// Tudo que está pronto para colher: plantas maduras (por terreno) e árvores com frutas. Ignora o que o
+// fazendeiro já tem na fila para não pedir duas vezes.
+export function harvestables(data: SaveData, now: number): { plots: TileCommand[]; trees: string[] } {
+  const queued = data.farmer.jobs
+  const plots: TileCommand[] = []
+  data.plots.forEach((plot, i) => {
+    const tiles: { row: number; col: number }[] = []
+    plot.grid.forEach((line, row) =>
+      line.forEach((t, col) => {
+        const ripe = t.state === 'planted' && isCropId(t.crop) && t.growth >= CROPS[t.crop].growSeconds
+        const taken = queued.some((j) => j.action === 'harvest' && j.plotX === plot.x && j.plotY === plot.y && j.row === row && j.col === col)
+        if (ripe && !taken) tiles.push({ row, col })
+      }),
+    )
+    if (tiles.length > 0) plots.push({ action: 'harvest', plot: i, tiles })
+  })
+  const trees = readyTreeIds(data, now).filter((id) => !queued.some((j) => j.action === 'harvest_tree' && j.treeId === id))
+  return { plots, trees }
+}
+
 // Tiles afetados por um clique (usado para destacar a linha no desenho)
 export function tilesInMode(mode: ClickMode, row: number, col: number) {
   if (mode === 'tile') return [{ row, col }]
