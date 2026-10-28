@@ -13,10 +13,13 @@ jobs:
         include:
           - os: windows-latest
             flag: --win
+            name: windows
           - os: macos-latest
             flag: --mac
+            name: macos
           - os: ubuntu-latest
             flag: --linux
+            name: linux
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -32,11 +35,10 @@ jobs:
       - run: npx electron-builder ${{ matrix.flag }} --publish never
       - uses: actions/upload-artifact@v4
         with:
-          name: dead-harvest-${{ matrix.os }}
+          name: dead-harvest-${{ matrix.name }}
           path: |
             release/*.exe
             release/*.dmg
-            release/*.zip
             release/*.AppImage
 
   # só em tag: junta os três artifacts numa GitHub Release
