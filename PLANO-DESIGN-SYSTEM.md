@@ -292,19 +292,19 @@ Lições do teste (job `f6296597-9886-4500-b7b1-5cb173cd6388`, painel v1): a pal
 Por isso: um elemento por job, prompts com a lista do que não pode aparecer (rebites, cantos, aba, coroa) e
 referências de estilo só quando forem planas.
 
-**2.1 Peças (um job cada)**
-- [ ] Painel (`panel`): moldura dourada fina, interior escuro liso.
-- [ ] Slot afundado (`panel`, descrição de slot de item).
-- [ ] Botão (`button`): dourado, com a variante de perigo gerada a partir dele (recolorida).
-- [ ] Moldura de barra (`health_bar`): molde da barra de progresso, vida e energia.
-- [ ] Aba (`tab`).
+**2.1 Peças (um job cada; gerado, aguardando aprovação)**
+- [x] Painel (`panel`): moldura dourada fina, interior escuro liso.
+- [x] Slot afundado (`panel`, descrição de slot de item).
+- [x] Botão (`button`): dourado, com a variante de perigo gerada a partir dele (recolorida).
+- [x] Moldura de barra (`health_bar`): molde da barra de progresso, vida e energia.
+- [x] Aba (`tab`).
 
 **2.2 Aprovação, uma peça por vez**
 - [ ] Aprovar cada peça (poucos anéis de tons vizinhos, sem ornamento, interior liso, bordas retas para o 9-slice).
 - [ ] Se não passar, ajustar o prompt e repetir só aquela peça (10 gerações por tentativa).
 
 **2.3 Pipeline de arte**
-- [ ] Guardar as saídas cruas em `art/pixellab/raw/ui`.
+- [x] Guardar as saídas cruas em `art/pixellab/raw/ui` (`g2_*.png`).
 - [ ] Atualizar `scripts/build_ui_frames.py`: cortar cada peça, reduzir o 3x, limpar o miolo (liso, porque o 9-slice
   estica), normalizar a borda para 8px e produzir `panel.png`, `slot.png`, `button.png` (e variantes).
 - [ ] Ajustar `slice` e as variáveis da fase 1 em um único lugar.
