@@ -64,18 +64,17 @@
 @keyframes cow { to { background-position-x: -672px; } }
 @keyframes chicken { to { background-position-x: -416px; } }
 
-/* zumbis: silhuetas escuras com olhos vermelhos, cruzando a tela da direita para a esquerda */
+/* zumbis: tira de 8 quadros (zombie_walk.png) tocada quadro a quadro enquanto ele cruza a tela da direita para a esquerda */
 .zombie {
   position: absolute;
   left: 0;
-  fill: #070b17;
-  opacity: 0.92;
-  animation: march linear infinite;
+  background: url('/assets/world/zombie_walk.png') 0 0 no-repeat;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.35)) brightness(0.9);
+  animation: march var(--dur) linear var(--delay) infinite, step 0.9s steps(8) infinite;
 }
-.body { animation: shamble steps(2) infinite; }
-.eye { fill: #d9482b; }
 @keyframes march { from { transform: translateX(104vw); } to { transform: translateX(-14vw); } }
-@keyframes shamble { to { transform: translateY(0.6px); } }
+@keyframes step { to { background-position-x: calc(-352px * var(--scale)); } }
 
 /* escurece as bordas para o conteúdo ficar em destaque */
 .vignette {
@@ -85,7 +84,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .stars, .cow, .chicken, .zombie, .body { animation: none; }
+  .stars, .cow, .chicken, .zombie { animation: none; }
   .zombie { transform: translateX(var(--still)); }
 }
 

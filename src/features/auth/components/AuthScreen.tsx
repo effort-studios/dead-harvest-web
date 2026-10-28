@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { forgotPassword, resetPassword } from '../api'
 import { AuthScene } from './AuthScene'
 import { Button, Field, Input, Panel } from '@/shared/ui'
-import { EyeIcon, EyeOffIcon, FarmerIcon } from '@/shared/ui/icons'
+import { EyeIcon, EyeOffIcon } from '@/shared/ui/icons'
 
 type Mode = 'login' | 'register' | 'forgot' | 'reset'
 
@@ -66,7 +66,6 @@ export function AuthScreen({ onLogin, onRegister }: Props) {
     <div className="auth-screen">
       <AuthScene />
       <header className="auth-hero">
-        <FarmerIcon size={96} />
         <h1>
           <span>Dead</span> Harvest
         </h1>
