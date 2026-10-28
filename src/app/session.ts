@@ -57,8 +57,13 @@ export async function login(email: string, password: string) {
   await enter(await authApi.login({ email, password }))
 }
 
+// Só cria a conta: o jogador entra depois, ao confirmar o e-mail (verifyEmail)
 export async function register(email: string, password: string, displayName: string) {
-  await enter(await authApi.register({ email, password, displayName }))
+  await authApi.register({ email, password, displayName })
+}
+
+export async function verifyEmail(email: string, code: string) {
+  await enter(await authApi.verifyEmail({ email, code }))
 }
 
 export async function logout() {
