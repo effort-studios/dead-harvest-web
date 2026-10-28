@@ -676,7 +676,7 @@ table.crops th, table.crops td { text-align: left; padding: 3px 4px; border-bott
   .side-rail { gap: 4px; }
   .side-rail .rail-btn { width: 34px; height: 34px; }
   .day-clock { top: 4px; right: 4px; transform: scale(0.5); transform-origin: top right; }
-  .game .hud-hotbar { bottom: 4px; padding: 2px 4px; gap: 3px; --slot-size: clamp(30px, 8vw, 40px); }
+  .game .hud-hotbar { bottom: 4px; left: 4px; transform: none; padding: 2px 4px; gap: 3px; --slot-size: clamp(30px, 8vw, 40px); } /* à esquerda: o canto direito é do botão de música */
   .hud-hotbar .svg-icon { width: 100%; height: 100%; }
   /* moldura mais fina (a de 9px comia o miolo); em 390px os 9 slots ainda deixam lugar para o botão de música */
   .hud-save { bottom: 4px; left: 4px; }
