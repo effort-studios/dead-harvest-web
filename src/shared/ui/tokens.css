@@ -26,24 +26,16 @@
   --text-muted: #b8a888;
   --danger: #d9482b;
 
-  /* ---------- Molduras 9-slice (public/assets/ui) ----------
-     --frame-art: espessura da borda na arte, em pixels da imagem (vira 8 na fase 2, com a arte nova).
-     Em 1x a moldura ocupa --frame-art; em 2x, o dobro. O espaço entre a borda CSS e o conteúdo tem de ser
-     pelo menos o que a moldura ocupa além da borda (ver README.md desta pasta). */
-  --frame-art: 9px;
-  --frame-1x: var(--frame-art);
-  --frame-2x: calc(var(--frame-art) * 2);
-
-  /* Painel (2x): a arte cobre --frame-panel-art, mas a borda CSS reserva só --frame-panel-border; o resto da
-     moldura invade o padding. Por isso o padding nunca pode ser menor que --frame-panel-pad. */
-  --frame-panel-art: var(--frame-2x);
-  --frame-panel-border: 12px;
-  --frame-panel-pad: calc(var(--frame-panel-art) - var(--frame-panel-border));
-
-  /* Botão e slot (1x): a borda CSS é do tamanho da arte, então o padding pode ser zero. */
-  --frame-small-art: var(--frame-1x);
-  --frame-small-border: var(--frame-1x);
-  --frame-small-pad: 0px;
+  /* ---------- Molduras 9-slice (public/assets/ui/v2) ----------
+     --px: tamanho de um pixel da arte na tela (as peças são desenhadas em tamanho real e ampliadas sem borrar).
+     --frame-*-slice: pixels da arte que cada peça reserva em cada lado (a borda do 9-slice). Na tela a borda
+     ocupa slice x --px. As peças foram geradas na PixelLab e montadas por scripts/build_ui_frames_dark.py. */
+  --px: 2px;
+  --frame-panel-slice: 5;
+  --frame-plate-slice: 4;
+  --frame-bar-slice: 5;
+  --frame-slot-slice: 2;
+  --frame-button-slice: 3;
 
   /* ---------- Espaçamento (escala de 4px) ---------- */
   --space-1: 4px;

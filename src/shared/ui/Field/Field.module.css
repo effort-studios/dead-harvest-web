@@ -1,0 +1,24 @@
+.field { display: flex; flex-direction: column; gap: var(--space-1); font-family: var(--font-ui); color: var(--text); }
+.label { font-size: var(--text-sm); }
+.hint { font-size: var(--text-xs); color: var(--text-muted); }
+.error { font-size: var(--text-xs); color: var(--danger); }
+
+/* Controle: moldura de 4 pixels da arte (plate.png), texto claro sobre o interior escuro */
+.control {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 40px;
+  padding: 0 var(--space-1);
+  border: calc(var(--frame-plate-slice) * var(--px)) solid transparent;
+  border-image: url('/assets/ui/v2/plate.png') var(--frame-plate-slice) fill / calc(var(--frame-plate-slice) * var(--px)) stretch;
+  image-rendering: pixelated;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: var(--text-md);
+}
+.control::placeholder { color: var(--text-muted); }
+.control:focus-visible { outline: 2px solid var(--frame-gold-light); outline-offset: 1px; }
+.control:disabled { filter: grayscale(0.8) brightness(0.8); cursor: not-allowed; }
+select.control { cursor: pointer; }
+.invalid { outline: 2px solid var(--danger); outline-offset: 1px; }

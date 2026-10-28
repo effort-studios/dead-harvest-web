@@ -226,7 +226,7 @@ revisar o resultado antes de seguir. Marcar `[x]` só depois de feito e verifica
 | 0 | Decidir o visual | concluída |
 | 1 | Tokens e regras | concluída |
 | 2 | Arte das molduras | em andamento |
-| 3 | Componentes base | pendente |
+| 3 | Componentes base | concluída |
 | 4 | Página `/ui-kit` | pendente |
 | 5 | Migrar a HUD | pendente |
 | 6 | Peças novas | pendente |
@@ -310,8 +310,8 @@ referências de estilo só quando forem planas.
   repetindo o meio, deixa o miolo liso e recolore o botão (dourado e perigo). Saem em `public/assets/ui/v2/`
   (`panel`, `plate`, `bar`, `slot`, `slot_selected`, `button`, `button_pressed`, `button_danger`); as atuais só
   trocam na fase 5. Folha de conferência em `art/ui_frames_dark_preview.png`.
-- [ ] Ajustar `slice` por peça (painel 5, barra 5, placa 4, botão 3, slot 2) e as variáveis da fase 1 em um único lugar
-  (hoje `--frame-art` é 9px, uma única medida; passa a ser uma por peça).
+- [x] Ajustar `slice` por peça (painel 5, barra 5, placa 4, botão 3, slot 2) e as variáveis da fase 1 em um único lugar
+  (`--px` e `--frame-*-slice` no `tokens.css`).
 
 **2.4 Verificação**
 - [ ] Conferir as PNGs e o resultado no navegador (hard reload).
@@ -322,24 +322,24 @@ pressionado, selecionado e desabilitado, e exportado em `shared/ui/index.ts`. Su
 (`.panel`, `.btn`, `.slot`...): as globais saem do `index.css` na fase 5.
 
 **3.1 Molduras**
-- [ ] `Panel`
-- [ ] `Slot`
+- [x] `Panel`
+- [x] `Slot`
 
 **3.2 Ações**
-- [ ] `Button` (com `IconButton` como variante e variante de perigo)
+- [x] `Button` (com `IconButton` como variante e variante de perigo)
 
 **3.3 Campos e navegação**
-- [ ] `Field` (input e select)
-- [ ] `Tabs`
+- [x] `Field` (input e select)
+- [x] `Tabs`
 
 **3.4 Informação**
-- [ ] `Plate`
-- [ ] `Chip`
-- [ ] `ProgressBar` (variantes: progresso, vida, energia, dano)
-- [ ] `Tooltip`
+- [x] `Plate`
+- [x] `Chip`
+- [x] `ProgressBar` (variantes: progresso, vida, energia, dano)
+- [x] `Tooltip`
 
 **3.5 Verificação**
-- [ ] `npm run build` e `npm run lint` passam.
+- [x] `npm run build` e `npm run lint` passam.
 
 ---
 

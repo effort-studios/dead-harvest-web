@@ -9,22 +9,26 @@ Peças reutilizáveis de interface. Regra de dependência: `app → features →
 
 ## Molduras e tamanho mínimo
 
-As molduras são 9-slice em `public/assets/ui`, ampliadas sem borrar (`image-rendering: pixelated`). A arte ocupa
-`--frame-art` pixels em 1x e o dobro em 2x. A borda CSS reserva só uma parte; o resto da moldura invade o padding.
+As molduras são 9-slice em `public/assets/ui/v2`, geradas na PixelLab e montadas por
+`scripts/build_ui_frames_dark.py`. Cada peça é desenhada em tamanho real da arte e ampliada sem borrar
+(`image-rendering: pixelated`). `--px` (em `tokens.css`) é o tamanho de um pixel da arte na tela. A borda de uma
+peça na tela é `slice x --px`.
 
-| Moldura | Escala | Arte | Borda CSS | Padding mínimo | Miolo mínimo |
-|---|---|---|---|---|---|
-| Painel (`panel`, `panel_light`) | 2x | `--frame-panel-art` | `--frame-panel-border` | `--frame-panel-pad` | 24 x 24px |
-| Botão, botão de ícone | 1x | `--frame-small-art` | `--frame-small-border` | `--frame-small-pad` | 18px de altura |
-| Slot | 1x | `--frame-small-art` | `--frame-small-border` | `--frame-small-pad` | 24 x 24px |
-
-Valores de hoje (arte de 9px): painel com arte de 18px, borda de 12px e padding mínimo de 6px; botão e slot com 9px.
-Quando a arte nova de 8px entrar (fase 2), só `--frame-art` muda, e o resto sai das fórmulas.
+| Peça | Arquivo | `slice` | Borda na tela (`--px: 2px`) | Usada em |
+|---|---|---|---|---|
+| Painel | `panel.png` | 5 | 10px | `Panel` |
+| Placa | `plate.png` | 4 | 8px | `Plate`, `Input`, `Select`, `Tabs`, `Tooltip` |
+| Barra | `bar.png` | 5 | 10px (altura fixa de 22px) | `ProgressBar` |
+| Slot | `slot.png`, `slot_selected.png` | 2 | 4px | `Slot` |
+| Botão | `button.png`, `button_pressed.png`, `button_danger.png` | 3 | 6px | `Button`, `IconButton`, aba ativa |
 
 Regras de encaixe:
 
-1. **Padding do painel ≥ `--frame-panel-pad`.** Abaixo disso o conteúdo fica por baixo da moldura.
-2. **Largura e altura mínimas do componente = 2 x borda + miolo mínimo.** Ex.: botão de ícone de 26px precisa de
-   26 + 2 x 9 = 44px. Um botão de 40px (como o de música era) estrangula o ícone.
-3. **Em tela compacta, mudar a borda e a arte juntas** (`border-width` e `border-image-width`), nunca só uma.
+1. **Borda CSS e `border-image-width` são a mesma medida** (`slice x --px`), então o conteúdo nunca fica por baixo da
+   moldura. A exceção é a barra, que tem a borda de layout fina de propósito (o preenchimento fica dentro).
+2. **Tamanho mínimo do miolo:** a moldura ocupa `2 x slice x --px` em cada eixo. Um botão de ícone de 26px dentro de
+   um botão de 40px sobra com 40 - 12 = 28px: cabe. Um botão de 30px não caberia.
+3. **Mudar a escala é mudar `--px`** (por exemplo, 1px em telas pequenas): todas as molduras acompanham.
 4. **Ícone dentro de moldura é bloco centralizado** (`display: block`), sem o respiro de linha de texto.
+5. **Estados:** hover é `filter: brightness`, apertado troca para a imagem `_pressed`, desabilitado é
+   `grayscale`. Nada de cor solta nos componentes: tudo vem de `tokens.css`.
