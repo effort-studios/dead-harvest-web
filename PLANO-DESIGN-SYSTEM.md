@@ -224,7 +224,7 @@ revisar o resultado antes de seguir. Marcar `[x]` só depois de feito e verifica
 |---|---|---|
 | 0 | Decidir o visual | concluída |
 | 1 | Tokens e regras | concluída |
-| 2 | Arte das molduras | pendente (próxima) |
+| 2 | Arte das molduras | em andamento |
 | 3 | Componentes base | pendente |
 | 4 | Página `/ui-kit` | pendente |
 | 5 | Migrar a HUD | pendente |
@@ -283,32 +283,34 @@ Status: `pendente`, `em andamento`, `concluída`. Atualizar a tabela junto com o
 
 ### Fase 2: arte das molduras
 
-**2.1 Grupo 1: painéis**
-- [x] Gerar `panel` e `window` na PixelLab, com a referência como `style_image_base64` e a paleta fixa (v1: job `f6296597-9886-4500-b7b1-5cb173cd6388`, 10 gerações).
-- [ ] Aprovar (4 a 6 anéis de tons vizinhos, sem faixas grossas nem degradê). Só então gastar crédito nos outros.
+Método: PixelLab (`create_ui_asset`), **um job por peça**, cada um com `elements` de um tipo só e uma descrição
+específica, sempre com a paleta fixa (8 hex da seção 2). Cada job devolve uma imagem (192x192, 10 gerações).
 
-**2.2 Grupo 2: botões**
-- [ ] Gerar `button`, `icon_button` e `tab`.
-- [ ] Aprovar.
+Lições do teste (job `f6296597-9886-4500-b7b1-5cb173cd6388`, painel v1): a paleta é respeitada (9 cores), mas pedir
+`panel` e `window` juntos funde as duas num desenho só (placa com aba embaixo); a referência com ornamentos
+(molduras ornamentadas) induz cantos aparafusados mesmo com "no ornaments" no prompt; e a luz sai simétrica.
+Por isso: um elemento por job, prompts com a lista do que não pode aparecer (rebites, cantos, aba, coroa) e
+referências de estilo só quando forem planas.
 
-**2.3 Grupo 3: barra de itens**
-- [ ] Gerar `toolbar`, de onde sai o slot.
-- [ ] Aprovar.
+**2.1 Peças (um job cada)**
+- [ ] Painel (`panel`): moldura dourada fina, interior escuro liso.
+- [ ] Slot afundado (`panel`, descrição de slot de item).
+- [ ] Botão (`button`): dourado, com a variante de perigo gerada a partir dele (recolorida).
+- [ ] Moldura de barra (`health_bar`): molde da barra de progresso, vida e energia.
+- [ ] Aba (`tab`).
 
-**2.4 Grupo 4: barras**
-- [ ] Gerar `health_bar`, molde da barra de progresso e da vida.
-- [ ] Aprovar.
+**2.2 Aprovação, uma peça por vez**
+- [ ] Aprovar cada peça (poucos anéis de tons vizinhos, sem ornamento, interior liso, bordas retas para o 9-slice).
+- [ ] Se não passar, ajustar o prompt e repetir só aquela peça (10 gerações por tentativa).
 
-**2.5 Pipeline de arte**
+**2.3 Pipeline de arte**
 - [ ] Guardar as saídas cruas em `art/pixellab/raw/ui`.
 - [ ] Atualizar `scripts/build_ui_frames.py`: cortar cada peça, reduzir o 3x, limpar o miolo (liso, porque o 9-slice
-  estica) e produzir `panel.png`, `slot.png` e `button.png` (e variantes).
+  estica), normalizar a borda para 8px e produzir `panel.png`, `slot.png`, `button.png` (e variantes).
 - [ ] Ajustar `slice` e as variáveis da fase 1 em um único lugar.
 
-**2.6 Verificação**
+**2.4 Verificação**
 - [ ] Conferir as PNGs e o resultado no navegador (hard reload).
-
----
 
 ### Fase 3: componentes base
 Cada componente: `Nome.tsx` + `Nome.module.css`, variações por prop (`variant`, `size`), estados normal, hover,
