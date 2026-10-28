@@ -5,7 +5,7 @@ import { AuthScreen } from '@/features/auth/components/AuthScreen'
 import { Hud } from '@/features/farm/components/Hud'
 import { Avatar } from '@/features/profile/components/Avatar'
 import { readLastUser } from '@/features/profile/render/avatarCache'
-import { init, login, logout, register, useSession } from './session'
+import { init, login, logout, register, useSession, verifyEmail } from './session'
 
 // Em modo dev o StrictMode roda o effect 2x; sem isso a inicialização rodaria duas vezes
 let started = false
@@ -42,7 +42,7 @@ export default function App() {
   }, [status])
 
   if (status === 'loading') return <LoadingScreen />
-  if (status === 'anonymous') return <AuthScreen onLogin={login} onRegister={register} />
+  if (status === 'anonymous') return <AuthScreen onLogin={login} onRegister={register} onVerifyEmail={verifyEmail} />
   if (status === 'error') return <p className="error">Não foi possível conectar à API: {error}</p>
   return (
     <div className="game">

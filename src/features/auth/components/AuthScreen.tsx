@@ -1,14 +1,16 @@
 import { useState, type FormEvent } from 'react'
-import { forgotPassword, resetPassword } from '../api'
+import { forgotPassword, resendVerification, resetPassword } from '../api'
 import { AuthScene } from './AuthScene'
+import { ApiError } from '@/shared/api/http'
 import { Button, Field, Input, Panel } from '@/shared/ui'
 import { EyeIcon, EyeOffIcon } from '@/shared/ui/icons'
 
-type Mode = 'login' | 'register' | 'forgot' | 'reset'
+type Mode = 'login' | 'register' | 'verify' | 'forgot' | 'reset'
 
 const TITLES: Record<Mode, string> = {
   login: 'Entrar',
   register: 'Criar conta',
+  verify: 'Confirmar e-mail',
   forgot: 'Esqueci minha senha',
   reset: 'Nova senha',
 }
@@ -17,9 +19,10 @@ const TITLES: Record<Mode, string> = {
 type Props = {
   onLogin: (email: string, password: string) => Promise<void>
   onRegister: (email: string, password: string, displayName: string) => Promise<void>
+  onVerifyEmail: (email: string, code: string) => Promise<void>
 }
 
-export function AuthScreen({ onLogin, onRegister }: Props) {
+export function AuthScreen({ onLogin, onRegister, onVerifyEmail }: Props) {
 
   const [mode, setMode] = useState<Mode>('login')
   const [email, setEmail] = useState('')
@@ -44,8 +47,14 @@ export function AuthScreen({ onLogin, onRegister }: Props) {
     setError(null)
     try {
       if (mode === 'login') await onLogin(email, password)
-      else if (mode === 'register') await onRegister(email, password, displayName)
-      else if (mode === 'forgot') {
+      else if (mode === 'register') {
+        await onRegister(email, password, displayName)
+        go('verify')
+        setNotice('Conta criada! Enviamos um código de 6 dígitos para o seu e-mail. Digite-o para confirmar e entrar.')
+      } else if (mode === 'verify') {
+        await onVerifyEmail(email, code)
+        setCode('')
+      } else if (mode === 'forgot') {
         await forgotPassword(email)
         go('reset')
         setNotice('Se existir uma conta com este e-mail, enviamos um código de 6 dígitos. Ele vale 15 minutos.')
@@ -56,9 +65,26 @@ export function AuthScreen({ onLogin, onRegister }: Props) {
         setNotice('Senha alterada! Entre com a senha nova.')
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Algo deu errado')
+      if (mode === 'login' && err instanceof ApiError && err.code === 'EMAIL_NOT_VERIFIED') {
+        // acertou a senha, mas nunca confirmou o e-mail: manda um código novo e leva para a confirmação
+        await resendVerification(email).catch(() => undefined)
+        go('verify')
+        setNotice('Seu e-mail ainda não foi confirmado. Enviamos um código novo; digite-o para entrar.')
+      } else {
+        setError(err instanceof Error ? err.message : 'Algo deu errado')
+      }
     } finally {
       setBusy(false)
+    }
+  }
+
+  async function resend() {
+    setError(null)
+    try {
+      await resendVerification(email)
+      setNotice('Se a conta ainda não foi confirmada, enviamos um código novo. Pode levar alguns instantes.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Algo deu errado')
     }
   }
 
@@ -74,7 +100,7 @@ export function AuthScreen({ onLogin, onRegister }: Props) {
       <Panel className="auth-card">
       <form onSubmit={submit}>
         {/* entrar e criar conta: o botão já diz o que faz; só a recuperação de senha precisa de título */}
-        {(mode === 'forgot' || mode === 'reset') && <h2>{TITLES[mode]}</h2>}
+        {(mode === 'forgot' || mode === 'reset' || mode === 'verify') && <h2>{TITLES[mode]}</h2>}
         {(mode === 'login' || mode === 'register') && <h2>{mode === 'login' ? 'Bem-vindo de volta' : 'Comece sua fazenda'}</h2>}
 
         {notice && <p className="auth-notice">{notice}</p>}
@@ -89,13 +115,13 @@ export function AuthScreen({ onLogin, onRegister }: Props) {
           <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" autoFocus />
         </Field>
 
-        {mode === 'reset' && (
+        {(mode === 'reset' || mode === 'verify') && (
           <Field label="Código recebido por e-mail">
             <Input value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" pattern="\d{6}" placeholder="000000" required autoComplete="one-time-code" />
           </Field>
         )}
 
-        {mode !== 'forgot' && (
+        {mode !== 'forgot' && mode !== 'verify' && (
           <Field label={mode === 'reset' ? 'Nova senha' : 'Senha'} hint={mode !== 'login' ? 'Pelo menos 8 caracteres.' : undefined}>
             <span className="password-field">
               <Input
@@ -124,7 +150,7 @@ export function AuthScreen({ onLogin, onRegister }: Props) {
         {error && <p className="auth-error" role="alert">{error}</p>}
 
         <Button type="submit" className="auth-submit" disabled={busy}>
-          {busy ? 'Aguarde...' : mode === 'forgot' ? 'Enviar código' : TITLES[mode]}
+          {busy ? 'Aguarde...' : mode === 'forgot' ? 'Enviar código' : mode === 'verify' ? 'Confirmar e entrar' : TITLES[mode]}
         </Button>
 
         <div className="auth-links">
@@ -135,7 +161,8 @@ export function AuthScreen({ onLogin, onRegister }: Props) {
             </>
           )}
           {mode === 'register' && <button type="button" onClick={() => go('login')}>Já tenho conta</button>}
-          {(mode === 'forgot' || mode === 'reset') && <button type="button" onClick={() => go('login')}>Voltar para o login</button>}
+          {mode === 'verify' && <button type="button" onClick={resend}>Reenviar código</button>}
+          {(mode === 'forgot' || mode === 'reset' || mode === 'verify') && <button type="button" onClick={() => go('login')}>Voltar para o login</button>}
         </div>
       </form>
       </Panel>

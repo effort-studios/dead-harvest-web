@@ -11,9 +11,17 @@ export async function fetchMe(): Promise<User | null> {
   }
 }
 
-export async function register(input: { email: string; password: string; displayName: string }): Promise<User> {
-  return (await post<{ user: User }>('/auth/register', input)).user
+// Cria a conta, mas NÃO entra: falta confirmar o e-mail com o código que chega por e-mail (verifyEmail)
+export async function register(input: { email: string; password: string; displayName: string }): Promise<void> {
+  await post<{ user: User }>('/auth/register', input)
 }
+
+// Código certo: e-mail confirmado e já entra (a API abre a sessão)
+export async function verifyEmail(input: { email: string; code: string }): Promise<User> {
+  return (await post<{ user: User }>('/auth/verify-email', input)).user
+}
+
+export const resendVerification = (email: string) => post<void>('/auth/resend-verification', { email })
 
 export async function login(input: { email: string; password: string }): Promise<User> {
   return (await post<{ user: User }>('/auth/login', input)).user
