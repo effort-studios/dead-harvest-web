@@ -17,6 +17,25 @@ export type Pose = {
 
 const STRIDE_PER_CELL = 2.6 // passos (fase) por célula andada
 
+// Velocidade de caminhada em células por segundo: regra do servidor, chega pelo catálogo
+let walkSpeed = 3.4
+export const setFarmerWalkSpeed = (cellsPerSecond: number) => {
+  walkSpeed = cellsPerSecond
+}
+export const farmerWalkSpeed = () => walkSpeed
+
+// Andando livre (WASD): a posição é a do cliente, sem fila nem horários do servidor.
+// `walked` = distância total andada, para a fase do passo.
+export type FreeWalkState = { r: number; c: number; facing: Pose['facing']; moving: boolean; walked: number }
+export const freeWalkPose = (w: FreeWalkState): Pose => ({
+  r: w.r,
+  c: w.c,
+  facing: w.facing,
+  walking: w.moving,
+  phase: w.walked * STRIDE_PER_CELL,
+  acting: null,
+})
+
 const ACTION: Record<FarmJob['action'], FarmerAction | null> = {
   till: 'till',
   untill: 'till', // mesmo gesto: mexe na terra

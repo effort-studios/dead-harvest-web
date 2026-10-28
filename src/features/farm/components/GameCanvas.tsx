@@ -19,7 +19,8 @@ import { freeSlots, placementProblem, plotCell, tileMenu, type ClickMode } from 
 import { buildingPos, growthRate, machineById } from '@/features/farm/model/production'
 import { CROPS, formatDuration, isCropId } from '@/features/farm/model/crops'
 import { FRUITS, TREES } from '@/features/farm/model/trees'
-import { farmerPose, type Pose } from '@/features/farm/model/farmer'
+import { farmerPose, freeWalkPose, type Pose } from '@/features/farm/model/farmer'
+import { useFreeWalk } from './useFreeWalk'
 import { useProfileStore } from '@/features/profile/store'
 import { skyTint } from '@/features/farm/model/daycycle'
 import { loadSprites, SCENE_FPS } from '@/features/farm/render/sprites'
@@ -77,6 +78,7 @@ export function GameCanvas() {
     camX: number
     camY: number
     moved: boolean
+    button: number
     building: { target: YardBuilding; dr: number; dc: number } | null
   } | null>(null)
   // Prévia do prédio: o que está sendo arrastado ou o escolhido na loja para construir; onde ele ficaria e se pode
@@ -89,6 +91,7 @@ export function GameCanvas() {
   const buildingHover = useRef<YardBuilding | null>(null) // prédio (ou lote à venda) sob o mouse
   const mode = useRef<ClickMode>('tile') // alterado por Shift/Ctrl
   const drawRef = useRef<() => void>(() => {})
+  const freeWalk = useFreeWalk(() => drawRef.current())
   const facing = useRef<Pose['facing']>({ dr: 1, dc: 0 }) // para onde o fazendeiro olhava na última vez que se mexeu
 
   useEffect(() => {
@@ -119,7 +122,8 @@ export function GameCanvas() {
     const ready = new Set(readyTrees ? readyTrees.split(',') : [])
     const avatar = useProfileStore.getState().user?.avatar
     // O fazendeiro é do servidor: a pose sai dos horários da fila que ele mandou
-    const pose = farmerPose(data.farmer, serverNow(), facing.current)
+    const walking = freeWalk.current // andando livre (WASD): a posição é a do cliente
+    const pose = walking ? freeWalkPose(walking) : farmerPose(data.farmer, serverNow(), facing.current)
     if (pose.walking || pose.acting) facing.current = pose.facing
     const queued = data.farmer.jobs.filter((j) => j.row !== null).map((j) => ({ r: j.targetRow, c: j.targetCol }))
     drawWorld(
@@ -128,7 +132,7 @@ export function GameCanvas() {
       yardView(data, serverNow(), ghost.current), ghost.current?.target ?? buildingHover.current,
       { hover: treeHover.current, queued: data.farmer.jobs.filter((j) => j.treeId !== null).map((j) => j.treeId!) },
     )
-  }, [sprites, size, readyTrees])
+  }, [sprites, size, readyTrees, freeWalk])
 
   // Redesenha quando os terrenos, os prédios, as imagens ou o tamanho da janela mudam
   useEffect(() => {
@@ -390,8 +394,8 @@ export function GameCanvas() {
     }
     afterPinch.current = false
     const world = worldAt(e)
-    const building = readyTreeAt(world.x, world.y) ? null : grabBuildingAt(world.x, world.y)
-    drag.current = { startX: e.clientX, startY: e.clientY, camX: camera.current.x, camY: camera.current.y, moved: false, building }
+    const building = e.button !== 0 || readyTreeAt(world.x, world.y) ? null : grabBuildingAt(world.x, world.y)
+    drag.current = { startX: e.clientX, startY: e.clientY, camX: camera.current.x, camY: camera.current.y, moved: false, button: e.button, building }
   }
 
   // Arrastando um prédio: ele segue o mouse de célula em célula
@@ -425,6 +429,7 @@ export function GameCanvas() {
       updateHover(e) // mouse solto: só atualiza o contorno do tile
       return
     }
+    if (d.button !== 0) return // só o botão esquerdo arrasta o mapa; o direito só abre o menu
     setTipTile(null) // arrastando: sem balão
     setTipTree(null)
     const dx = e.clientX - d.startX
@@ -456,7 +461,13 @@ export function GameCanvas() {
       scheduleDraw()
       return
     }
-    if (!d || d.moved) return // foi um arrasto, não um clique
+    if (!d || d.moved || d.button === 1) return // foi um arrasto, não um clique
+    // Botão direito abre o menu; no toque não há botão direito, então o toque simples continua abrindo o menu
+    const secondary = d.button === 2 || e.pointerType === 'touch'
+    if (d.button === 2 && useFarmStore.getState().placing) {
+      useFarmStore.getState().startPlacing(null) // direito enquanto escolhe onde construir: cancela
+      return
+    }
     if (useFarmStore.getState().placing) {
       // clicou onde construir: o store confere o lugar (e avisa se não pode, continuando a escolha)
       updatePlacing(e)
@@ -464,6 +475,10 @@ export function GameCanvas() {
       return
     }
     const world = worldAt(e)
+    if (d.button === 2) {
+      openMenu(e, world)
+      return
+    }
     const tree = readyTreeAt(world.x, world.y)
     if (tree) {
       useFarmStore.getState().queueTree(tree)
@@ -480,23 +495,29 @@ export function GameCanvas() {
       useFarmStore.getState().openBuilding(building)
       return
     }
-    const cell = tileFromWorld(world.x, world.y)
-    // Alt + clique: o fazendeiro só anda até lá, sem agir
-    if (e.altKey && !useFarmStore.getState().buyingPlot) {
-      moveTo(cell.row, cell.col)
-      return
-    }
     const target = targetAt(world.x, world.y, modeOf(e))
     if (target?.kind === 'slot') useFarmStore.getState().buyPlot(target.x, target.y)
     // Shift/Ctrl + clique: age direto na linha/coluna, sem menu
     else if (target && target.mode !== 'tile') useFarmStore.getState().queueTiles(target.plot, target.row, target.col, target.mode)
     else if (!useFarmStore.getState().buyingPlot) {
-      // clique simples: abre o menu do que dá para fazer ali (em cima de um tile ou só no chão)
-      const rect = e.currentTarget.getBoundingClientRect()
-      setTipTile(null)
-      setTipTree(null)
-      setMenu({ sx: e.clientX - rect.left, sy: e.clientY - rect.top, tile: target?.kind === 'tile' ? { plot: target.plot, row: target.row, col: target.col } : null, cell })
+      // clique esquerdo simples: o fazendeiro anda até lá (no toque, em cima de um tile abre o menu)
+      if (!secondary || !openMenu(e, world)) {
+        const cell = tileFromWorld(world.x, world.y)
+        moveTo(cell.row, cell.col)
+      }
     }
+  }
+
+  // Menu do que dá para fazer no tile sob o mouse; devolve false se não há tile ali (fora dos terrenos)
+  function openMenu(e: React.PointerEvent<HTMLCanvasElement>, world: { x: number; y: number }) {
+    if (useFarmStore.getState().buyingPlot) return false
+    const target = targetAt(world.x, world.y, 'tile')
+    if (target?.kind !== 'tile') return false
+    const rect = e.currentTarget.getBoundingClientRect()
+    setTipTile(null)
+    setTipTree(null)
+    setMenu({ sx: e.clientX - rect.left, sy: e.clientY - rect.top, tile: { plot: target.plot, row: target.row, col: target.col } })
+    return true
   }
 
   return (
@@ -543,25 +564,25 @@ export function GameCanvas() {
 }
 
 type TileRef = { plot: number; row: number; col: number }
-type MenuAt = { sx: number; sy: number; tile: TileRef | null; cell: { row: number; col: number } }
+type MenuAt = { sx: number; sy: number; tile: TileRef }
 
 const MENU_WIDTH = 210
 const MENU_ROW = 38
 
-// Menu do clique: o que dá para fazer no tile (arar, plantar, colher, regar, adubar, desfazer a aragem) e
-// "Mover para cá". Fora dos terrenos só tem o mover. Item sem condição de uso fica apagado, com o motivo na dica.
+// Menu do clique direito: o que dá para fazer no tile (arar, plantar, colher, regar, adubar, desfazer a aragem).
+// Item sem condição de uso fica apagado, com o motivo na dica.
 function TileMenu({ at, size, onClose }: { at: MenuAt; size: Size; onClose: () => void }) {
   const data = useFarmStore((s) => s.data)
   const selected = useFarmStore((s) => s.selected)
-  const menu = data && at.tile ? tileMenu(data, at.tile.plot, at.tile.row, at.tile.col, selected) : null
-  const rows = (menu?.items.length ?? 0) + (menu?.subtitle ? 4 : 3)
+  const menu = data ? tileMenu(data, at.tile.plot, at.tile.row, at.tile.col, selected) : null
+  const rows = (menu?.items.length ?? 0) + (menu?.subtitle ? 3 : 2)
   const left = Math.max(4, Math.min(at.sx + 8, size.width - MENU_WIDTH - 8))
   const top = Math.max(4, Math.min(at.sy + 8, size.height - rows * MENU_ROW - 40))
   const store = useFarmStore.getState()
 
   return (
     <Panel className="ctx-menu" style={{ left, top, width: MENU_WIDTH }} onContextMenu={(e) => e.preventDefault()}>
-      <div className="ctx-title">{menu?.title ?? 'Chão'}</div>
+      <div className="ctx-title">{menu?.title}</div>
       {menu?.subtitle && <div className="ctx-sub">{menu.subtitle}</div>}
       {menu?.items.map((item) => (
         <Button
@@ -570,14 +591,14 @@ function TileMenu({ at, size, onClose }: { at: MenuAt; size: Size; onClose: () =
           disabled={!!item.disabled}
           title={item.disabled}
           onClick={() => {
-            if (at.tile) store.queueTileAction(at.tile.plot, at.tile.row, at.tile.col, item.action, item.crop)
+            store.queueTileAction(at.tile.plot, at.tile.row, at.tile.col, item.action, item.crop)
             onClose()
           }}
         >
           {item.label}
         </Button>
       ))}
-      {at.tile && menu?.items.some((i) => !i.disabled && i.action !== 'untill') && (
+      {menu?.items.some((i) => !i.disabled && i.action !== 'untill') && (
         <div className="ctx-line">
           {(['row', 'col'] as const).map((mode) => (
             <Button
@@ -585,7 +606,7 @@ function TileMenu({ at, size, onClose }: { at: MenuAt; size: Size; onClose: () =
               size="sm"
               title={`Mesma ação na ${mode === 'row' ? 'linha' : 'coluna'} inteira (Shift ou Ctrl + clique)`}
               onClick={() => {
-                store.queueTiles(at.tile!.plot, at.tile!.row, at.tile!.col, mode)
+                store.queueTiles(at.tile.plot, at.tile.row, at.tile.col, mode)
                 onClose()
               }}
             >
@@ -594,16 +615,6 @@ function TileMenu({ at, size, onClose }: { at: MenuAt; size: Size; onClose: () =
           ))}
         </div>
       )}
-      <Button
-        size="sm"
-        title="Atalho: Alt + clique"
-        onClick={() => {
-          moveTo(at.cell.row, at.cell.col)
-          onClose()
-        }}
-      >
-        Mover para cá
-      </Button>
     </Panel>
   )
 }
