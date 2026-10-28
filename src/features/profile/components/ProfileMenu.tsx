@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useProfileStore } from '../store'
 import { Avatar } from './Avatar'
+import { Panel, Plate } from '@/shared/ui'
 import { CoinIcon } from '@/shared/ui/icons'
 import { ProfileEditor } from './ProfileEditor'
 
@@ -33,18 +34,20 @@ export function ProfileMenu({ money, onLogout }: { money: number; onLogout: () =
 
   return (
     <div className="profile" ref={ref}>
-      <button className="panel hud-player" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)} title="Perfil e conta">
-        <div className="portrait">
-          <Avatar avatar={user.avatar} size={80} />
-        </div>
-        <div className="player-info">
-          <div className="plate player-name">{user.displayName}</div>
-          <div className="plate money">
-            <CoinIcon size={22} /> {money}
+      <Panel className="hud-player">
+        <button className="hud-player-btn" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)} title="Perfil e conta">
+          <div className="portrait">
+            <Avatar avatar={user.avatar} size={80} />
           </div>
-        </div>
-        <span className={`select-caret ${open ? 'up' : ''}`} aria-hidden="true" />
-      </button>
+          <div className="player-info">
+            <Plate>{user.displayName}</Plate>
+            <Plate className="money">
+              <CoinIcon size={22} /> {money}
+            </Plate>
+          </div>
+          <span className={`select-caret ${open ? 'up' : ''}`} aria-hidden="true" />
+        </button>
+      </Panel>
 
       {open && (
         <div className="panel-light profile-menu" role="menu">

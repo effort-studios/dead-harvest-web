@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { formatDuration } from '@/features/farm/model/crops'
 import { clockTime, dayHour, dayPhase, PHASE_LABEL, phaseSpan, type DayPhase } from '@/features/farm/model/daycycle'
+import { Panel, Plate } from '@/shared/ui'
 import { LateNightIcon, MoonIcon, SunIcon, SunriseIcon, SunsetIcon } from './icons'
 
 // Relógio do dia: uma cúpula em pixel art com o céu da hora atual e um ponteiro de 24 horas, ao lado
@@ -207,14 +208,16 @@ export function DayClock({ time, day }: { time: number; day: number }) {
     >
       <canvas ref={canvasRef} className="clock-dome" width={W} height={H} aria-hidden="true" />
 
-      <div className="clock-frame">
-        <div className="clock-plate clock-day">Dia {day}</div>
-        <div className="clock-plate clock-phase">
+      <Panel className="clock-frame">
+        <Plate className="clock-day">Dia {day}</Plate>
+        <Plate className="clock-phase">
           <PhaseIcon size={20} />
           <span>{label}</span>
-        </div>
-        <div className="clock-plate clock-time">{clockTime(time)}</div>
-      </div>
+        </Plate>
+        <Plate size="lg" className="clock-time">
+          {clockTime(time)}
+        </Plate>
+      </Panel>
     </div>
   )
 }

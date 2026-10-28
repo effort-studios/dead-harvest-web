@@ -45,24 +45,12 @@ canvas:active {
    Molduras em pixel art (public/assets/ui, geradas na PixelLab e montadas por scripts/build_ui_frames.py),
    aplicadas como 9-slice: a borda tem 9 pixels da arte e é ampliada sem borrar (2x nos painéis, 1x nos
    botões e slots). Placas creme por dentro e sombra dura (sem desfoque). */
-.panel,
 .panel-light,
 .btn,
 .portrait {
   box-sizing: border-box;
   font: inherit;
 }
-/* moldura dourada (barra de itens, painel do jogador, relógio): a arte ocupa 18px, os 6 de dentro por cima
-   do padding */
-.panel,
-.clock-frame {
-  background: none;
-  border: 12px solid transparent;
-  border-image: url('/assets/ui/panel.png') 9 fill / 18px stretch;
-  image-rendering: pixelated;
-  color: var(--ink);
-}
-.panel { filter: var(--hard-shadow); }
 /* moldura dourada com o miolo creme (menus, janelas, login) */
 .panel-light {
   background: none;
@@ -82,22 +70,6 @@ canvas:active {
   box-shadow: none;
   image-rendering: pixelated;
 }
-/* placa creme (como as do relógio) */
-.plate,
-.clock-plate {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  height: 26px;
-  color: var(--ink);
-  font-weight: 600;
-  background: var(--plate);
-  border: 2px solid var(--plate-border);
-  border-radius: 6px;
-  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.5);
-}
-
 /* ---------- HUD ---------- */
 .hud-left {
   position: absolute;
@@ -108,11 +80,19 @@ canvas:active {
   align-items: flex-start;
   gap: 8px;
 }
-.hud-player {
+.hud-left .hud-player { padding: 4px 8px 4px 4px; filter: var(--hard-shadow); }
+.hud-left .hud-player:hover { filter: var(--hard-shadow) brightness(1.1); }
+.hud-player-btn {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 7px 12px 7px 7px;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 .portrait {
   width: 104px;
@@ -130,10 +110,9 @@ canvas:active {
 .portrait .svg-icon,
 .panel-close .svg-icon { display: block; }
 .panel-close { display: flex; align-items: center; justify-content: center; padding: 2px; }
-.money, .btn { display: inline-flex; align-items: center; gap: 6px; }
+.btn { display: inline-flex; align-items: center; gap: 6px; }
 .panel-title { display: inline-flex; align-items: center; gap: 8px; }
 .player-info { display: flex; flex-direction: column; gap: 4px; min-width: 96px; }
-.player-name { padding: 0 8px; font-size: 14px; }
 .sky-tint {
   position: absolute;
   inset: 0;
@@ -141,7 +120,7 @@ canvas:active {
   mix-blend-mode: multiply;
   transition: background-color 1s linear; /* 1 tick por segundo: a mudança fica contínua */
 }
-.money { padding: 0 8px; height: 29px; justify-content: flex-start; font-size: 20px; font-weight: 700; color: var(--ink); }
+.hud-player .money { justify-content: flex-start; font-size: 20px; }
 
 .day-clock {
   position: absolute;
@@ -154,16 +133,16 @@ canvas:active {
 }
 /* cúpula desenhada em 40x52 e ampliada 2x sem suavizar */
 .clock-dome { position: relative; z-index: 1; margin-right: -10px; flex: none; width: 80px; height: 104px; image-rendering: pixelated; }
-.clock-frame {
+.day-clock .clock-frame {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  width: 124px;
-  padding: 0 0 0 9px;
+  width: 150px;
+  padding: 2px 2px 2px 12px; /* a cúpula cobre a esquerda da moldura */
 }
-.clock-day { font-size: 16px; height: 23px; }
-.clock-phase { font-size: 13px; gap: 4px; } /* "Entardecer" precisa caber */
-.clock-time { font-size: 22px; height: 29px; font-weight: 700; letter-spacing: 1px; } /* a hora é a informação principal */
+.day-clock .clock-day { min-height: 28px; font-size: 16px; }
+.day-clock .clock-phase { min-height: 28px; font-size: 13px; } /* "Entardecer" precisa caber */
+.day-clock .clock-time { min-height: 36px; font-size: 22px; } /* a hora é a informação principal */
 
 .game .hud-hotbar {
   position: absolute;
@@ -519,13 +498,8 @@ table.crops th, table.crops td { text-align: left; padding: 3px 4px; border-bott
 
 /* ---------- Menu do perfil e editor de avatar ---------- */
 .profile { position: relative; }
-button.hud-player {
-  text-align: left;
-  cursor: pointer;
-}
-button.hud-player:hover { background: #f6c04a; }
 .player-info { flex: 1; }
-.hud-player .select-caret { border-top-color: var(--outline); margin-left: 2px; }
+.hud-player .select-caret { border-top-color: var(--text); margin-left: 2px; }
 .profile-menu {
   position: absolute;
   z-index: 6;
@@ -613,7 +587,7 @@ button.hud-player:hover { background: #f6c04a; }
 .hud-player .portrait {
   width: auto;
   height: auto;
-  border: 2px solid var(--plate-border);
+  border: 2px solid var(--frame-outline);
   border-radius: 6px;
   overflow: hidden;
 }
@@ -844,14 +818,14 @@ button.hud-player:hover { background: #f6c04a; }
 @media (max-height: 500px), (max-width: 600px) {
   :root { --px: 1px; } /* molduras do design system no tamanho de 1 pixel da arte */
   .hud-left { top: 4px; left: 4px; gap: 4px; }
-  .hud-player { gap: 5px; padding: 3px 6px 3px 3px; }
+  .hud-left .hud-player { padding: 2px 4px; }
+  .hud-player-btn { gap: 5px; }
   .hud-player .avatar-img { width: 40px; height: 40px; }
   .hud-player .portrait { border-width: 1px; border-radius: 4px; }
   .player-info { min-width: 76px; gap: 2px; }
-  .plate { height: 18px; border-width: 1px; }
-  .player-name { font-size: 11px; padding: 0 5px; }
-  .money { height: 20px; padding: 0 5px; font-size: 13px; gap: 4px; }
-  .money .svg-icon { width: 15px; height: 15px; }
+  .hud-player .player-info > div { min-height: 22px; padding: 0 4px; font-size: 11px; }
+  .hud-player .money { font-size: 13px; gap: 4px; }
+  .hud-player .money .svg-icon { width: 15px; height: 15px; }
   .hud-player .select-caret { transform: scale(0.75); }
   .side-rail { gap: 4px; }
   .side-rail .rail-btn { width: 34px; height: 34px; }
