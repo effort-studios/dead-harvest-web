@@ -1,0 +1,15 @@
+/* A cena é uma imagem de 640 x 360 ampliada para cobrir a tela (3x em 1920 x 1080), sem suavizar */
+.scene {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #1a1030 url('/assets/login_scene.png') center bottom / cover no-repeat;
+  image-rendering: pixelated;
+}
+
+/* escurece as bordas para o conteúdo ficar em destaque */
+.vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 40% 50%, transparent 55%, rgba(8, 4, 20, 0.5) 100%);
+}

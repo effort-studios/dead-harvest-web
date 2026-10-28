@@ -1,10 +1,11 @@
 import { useEffect } from 'react'
 import { CROPS, formatDuration } from '@/features/farm/model/crops'
 import { FERTILIZER, GROWTH_BONUS, WATERING_CAN } from '@/features/farm/model/production'
-import { hotbarCount, hotbarItems, type HotbarItem } from '@/features/farm/model/state'
-import { useFarmStore } from '../store'
+import { harvestables, hotbarCount, hotbarItems, type HotbarItem } from '@/features/farm/model/state'
+import { serverNow, useFarmStore } from '../store'
 import { CropIcon } from './icons'
 import { CanIcon, ItemIcon } from './itemIcons'
+import { Button, Panel, Slot } from '@/shared/ui'
 import { ProfileMenu } from '@/features/profile/components/ProfileMenu'
 import { BuildingPanel } from './BuildingPanel'
 import { DayClock } from './DayClock'
@@ -27,7 +28,7 @@ const HOTBAR_SLOTS = 9
 // dia (canto superior direito), barra de itens (embaixo) e erros de salvamento (embaixo à esquerda).
 // Vida, energia, missões e minimapa ainda não existem no jogo e ficam para depois do MVP.
 export function Hud({ onLogout }: { onLogout: () => void }) {
-  const { data, error, selected, select, cancelQueue } = useFarmStore()
+  const { data, error, selected, select, cancelQueue, harvestAll } = useFarmStore()
 
   // Teclas 1 a 9 escolhem o item do slot correspondente (só existem slots para o que o jogador tem)
   useEffect(() => {
@@ -42,6 +43,8 @@ export function Hud({ onLogout }: { onLogout: () => void }) {
 
   if (!data) return null
   const owned = hotbarItems(data)
+  const ready = harvestables(data, serverNow())
+  const readyCount = ready.plots.reduce((n, p) => n + p.tiles.length, 0) + ready.trees.length
 
   return (
     <>
@@ -55,31 +58,36 @@ export function Hud({ onLogout }: { onLogout: () => void }) {
       <MusicPlayer />
       <BuildingPanel />
 
-      <div className="panel hud-hotbar">
+      <Panel className="hud-hotbar">
         {Array.from({ length: HOTBAR_SLOTS }, (_, i) => {
           const item = owned[i]
           return (
-            <button
+            <Slot
               key={i}
-              className={`slot ${item && item === selected ? 'selected' : ''}`}
+              hotkey={i + 1}
+              count={item ? hotbarCount(data, item) : undefined}
+              selected={!!item && item === selected}
               disabled={!item}
               onClick={() => item && select(item)}
               title={item ? slotTitle(item) : undefined}
             >
-              <span className="slot-key">{i + 1}</span>
               {item && (item === 'fertilizer' ? <ItemIcon itemId={FERTILIZER.itemId} size={34} /> : item === 'can' ? <CanIcon size={34} /> : <CropIcon crop={item} size={34} />)}
-              {item && <span className="slot-qty">{hotbarCount(data, item)}</span>}
-            </button>
+            </Slot>
           )
         })}
-      </div>
+      </Panel>
 
-      {(error || data.farmer.jobs.length > 0) && (
+      {(error || data.farmer.jobs.length > 0 || readyCount > 0) && (
         <div className="hud-save">
+          {readyCount > 0 && (
+            <Button onClick={harvestAll} title="O fazendeiro colhe tudo que está pronto: plantas e árvores">
+              Colher tudo ({readyCount})
+            </Button>
+          )}
           {data.farmer.jobs.length > 0 && (
-            <button className="btn danger" onClick={cancelQueue} title="Cancela as tarefas que ele ainda não fez; ele para onde está">
+            <Button variant="danger" onClick={cancelQueue} title="Cancela as tarefas que ele ainda não fez; ele para onde está">
               Parar fazendeiro ({data.farmer.jobs.length})
-            </button>
+            </Button>
           )}
           {error && <span className="error">{error}</span>}
         </div>

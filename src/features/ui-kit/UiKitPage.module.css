@@ -1,0 +1,25 @@
+/* O resto do app trava a rolagem da página; aqui a vitrine rola por dentro */
+.page {
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  padding: var(--space-4);
+  background: #4f7f3b;
+  color: var(--text);
+  font-family: var(--font-ui);
+}
+.header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); margin-bottom: var(--space-3); }
+.header h1 { margin: 0; font-size: var(--text-xl); }
+.scale { display: flex; align-items: center; gap: var(--space-1); font-size: var(--text-sm); }
+
+.section { margin-bottom: var(--space-4); }
+.section h2 { margin: 0 0 var(--space-2); font-size: var(--text-md); text-shadow: 0 2px 0 rgba(0, 0, 0, 0.4); }
+
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2); }
+.rowLabel { width: 110px; font-size: var(--text-xs); text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4); }
+.rowItems { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+
+.demoPanel { max-width: 320px; }
+.demoPanel p { margin: var(--space-1) 0 0; font-size: var(--text-sm); }
+.fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--space-3); max-width: 760px; }
+.bars { display: flex; flex-direction: column; gap: var(--space-2); max-width: 360px; }

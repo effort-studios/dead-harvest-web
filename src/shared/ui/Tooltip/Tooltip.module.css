@@ -1,0 +1,16 @@
+/* Moldura de 4 pixels da arte (plate.png) */
+.tooltip {
+  box-sizing: border-box;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 0 var(--space-1);
+  border: calc(var(--frame-plate-slice) * var(--px)) solid transparent;
+  border-image: url('/assets/ui/plate.png') var(--frame-plate-slice) fill / calc(var(--frame-plate-slice) * var(--px)) stretch;
+  image-rendering: pixelated;
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  white-space: nowrap;
+}
+.tooltip small { color: var(--text-muted); font-size: var(--text-xs); }

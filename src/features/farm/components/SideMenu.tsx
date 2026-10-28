@@ -19,6 +19,7 @@ import {
   type ItemKind,
 } from '@/features/farm/model/production'
 import { serverNow, useFarmStore } from '../store'
+import { Button, IconButton, Panel } from '@/shared/ui'
 import { CloseIcon, CoinIcon } from '@/shared/ui/icons'
 import { BulbIcon, CropIcon, PlotIcon, ShopIcon } from './icons'
 import { BarnIcon, BuildingIcon, CanIcon, ItemIcon, MachineIcon, WellIcon } from './itemIcons'
@@ -60,27 +61,28 @@ export function SideMenu() {
     <div className="side-menu">
       <nav className={`side-rail ${open ? 'has-open' : ''}`}>
         {SECTIONS.map((s) => (
-          <button
+          <IconButton
             key={s.id}
-            className={`rail-btn ${open === s.id ? 'active' : ''}`}
+            className="rail-btn"
+            pressed={open === s.id}
             title={s.title}
             aria-label={s.title}
             onClick={() => setOpen(open === s.id ? null : s.id)}
           >
             <s.Icon size={34} />
-          </button>
+          </IconButton>
         ))}
       </nav>
 
       {current && (
-        <section className="panel-light side-panel">
+        <Panel className="side-panel">
           <h2>
             <span className="panel-title">
               <current.Icon size={26} /> {current.title}
             </span>
-            <button className="panel-close" aria-label="Fechar" onClick={() => setOpen(null)}>
+            <IconButton size="sm" aria-label="Fechar" onClick={() => setOpen(null)}>
               <CloseIcon size={20} />
-            </button>
+            </IconButton>
           </h2>
           <div className="side-body">
             {open === 'shop' && <ShopPanel />}
@@ -88,7 +90,7 @@ export function SideMenu() {
             {open === 'yard' && <YardPanel />}
             {open === 'tips' && <TipsPanel />}
           </div>
-        </section>
+        </Panel>
       )}
     </div>
   )
@@ -187,9 +189,9 @@ function BuySeeds() {
       <p className="muted buy-label">Comprar:</p>
       <div className="buy-row">
         {BUY_AMOUNTS.map((n) => (
-          <button key={n} className="btn" disabled={money < info.seedPrice * n} onClick={() => buySeed(crop, n)}>
+          <Button key={n} disabled={money < info.seedPrice * n} onClick={() => buySeed(crop, n)}>
             ×{n} · <CoinIcon size={15} /> {info.seedPrice * n}
-          </button>
+          </Button>
         ))}
       </div>
     </>
@@ -219,9 +221,9 @@ function BuyPlot() {
           </li>
         </ul>
       </div>
-      <button className={`btn plot-buy ${buyingPlot ? 'danger' : ''}`} disabled={!buyingPlot && missing > 0} onClick={() => setBuyingPlot(!buyingPlot)}>
+      <Button className="plot-buy" variant={buyingPlot ? 'danger' : 'primary'} disabled={!buyingPlot && missing > 0} onClick={() => setBuyingPlot(!buyingPlot)}>
         {buyingPlot ? 'Cancelar escolha' : <>Escolher no mapa · <CoinIcon size={15} /> {price}</>}
-      </button>
+      </Button>
       {buyingPlot && <p className="muted plot-hint">Clique num dos terrenos destacados no mapa (Esc cancela).</p>}
     </div>
   )
@@ -281,13 +283,13 @@ function StoragePanel() {
                   {price != null && (
                     <div className="sell-buttons">
                       {qty > 1 && (
-                        <button className="btn small" onClick={() => sellItem(id, 1)} title="Vender 1">
+                        <Button size="sm" onClick={() => sellItem(id, 1)} title="Vender 1">
                           ×1
-                        </button>
+                        </Button>
                       )}
-                      <button className="btn" onClick={() => sellItem(id)} title="Vender todos">
+                      <Button onClick={() => sellItem(id)} title="Vender todos">
                         Tudo · <CoinIcon size={15} /> {price * qty}
-                      </button>
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -323,9 +325,9 @@ function BuyTools() {
           </small>
         </span>
         {charges === null ? (
-          <button className="btn" disabled={money < WATERING_CAN.price} onClick={buyCan}>
+          <Button disabled={money < WATERING_CAN.price} onClick={buyCan}>
             <CoinIcon size={14} /> {WATERING_CAN.price}
-          </button>
+          </Button>
         ) : (
           <span className="muted">comprado</span>
         )}
@@ -366,13 +368,13 @@ function BuyBuildings() {
                 <small>{b.detail}</small>
               </span>
             </button>
-            <button
-              className={`btn ${active ? 'danger' : ''}`}
-              disabled={!active && data.money < b.price}
-              onClick={() => startPlacing(active ? null : b.ref)}
-            >
+            <Button
+ variant={active ? 'danger' : 'primary'}
+ disabled={!active && data.money < b.price}
+ onClick={() => startPlacing(active ? null : b.ref)}
+ >
               {active ? 'Cancelar' : <><CoinIcon size={14} /> {b.price}</>}
-            </button>
+            </Button>
           </div>
         )
       })}

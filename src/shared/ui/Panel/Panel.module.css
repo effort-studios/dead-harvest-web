@@ -1,0 +1,10 @@
+/* Moldura de 5 pixels da arte (panel.png); o padding fica por conta de quem usa */
+.panel {
+  box-sizing: border-box;
+  padding: var(--space-2);
+  border: calc(var(--frame-panel-slice) * var(--px)) solid transparent;
+  border-image: url('/assets/ui/panel.png') var(--frame-panel-slice) fill / calc(var(--frame-panel-slice) * var(--px)) stretch;
+  image-rendering: pixelated;
+  color: var(--text);
+  font-family: var(--font-ui);
+}

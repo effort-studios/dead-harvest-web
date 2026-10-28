@@ -24,6 +24,7 @@ import { useProfileStore } from '@/features/profile/store'
 import { skyTint } from '@/features/farm/model/daycycle'
 import { loadSprites, SCENE_FPS } from '@/features/farm/render/sprites'
 import { loadFarmerSheet } from '@/features/farm/render/farmerSprite'
+import { Button, Panel, Tooltip } from '@/shared/ui'
 import { serverNow, useFarmStore } from '../store'
 
 // Shift = ação na linha inteira, Ctrl = na coluna inteira, nenhum = só no tile
@@ -530,10 +531,10 @@ export function GameCanvas() {
       </div>
       {menu && <TileMenu at={menu} size={size} onClose={() => setMenu(null)} />}
       {placing && (
-        <div className="place-hint">
+        <Panel className="place-hint">
           Clique no mapa onde construir {placing.kind === 'barn' ? 'o celeiro' : placing.kind === 'well' ? 'o poço' : machineById(placing.id)?.name.toLowerCase()} · verde
-          pode, vermelho não · <button onClick={() => useFarmStore.getState().startPlacing(null)}>Cancelar (Esc)</button>
-        </div>
+          pode, vermelho não · <Button size="sm" onClick={() => useFarmStore.getState().startPlacing(null)}>Cancelar (Esc)</Button>
+        </Panel>
       )}
       {/* Luz do dia: cobre só o mapa (a HUD fica de fora) e muda aos poucos com a hora */}
       <div className="sky-tint" style={{ backgroundColor: skyTint(time) }} />
@@ -559,13 +560,13 @@ function TileMenu({ at, size, onClose }: { at: MenuAt; size: Size; onClose: () =
   const store = useFarmStore.getState()
 
   return (
-    <div className="panel-light ctx-menu" style={{ left, top, width: MENU_WIDTH }} onContextMenu={(e) => e.preventDefault()}>
+    <Panel className="ctx-menu" style={{ left, top, width: MENU_WIDTH }} onContextMenu={(e) => e.preventDefault()}>
       <div className="ctx-title">{menu?.title ?? 'Chão'}</div>
       {menu?.subtitle && <div className="ctx-sub">{menu.subtitle}</div>}
       {menu?.items.map((item) => (
-        <button
+        <Button
           key={item.action}
-          className="ctx-item"
+          size="sm"
           disabled={!!item.disabled}
           title={item.disabled}
           onClick={() => {
@@ -574,14 +575,14 @@ function TileMenu({ at, size, onClose }: { at: MenuAt; size: Size; onClose: () =
           }}
         >
           {item.label}
-        </button>
+        </Button>
       ))}
       {at.tile && menu?.items.some((i) => !i.disabled && i.action !== 'untill') && (
         <div className="ctx-line">
           {(['row', 'col'] as const).map((mode) => (
-            <button
+            <Button
               key={mode}
-              className="ctx-item small"
+              size="sm"
               title={`Mesma ação na ${mode === 'row' ? 'linha' : 'coluna'} inteira (Shift ou Ctrl + clique)`}
               onClick={() => {
                 store.queueTiles(at.tile!.plot, at.tile!.row, at.tile!.col, mode)
@@ -589,12 +590,12 @@ function TileMenu({ at, size, onClose }: { at: MenuAt; size: Size; onClose: () =
               }}
             >
               {mode === 'row' ? 'Linha' : 'Coluna'}
-            </button>
+            </Button>
           ))}
         </div>
       )}
-      <button
-        className="ctx-item"
+      <Button
+        size="sm"
         title="Atalho: Alt + clique"
         onClick={() => {
           moveTo(at.cell.row, at.cell.col)
@@ -602,8 +603,8 @@ function TileMenu({ at, size, onClose }: { at: MenuAt; size: Size; onClose: () =
         }}
       >
         Mover para cá
-      </button>
-    </div>
+      </Button>
+    </Panel>
   )
 }
 
@@ -617,7 +618,7 @@ function PlantTip({ at }: { at: TileRef }) {
   const boosts = [tile.fertilized && 'adubada', tile.watered && 'regada'].filter(Boolean)
   const faster = Math.round((growthRate(tile) - 1) * 100)
   return (
-    <div className="plant-tip">
+    <Tooltip>
       <b>{crop.name}</b>
       {left === 0 ? <span className="ready-text">pronta para colher!</span> : <span>falta {formatDuration(left)}</span>}
       {boosts.length > 0 && (
@@ -625,7 +626,7 @@ function PlantTip({ at }: { at: TileRef }) {
           {boosts.join(' e ')} ({faster}% mais rápido)
         </small>
       )}
-    </div>
+    </Tooltip>
   )
 }
 
@@ -639,13 +640,13 @@ function TreeTip({ id }: { id: string }) {
   const fruit = FRUITS[tree.fruit]
   const left = last === undefined ? 0 : Math.ceil(Math.max(0, tree.regrowMs - (serverNow() - last)) / 1000)
   return (
-    <div className="plant-tip">
+    <Tooltip>
       <b>Árvore de {fruit.name.toLowerCase()}</b>
       {left === 0 ? (
         <span className="ready-text">{tree.fruitsPerHarvest} frutas para colher!</span>
       ) : (
         <span>frutas voltam em {formatDuration(left)}</span>
       )}
-    </div>
+    </Tooltip>
   )
 }
