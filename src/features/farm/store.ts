@@ -3,6 +3,7 @@ import * as api from '@/features/farm/api'
 import { ApiError } from '@/shared/api/http'
 import { isCropId, setCrops, type CropId } from '@/features/farm/model/crops'
 import { setDayLength } from '@/features/farm/model/daycycle'
+import { farmerPose, setFarmerWalkSpeed } from '@/features/farm/model/farmer'
 import * as production from '@/features/farm/model/production'
 import {
   buyPlot,
@@ -50,6 +51,7 @@ type FarmState = {
   queueTree: (treeId: string) => void
   harvestAll: () => void // pede a colheita de tudo que está pronto (plantas e árvores)
   cancelQueue: () => void
+  walkTo: (row: number, col: number) => void // andar livre: avisa a posição (só vale sem fila de tarefas)
   select: (item: HotbarItem) => void
   tick: () => void
   buySeed: (crop: CropId, qty?: number) => void
@@ -89,6 +91,7 @@ export const useFarmStore = create<FarmState>((set, get) => ({
     production.setProduction(catalog)
     setPlotPrice(catalog.plotPrice)
     setDayLength(catalog.dayLengthSeconds)
+    setFarmerWalkSpeed(catalog.farmerWalkSpeed)
     set({ active: true, error: null, buyingPlot: false, building: null, placing: null, selected: 'corn' })
     applyServerState(data)
   },
@@ -141,7 +144,23 @@ export const useFarmStore = create<FarmState>((set, get) => ({
     trees.forEach((id) => get().queueTree(id))
   },
 
-  cancelQueue: () => run(undefined, api.cancelJobs),
+  // Cancelar para o fazendeiro onde ele está: a tela já mostra a fila vazia, sem esperar o servidor
+  cancelQueue: () =>
+    run(
+      (data) => {
+        if (data.farmer.jobs.length === 0) return data
+        const here = farmerPose(data.farmer, serverNow(), { dr: 1, dc: 0 })
+        return { ...data, farmer: { row: here.r, col: here.c, jobs: [] } }
+      },
+      api.cancelJobs,
+    ),
+
+  walkTo: (row, col) => {
+    const { data, active } = useFarmStore.getState()
+    if (!data || !active || data.farmer.jobs.length > 0) return
+    useFarmStore.setState({ data: { ...data, farmer: { ...data.farmer, row, col } } })
+    submit(() => api.walkTo(row, col))
+  },
 
   select: (item) => set({ selected: item }),
 
@@ -285,6 +304,15 @@ function handleFailure(err: unknown) {
   }
 }
 
+// Posição de quem está andando livre (WASD) neste instante. Qualquer ação avisa essa posição ANTES de ir, senão
+// o servidor planejaria a partir do último aviso (até meio segundo atrás) e o fazendeiro daria um pulo.
+let livePosition: { row: number; col: number } | null = null
+export const setLivePosition = (position: { row: number; col: number } | null) => {
+  livePosition = position
+}
+// Resolve quando todos os pedidos enviados até agora tiveram resposta (e o estado do servidor já está na tela)
+export const settled = () => queue
+
 // Ação do jogador: mostra a previsão na hora e põe o pedido na fila. Quando a fila esvazia, a tela
 // fica com o último estado que o servidor devolveu. Se o servidor recusa a ação (ex.: a planta ainda
 // não amadureceu lá), mostra o motivo e busca o estado de verdade.
@@ -302,6 +330,14 @@ function run(predict: ((data: SaveData) => SaveData) | undefined, send: () => Pr
     }))
   }
 
+  if (livePosition) {
+    const { row, col } = livePosition
+    submit(() => api.walkTo(row, col))
+  }
+  submit(send)
+}
+
+function submit(send: () => Promise<SaveData>) {
   pending++
   queue = queue.then(async () => {
     try {

@@ -10,6 +10,7 @@ import type { SaveData } from '@/features/farm/model/types'
 
 export type Catalog = ProductionCatalog & {
   gridSize: number
+  farmerWalkSpeed: number // células por segundo
   dayLengthSeconds: number // duração do dia inteiro
   dayStartSeconds: number
   plotPrice: { base: number; factor: number }
@@ -33,6 +34,8 @@ export type JobRequest =
   | { action: 'refill_can' }
   | { action: 'move'; row: number; col: number } // só andar até a célula do mapa
 export const enqueueJob = (job: JobRequest) => post<SaveData>('/game/jobs', job)
+// Andar livre (WASD): avisa onde o fazendeiro está; o servidor limita pela velocidade
+export const walkTo = (row: number, col: number) => post<SaveData>('/game/farmer/position', { row, col })
 export const cancelJobs = () => request<SaveData>('/game/jobs', { method: 'DELETE' })
 export const buySeed = (cropId: string, quantity: number) => post<SaveData>('/game/seeds/buy', { cropId, quantity })
 export const sellItem = (itemId: string, quantity?: number) => post<SaveData>('/game/items/sell', { itemId, quantity })
