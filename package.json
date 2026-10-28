@@ -12,7 +12,7 @@
     "prepare": "git config core.hooksPath .githooks || true",
     "electron:dev": "concurrently -k \"vite --strictPort --port 5173\" \"wait-on http://localhost:5173 && cross-env ELECTRON_DEV_URL=http://localhost:5173 electron .\"",
     "electron:start": "npm run build && electron .",
-    "electron:build": "npm run build && electron-builder --win"
+    "electron:build": "npm run build && node scripts/electron-build.mjs"
   },
   "dependencies": {
     "react": "^19.3.1",
@@ -51,9 +51,26 @@
       "electron/**",
       "package.json"
     ],
-    "artifactName": "${productName}.${ext}",
     "win": {
-      "target": "portable"
+      "target": "portable",
+      "artifactName": "${productName}.${ext}"
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.games",
+      "icon": "build/icon.icns",
+      "artifactName": "${productName}-mac-${arch}.${ext}"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Game",
+      "icon": "build/icon.png",
+      "artifactName": "${productName}-linux-${arch}.${ext}"
     }
   }
 }
