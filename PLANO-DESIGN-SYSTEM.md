@@ -34,8 +34,9 @@ barra de itens escura de bronze (barra de atalhos). Ver seção 3.
 
 Princípios:
 
-- **Borda fina: 8px de arte** (hoje 9px), em 1x ou 2x conforme o componente. A moldura em si é de ~3 a 4px (contorno
-  escuro, dourado com luz em cima e sombra embaixo); o resto é respiro.
+- **Borda fina: no máximo 8px de arte** (hoje 9px), em 1x ou 2x conforme o componente. As peças geradas ficaram com
+  anéis de 2 a 5px (painel 5, barra 5, placa 4, botão 3, slot 2): contorno escuro, dourado com luz em cima e sombra
+  embaixo. Cada peça tem o seu `slice`.
 - **Poucas camadas, de tons vizinhos:** ~4 a 6 anéis. Uma moldura chapada é simples demais, e 8 camadas com degradê
   pesam e dificultam o encaixe.
 - **Interior escuro quente** (marrom-café ou ameixa escura, não azul-marinho). Texto claro sobre escuro, então os
@@ -300,14 +301,17 @@ referências de estilo só quando forem planas.
 - [x] Aba (`tab`).
 
 **2.2 Aprovação, uma peça por vez**
-- [ ] Aprovar cada peça (poucos anéis de tons vizinhos, sem ornamento, interior liso, bordas retas para o 9-slice).
-- [ ] Se não passar, ajustar o prompt e repetir só aquela peça (10 gerações por tentativa).
+- [x] Aprovar cada peça (poucos anéis de tons vizinhos, sem ornamento, interior liso, bordas retas para o 9-slice).
+- [x] Se não passar, ajustar o prompt e repetir só aquela peça: não foi preciso; o botão saiu bege e foi recolorido.
 
 **2.3 Pipeline de arte**
 - [x] Guardar as saídas cruas em `art/pixellab/raw/ui` (`g2_*.png`).
-- [ ] Atualizar `scripts/build_ui_frames.py`: cortar cada peça, reduzir o 3x, limpar o miolo (liso, porque o 9-slice
-  estica), normalizar a borda para 8px e produzir `panel.png`, `slot.png`, `button.png` (e variantes).
-- [ ] Ajustar `slice` e as variáveis da fase 1 em um único lugar.
+- [x] Script `scripts/build_ui_frames_dark.py`: recorta cada peça (já vêm em tamanho real, sem o 3x), refaz as bordas
+  repetindo o meio, deixa o miolo liso e recolore o botão (dourado e perigo). Saem em `public/assets/ui/v2/`
+  (`panel`, `plate`, `bar`, `slot`, `slot_selected`, `button`, `button_pressed`, `button_danger`); as atuais só
+  trocam na fase 5. Folha de conferência em `art/ui_frames_dark_preview.png`.
+- [ ] Ajustar `slice` por peça (painel 5, barra 5, placa 4, botão 3, slot 2) e as variáveis da fase 1 em um único lugar
+  (hoje `--frame-art` é 9px, uma única medida; passa a ser uma por peça).
 
 **2.4 Verificação**
 - [ ] Conferir as PNGs e o resultado no navegador (hard reload).
