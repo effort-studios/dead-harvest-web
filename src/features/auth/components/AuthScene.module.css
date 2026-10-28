@@ -1,100 +1,15 @@
-/* Cena de entardecer atrás do login. O horizonte fica em 60% da altura; céu em cima, chão embaixo. */
-.scene { position: absolute; inset: 0; overflow: hidden; }
-
-.sky {
+/* A cena é uma imagem de 640 x 360 ampliada para cobrir a tela (3x em 1920 x 1080), sem suavizar */
+.scene {
   position: absolute;
-  inset: 0 0 40% 0;
-  background: linear-gradient(to bottom, #0b1028 0%, #1c2856 30%, #4a3a78 52%, #b0587a 74%, #f0985c 100%);
-}
-.ground {
-  position: absolute;
-  inset: 60% 0 0 0;
-  background:
-    repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.1) 0 6px, transparent 6px 14px),
-    linear-gradient(to bottom, #2f6a30 0%, #1e4a27 55%, #11321c 100%);
-}
-/* neblina rente ao horizonte */
-.fog {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: calc(60% - 36px);
-  height: 90px;
-  background: linear-gradient(to bottom, transparent, rgba(240, 152, 92, 0.28) 45%, rgba(40, 70, 50, 0.35) 70%, transparent);
-}
-
-/* estrelas de 2px (pixel quadrado), piscando devagar */
-.stars {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 2px;
-  height: 2px;
-  background: transparent;
-  box-shadow:
-    6vw 7vh #fff6c0, 14vw 16vh #fff6c0, 22vw 5vh #c9cfef, 31vw 12vh #fff6c0, 38vw 21vh #c9cfef,
-    46vw 6vh #fff6c0, 53vw 15vh #c9cfef, 61vw 4vh #fff6c0, 68vw 19vh #fff6c0, 76vw 9vh #c9cfef,
-    83vw 22vh #fff6c0, 91vw 13vh #fff6c0, 96vw 5vh #c9cfef, 10vw 28vh #c9cfef, 27vw 31vh #fff6c0,
-    57vw 29vh #fff6c0, 72vw 33vh #c9cfef, 88vw 30vh #fff6c0;
-  animation: twinkle 5s ease-in-out infinite;
-}
-@keyframes twinkle { 50% { opacity: 0.45; } }
-
-.moon {
-  position: absolute;
-  top: 7vh;
-  right: 9vw;
-  width: 96px;
-  height: 96px;
+  inset: 0;
+  overflow: hidden;
+  background: #1a1030 url('/assets/login_scene.png') center bottom / cover no-repeat;
   image-rendering: pixelated;
-  filter: drop-shadow(0 0 22px rgba(255, 236, 160, 0.55));
 }
-
-.prop { position: absolute; image-rendering: pixelated; filter: drop-shadow(0 6px 0 rgba(0, 0, 0, 0.3)); }
-.barn { left: 3vw; bottom: 20vh; width: 362px; }
-.hay { left: 27vw; bottom: 22vh; width: 102px; }
-.rock { left: 19vw; bottom: 10vh; width: 84px; }
-.treeA { left: 46vw; bottom: 24vh; width: 142px; }
-.treeB { left: 55vw; bottom: 13vh; width: 142px; }
-.bush { left: 40vw; bottom: 9vh; width: 86px; }
-
-/* vaca e galinha animadas: tira de 8 quadros, ampliada 2x, quadro a quadro (sem suavizar) */
-.cow { left: 33vw; bottom: 8vh; width: 84px; height: 70px; background: url('/assets/world/cow_anim.png') 0 0 / 672px 70px; animation: cow 1.2s steps(8) infinite; }
-.chicken { left: 24vw; bottom: 6vh; width: 52px; height: 56px; background: url('/assets/world/chicken_anim.png') 0 0 / 416px 56px; animation: chicken 0.9s steps(8) infinite; }
-@keyframes cow { to { background-position-x: -672px; } }
-@keyframes chicken { to { background-position-x: -416px; } }
-
-/* zumbis: tira de 8 quadros (zombie_walk.png) tocada quadro a quadro enquanto ele cruza a tela da direita para a esquerda */
-.zombie {
-  position: absolute;
-  left: 0;
-  background: url('/assets/world/zombie_walk.png') 0 0 no-repeat;
-  image-rendering: pixelated;
-  filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.35)) brightness(0.9);
-  animation: march var(--dur) linear var(--delay) infinite, step 0.9s steps(8) infinite;
-}
-@keyframes march { from { transform: translateX(104vw); } to { transform: translateX(-14vw); } }
-@keyframes step { to { background-position-x: calc(-352px * var(--scale)); } }
 
 /* escurece as bordas para o conteúdo ficar em destaque */
 .vignette {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at 35% 55%, transparent 40%, rgba(4, 8, 20, 0.6) 100%);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .stars, .cow, .chicken, .zombie { animation: none; }
-  .zombie { transform: translateX(var(--still)); }
-}
-
-/* telas médias: sem o celeiro e os bichos, para não competir com o conteúdo */
-@media (max-width: 1100px) {
-  .barn, .hay, .rock, .chicken { display: none; }
-  .treeA { left: 6vw; }
-  .treeB { left: 18vw; }
-  .cow { left: 30vw; }
-}
-@media (max-width: 700px) {
-  .prop, .moon { display: none; }
+  background: radial-gradient(ellipse at 40% 50%, transparent 55%, rgba(8, 4, 20, 0.5) 100%);
 }
