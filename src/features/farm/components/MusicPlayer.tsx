@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { IconButton } from '@/shared/ui'
+import { IconButton, Panel } from '@/shared/ui'
 import { CloseIcon, ExternalIcon, MusicIcon, MusicOffIcon, NextIcon, PauseIcon, PlayIcon, PrevIcon, VolumeIcon } from '@/shared/ui/icons'
 
 const PLAYLIST_ID = 'PLQwRmTwWx0ubcpv0SkHroupj1LqW5_Va5'
@@ -180,14 +180,14 @@ export function MusicPlayer() {
 
   return (
     <div className="music-player">
-      <section className={`panel-light music-panel ${open ? '' : 'closed'}`} aria-label="Música">
+      <Panel className={`music-panel ${open ? '' : 'closed'}`} role="region" aria-label="Música">
         <h2 className="music-head">
           <span className="panel-title">
             <MusicIcon size={22} /> Música
           </span>
-          <button className="panel-close" aria-label="Fechar" onClick={() => setOpen(false)}>
+          <IconButton size="sm" aria-label="Fechar" onClick={() => setOpen(false)}>
             <CloseIcon size={18} />
-          </button>
+          </IconButton>
         </h2>
         <div className="music-now">
           <MusicIcon size={26} />
@@ -208,20 +208,20 @@ export function MusicPlayer() {
         </div>
         <div className="music-video" ref={hostRef} aria-hidden="true" />
         <div className="music-controls">
-          <button className="music-btn" onClick={() => playerRef.current?.previousVideo()} disabled={!ready} title="Música anterior">
+          <IconButton className="music-btn" onClick={() => playerRef.current?.previousVideo()} disabled={!ready} title="Música anterior">
             <PrevIcon size={22} />
-          </button>
-          <button className="music-btn big" onClick={togglePlay} disabled={!ready} title={playing ? 'Pausar a música' : 'Tocar a música'}>
+          </IconButton>
+          <IconButton className="music-btn big" onClick={togglePlay} disabled={!ready} title={playing ? 'Pausar a música' : 'Tocar a música'}>
             {playing ? <PauseIcon size={28} /> : <PlayIcon size={28} />}
-          </button>
-          <button className="music-btn" onClick={() => playerRef.current?.nextVideo()} disabled={!ready} title="Próxima música">
+          </IconButton>
+          <IconButton className="music-btn" onClick={() => playerRef.current?.nextVideo()} disabled={!ready} title="Próxima música">
             <NextIcon size={22} />
-          </button>
+          </IconButton>
         </div>
         <div className="music-volume">
-          <button className="music-mute" onClick={toggleMute} aria-label={volume === 0 ? 'Ativar o som' : 'Silenciar'} title={volume === 0 ? 'Ativar o som' : 'Silenciar'}>
+          <IconButton size="sm" className="music-mute" onClick={toggleMute} aria-label={volume === 0 ? 'Ativar o som' : 'Silenciar'} title={volume === 0 ? 'Ativar o som' : 'Silenciar'}>
             <VolumeIcon size={22} level={volume === 0 ? 0 : volume < 0.5 ? 1 : 2} />
-          </button>
+          </IconButton>
           <input
             type="range"
             min={0}
@@ -233,7 +233,7 @@ export function MusicPlayer() {
           />
           <b>{Math.round(volume * 100)}%</b>
         </div>
-      </section>
+      </Panel>
       <IconButton className="music-toggle" pressed={open} onClick={() => setOpen((o) => !o)} aria-label="Música" title="Música">
         {muted ? <MusicOffIcon size={26} /> : <MusicIcon size={26} />}
       </IconButton>

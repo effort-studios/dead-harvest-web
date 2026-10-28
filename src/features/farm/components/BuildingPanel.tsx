@@ -19,6 +19,7 @@ import {
   type MachineInfo,
   type RecipeInfo,
 } from '@/features/farm/model/production'
+import { Button, Chip, IconButton, Panel, ProgressBar } from '@/shared/ui'
 import { CloseIcon, CoinIcon } from '@/shared/ui/icons'
 import { serverNow, useFarmStore } from '../store'
 import { AnimalIcon, BuildingIcon, ItemIcon } from './itemIcons'
@@ -42,17 +43,17 @@ export function BuildingPanel() {
   if (!building || (building.kind === 'machine' && !machine)) return null
 
   return (
-    <section className="panel-light side-panel building-panel">
+    <Panel className="side-panel building-panel">
       <h2>
         <span className="panel-title">
           <BuildingIcon target={building} size={30} /> {machine ? machine.name : building.kind === 'well' ? 'Poço' : 'Celeiro'}
         </span>
-        <button className="panel-close" aria-label="Fechar" onClick={close}>
+        <IconButton size="sm" aria-label="Fechar" onClick={close}>
           <CloseIcon size={20} />
-        </button>
+        </IconButton>
       </h2>
       <div className="side-body">{machine ? <MachineBody machine={machine} /> : building.kind === 'well' ? <WellBody /> : <BarnBody />}</div>
-    </section>
+    </Panel>
   )
 }
 
@@ -65,11 +66,7 @@ function useNow() {
 const duration = (ms: number) => formatDuration(Math.max(1, Math.ceil(ms / 1000)))
 
 function Progress({ value }: { value: number }) {
-  return (
-    <span className="progress" aria-hidden="true">
-      <span style={{ width: `${Math.round(Math.min(Math.max(value, 0), 1) * 100)}%` }} />
-    </span>
-  )
+  return <ProgressBar value={value} size="sm" />
 }
 
 function Price({ value }: { value: number }) {
@@ -98,9 +95,9 @@ function BuyMachine({ machine }: { machine: MachineInfo }) {
       {machine.recipes.map((r) => (
         <RecipeRow key={r.id} recipe={r} />
       ))}
-      <button className="btn wide" disabled={money < machine.buyPrice} onClick={() => startPlacing({ kind: 'machine', id: machine.id })}>
+      <Button className="wide" disabled={money < machine.buyPrice} onClick={() => startPlacing({ kind: 'machine', id: machine.id })}>
         Construir · <Price value={machine.buyPrice} />
-      </button>
+      </Button>
       <p className="muted center">Depois é só clicar no mapa onde ela vai ficar.</p>
       {money < machine.buyPrice && <p className="muted center">Faltam {machine.buyPrice - money} moedas.</p>}
     </>
@@ -146,9 +143,9 @@ function MachineQueue({ machine }: { machine: MachineInfo }) {
         )
       })}
       {ready > 0 && (
-        <button className="btn wide" disabled={collecting} onClick={() => collectMachine(machine.id)}>
+        <Button className="wide" disabled={collecting} onClick={() => collectMachine(machine.id)}>
           {collecting ? 'O fazendeiro está indo buscar...' : `Coletar (${ready})`}
-        </button>
+        </Button>
       )}
       <h3>Receitas</h3>
       {full && <p className="muted">Fila cheia: colete o que ficou pronto para liberar espaço.</p>}
@@ -179,19 +176,19 @@ function RecipeRow({ recipe, canStart }: { recipe: RecipeInfo; canStart?: boolea
           </small>
         </div>
         {canStart !== undefined && (
-          <button className="btn" disabled={!canStart || missing.length > 0} onClick={() => startRecipe(recipe.id)}>
+          <Button disabled={!canStart || missing.length > 0} onClick={() => startRecipe(recipe.id)}>
             Produzir
-          </button>
+          </Button>
         )}
       </div>
       <div className="recipe-inputs">
         {recipe.inputs.map((i) => {
           const have = inventory[i.itemId] ?? 0
           return (
-            <span key={i.itemId} className={`chip ${have < i.quantity ? 'lacking' : ''}`} title={`${itemName(i.itemId)}: você tem ${have}`}>
+            <Chip key={i.itemId} lacking={have < i.quantity} title={`${itemName(i.itemId)}: você tem ${have}`}>
               <ItemIcon itemId={i.itemId} size={20} /> {i.quantity} {itemName(i.itemId).toLowerCase()}
               <span className="chip-have">({have})</span>
-            </span>
+            </Chip>
           )
         })}
       </div>
@@ -211,9 +208,9 @@ function WellBody() {
     return (
       <>
         <p>No poço o fazendeiro enche o regador. Ocupa 1 célula do mapa.</p>
-        <button className="btn wide" disabled={data.money < WELL.price} onClick={() => startPlacing({ kind: 'well' })}>
+        <Button className="wide" disabled={data.money < WELL.price} onClick={() => startPlacing({ kind: 'well' })}>
           Construir · <Price value={WELL.price} />
-        </button>
+        </Button>
         <p className="muted center">Depois é só clicar no mapa onde ele vai ficar.</p>
       </>
     )
@@ -226,9 +223,9 @@ function WellBody() {
         Regador: <b>{data.canCharges}/{WATERING_CAN.charges}</b> cargas
       </p>
       <Progress value={data.canCharges / WATERING_CAN.charges} />
-      <button className="btn wide" disabled={full || going} onClick={refillCan}>
+      <Button className="wide" disabled={full || going} onClick={refillCan}>
         {going ? 'O fazendeiro está indo encher...' : full ? 'O regador está cheio' : 'Encher o regador'}
-      </button>
+      </Button>
     </>
   )
 }
@@ -252,9 +249,9 @@ function BuyBarn() {
       <p>
         Começa com <b>{BARN.startCapacity} baias</b> e dá para ampliar até {BARN.maxCapacity}.
       </p>
-      <button className="btn wide" disabled={money < BARN.price} onClick={() => startPlacing({ kind: 'barn' })}>
+      <Button className="wide" disabled={money < BARN.price} onClick={() => startPlacing({ kind: 'barn' })}>
         Construir o celeiro · <Price value={BARN.price} />
-      </button>
+      </Button>
       <p className="muted center">Depois é só clicar no mapa onde ele vai ficar (com o cercadinho dos animais ao lado).</p>
       {money < BARN.price && <p className="muted center">Faltam {BARN.price - money} moedas.</p>}
     </>
@@ -285,12 +282,12 @@ function Barn() {
         ))}
       </p>
       <div className="buy-row two">
-        <button className="btn" disabled={hungry === 0} onClick={feedAnimals} title="Dá ração aos que estão com fome">
+        <Button disabled={hungry === 0} onClick={feedAnimals} title="Dá ração aos que estão com fome">
           Alimentar ({hungry})
-        </button>
-        <button className="btn" disabled={ready === 0 || collecting} onClick={collectBarn} title="O fazendeiro vai ao celeiro e já dá ração de novo">
+        </Button>
+        <Button disabled={ready === 0 || collecting} onClick={collectBarn} title="O fazendeiro vai ao celeiro e já dá ração de novo">
           {collecting ? 'Indo...' : `Coletar (${ready})`}
-        </button>
+        </Button>
       </div>
 
       {barn.animals.length === 0 && <p className="muted">Nenhum animal ainda. Compre abaixo.</p>}
@@ -330,9 +327,9 @@ function Barn() {
               {formatDuration(a.produceSeconds)}
             </small>
           </div>
-          <button className="btn" disabled={full || money < a.buyPrice} onClick={() => buyAnimal(a.id)}>
+          <Button disabled={full || money < a.buyPrice} onClick={() => buyAnimal(a.id)}>
             <Price value={a.buyPrice} />
-          </button>
+          </Button>
         </div>
       ))}
 
@@ -340,9 +337,9 @@ function Barn() {
       {barn.capacity >= BARN.maxCapacity ? (
         <p className="muted">O celeiro já está no tamanho máximo ({BARN.maxCapacity} baias).</p>
       ) : (
-        <button className="btn wide" disabled={money < expandPrice} onClick={expandBarn}>
+        <Button className="wide" disabled={money < expandPrice} onClick={expandBarn}>
           +{BARN.expandBy} baias · <Price value={expandPrice} />
-        </button>
+        </Button>
       )}
     </>
   )

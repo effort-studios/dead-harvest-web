@@ -17,3 +17,5 @@
 }
 .health { background: var(--danger); box-shadow: inset 0 var(--px) 0 #f08a6c; }
 .energy { background: var(--gold); box-shadow: inset 0 var(--px) 0 var(--gold-light); }
+/* o tamanho do pixel é só da barra: o preenchimento e a altura acompanham */
+.sm { --px: 1px; }
