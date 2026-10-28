@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
 import { CROPS, formatDuration } from '@/features/farm/model/crops'
 import { FERTILIZER, GROWTH_BONUS, WATERING_CAN } from '@/features/farm/model/production'
-import { hotbarCount, hotbarItems, type HotbarItem } from '@/features/farm/model/state'
-import { useFarmStore } from '../store'
+import { harvestables, hotbarCount, hotbarItems, type HotbarItem } from '@/features/farm/model/state'
+import { serverNow, useFarmStore } from '../store'
 import { CropIcon } from './icons'
 import { CanIcon, ItemIcon } from './itemIcons'
 import { ProfileMenu } from '@/features/profile/components/ProfileMenu'
@@ -27,7 +27,7 @@ const HOTBAR_SLOTS = 9
 // dia (canto superior direito), barra de itens (embaixo) e erros de salvamento (embaixo à esquerda).
 // Vida, energia, missões e minimapa ainda não existem no jogo e ficam para depois do MVP.
 export function Hud({ onLogout }: { onLogout: () => void }) {
-  const { data, error, selected, select, cancelQueue } = useFarmStore()
+  const { data, error, selected, select, cancelQueue, harvestAll } = useFarmStore()
 
   // Teclas 1 a 9 escolhem o item do slot correspondente (só existem slots para o que o jogador tem)
   useEffect(() => {
@@ -42,6 +42,8 @@ export function Hud({ onLogout }: { onLogout: () => void }) {
 
   if (!data) return null
   const owned = hotbarItems(data)
+  const ready = harvestables(data, serverNow())
+  const readyCount = ready.plots.reduce((n, p) => n + p.tiles.length, 0) + ready.trees.length
 
   return (
     <>
@@ -74,8 +76,13 @@ export function Hud({ onLogout }: { onLogout: () => void }) {
         })}
       </div>
 
-      {(error || data.farmer.jobs.length > 0) && (
+      {(error || data.farmer.jobs.length > 0 || readyCount > 0) && (
         <div className="hud-save">
+          {readyCount > 0 && (
+            <button className="btn" onClick={harvestAll} title="O fazendeiro colhe tudo que está pronto: plantas e árvores">
+              Colher tudo ({readyCount})
+            </button>
+          )}
           {data.farmer.jobs.length > 0 && (
             <button className="btn danger" onClick={cancelQueue} title="Cancela as tarefas que ele ainda não fez; ele para onde está">
               Parar fazendeiro ({data.farmer.jobs.length})

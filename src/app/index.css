@@ -49,7 +49,6 @@ canvas:active {
 .panel-light,
 .slot,
 .btn,
-.rail-btn,
 .portrait {
   box-sizing: border-box;
   font: inherit;
@@ -75,8 +74,7 @@ canvas:active {
   filter: var(--hard-shadow);
   color: #4a2f17;
 }
-/* moldura pequena (1x): botões da lateral e botões dourados; slot: madeira com miolo creme */
-.rail-btn,
+/* moldura pequena (1x): botões dourados; slot: madeira com miolo creme */
 .btn {
   background: none;
   border: 9px solid transparent;
@@ -138,11 +136,9 @@ canvas:active {
 .svg-icon { vertical-align: middle; flex-shrink: 0; }
 .pixel-icon { image-rendering: pixelated; object-fit: contain; } /* pixel art ampliado sem borrar */
 /* Dentro das molduras o ícone vira bloco centralizado (sem o respiro de linha de texto) */
-.rail-btn .svg-icon,
 .slot .svg-icon,
 .portrait .svg-icon,
 .panel-close .svg-icon { display: block; }
-.rail-btn .svg-icon { width: 100%; height: 100%; } /* preenche a área interna da moldura */
 .slot .svg-icon { width: 90%; height: 90%; } /* acompanha o tamanho do slot, que muda com a janela */
 .panel-close { display: flex; align-items: center; justify-content: center; padding: 2px; }
 .money, .btn { display: inline-flex; align-items: center; gap: 6px; }
@@ -241,21 +237,9 @@ canvas:active {
 }
 .side-rail:hover,
 .side-rail.has-open { opacity: 1; }
-.rail-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 54px;
-  height: 54px;
-  padding: 2px;
-  font-size: 18px;
-  line-height: 1;
-  color: inherit;
-  filter: var(--hard-shadow);
-  cursor: pointer;
-}
-.rail-btn:hover { filter: var(--hard-shadow) brightness(1.08); }
-.rail-btn.active { border-image-source: url('/assets/ui/panel_light.png'); }
+/* Botões da lateral: IconButton do design system; aqui só o tamanho (o ícone preenche o miolo da moldura) */
+.side-rail .rail-btn { width: 46px; height: 46px; padding: 0; }
+.rail-btn .svg-icon { display: block; width: 100%; height: 100%; }
 
 .side-panel {
   position: absolute;
@@ -487,7 +471,7 @@ table.crops th, table.crops td { text-align: left; padding: 3px 4px; border-bott
 
 /* Janelas baixas: botões do menu menores para a coluna da esquerda não bater no botão Salvar */
 @media (max-height: 640px) {
-  .rail-btn { width: 44px; height: 44px; padding: 6px; }
+  .side-rail .rail-btn { width: 40px; height: 40px; }
   .side-panel { max-height: calc(100vh - 210px); }
 }
 
@@ -722,13 +706,7 @@ button.hud-player:hover { background: #f6c04a; }
   align-items: flex-end;
   gap: 8px;
 }
-.music-toggle {
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  font-size: 20px;
-  cursor: pointer;
-}
+.music-toggle .svg-icon { display: block; }
 .music-panel {
   display: flex;
   flex-direction: column;
@@ -877,7 +855,6 @@ button.hud-player:hover { background: #f6c04a; }
   .btn.small { min-height: 36px; }
   .panel-close { padding: 8px; }
   .music-btn { height: 44px; }
-  .music-toggle { width: 46px; height: 46px; }
 }
 /* Telas estreitas: relógio menor, painel do prédio vira uma folha na parte de baixo */
 @media (max-width: 600px) {
@@ -900,7 +877,7 @@ button.hud-player:hover { background: #f6c04a; }
   .money .svg-icon { width: 15px; height: 15px; }
   .hud-player .select-caret { transform: scale(0.75); }
   .side-rail { gap: 4px; }
-  .rail-btn { width: 34px; height: 34px; padding: 4px; border-width: 2px; border-radius: 8px; }
+  .side-rail .rail-btn { width: 34px; height: 34px; }
   .day-clock { top: 4px; right: 4px; transform: scale(0.5); transform-origin: top right; }
   .hud-hotbar { bottom: 4px; padding: 3px; gap: 3px; }
   /* moldura mais fina (a de 9px comia o miolo); em 390px os 9 slots ainda deixam lugar para o botão de música */
@@ -910,7 +887,7 @@ button.hud-player:hover { background: #f6c04a; }
   .slot-qty { font-size: 10px; }
   .hud-save { bottom: 4px; left: 4px; }
   .music-player { bottom: 4px; right: 4px; }
-  .music-toggle { width: 36px; height: 36px; }
+  .music-player .music-toggle { width: 36px; height: 36px; }
   .music-toggle .svg-icon { width: 22px; height: 22px; }
   .place-hint { top: 4px; padding: 5px 10px; font-size: 13px; }
 }

@@ -7,6 +7,7 @@ import * as production from '@/features/farm/model/production'
 import {
   buyPlot,
   buySeed,
+  harvestables,
   pickItem,
   placementProblem,
   readyTreeIds,
@@ -47,6 +48,7 @@ type FarmState = {
   queueTileAction: (plot: number, row: number, col: number, action: TileAction, crop?: CropId) => void // item do menu do tile
   moveTo: (row: number, col: number) => void // o fazendeiro só anda até a célula
   queueTree: (treeId: string) => void
+  harvestAll: () => void // pede a colheita de tudo que está pronto (plantas e árvores)
   cancelQueue: () => void
   select: (item: HotbarItem) => void
   tick: () => void
@@ -127,6 +129,17 @@ export const useFarmStore = create<FarmState>((set, get) => ({
   moveTo: (row, col) => run(undefined, () => api.enqueueJob({ action: 'move', row, col })),
 
   queueTree: (treeId) => run(undefined, () => api.enqueueJob({ action: 'harvest_tree', treeId })),
+
+  harvestAll: () => {
+    const { data } = get()
+    if (!data) return
+    const { plots, trees } = harvestables(data, serverNow())
+    // a API aceita até 10 tiles por tarefa
+    for (const cmd of plots) {
+      for (let i = 0; i < cmd.tiles.length; i += 10) sendTiles(data, { ...cmd, tiles: cmd.tiles.slice(i, i + 10) })
+    }
+    trees.forEach((id) => get().queueTree(id))
+  },
 
   cancelQueue: () => run(undefined, api.cancelJobs),
 

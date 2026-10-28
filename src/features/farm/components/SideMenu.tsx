@@ -19,6 +19,7 @@ import {
   type ItemKind,
 } from '@/features/farm/model/production'
 import { serverNow, useFarmStore } from '../store'
+import { IconButton } from '@/shared/ui'
 import { CloseIcon, CoinIcon } from '@/shared/ui/icons'
 import { BulbIcon, CropIcon, PlotIcon, ShopIcon } from './icons'
 import { BarnIcon, BuildingIcon, CanIcon, ItemIcon, MachineIcon, WellIcon } from './itemIcons'
@@ -60,15 +61,16 @@ export function SideMenu() {
     <div className="side-menu">
       <nav className={`side-rail ${open ? 'has-open' : ''}`}>
         {SECTIONS.map((s) => (
-          <button
+          <IconButton
             key={s.id}
-            className={`rail-btn ${open === s.id ? 'active' : ''}`}
+            className="rail-btn"
+            pressed={open === s.id}
             title={s.title}
             aria-label={s.title}
             onClick={() => setOpen(open === s.id ? null : s.id)}
           >
             <s.Icon size={34} />
-          </button>
+          </IconButton>
         ))}
       </nav>
 

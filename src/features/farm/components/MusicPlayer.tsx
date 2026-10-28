@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { IconButton } from '@/shared/ui'
 import { CloseIcon, ExternalIcon, MusicIcon, MusicOffIcon, NextIcon, PauseIcon, PlayIcon, PrevIcon, VolumeIcon } from '@/shared/ui/icons'
 
 const PLAYLIST_ID = 'PLQwRmTwWx0ubcpv0SkHroupj1LqW5_Va5'
@@ -233,9 +234,9 @@ export function MusicPlayer() {
           <b>{Math.round(volume * 100)}%</b>
         </div>
       </section>
-      <button className="panel music-toggle" onClick={() => setOpen((o) => !o)} aria-label="Música" title="Música">
+      <IconButton className="music-toggle" pressed={open} onClick={() => setOpen((o) => !o)} aria-label="Música" title="Música">
         {muted ? <MusicOffIcon size={26} /> : <MusicIcon size={26} />}
-      </button>
+      </IconButton>
     </div>
   )
 }
