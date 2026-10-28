@@ -227,7 +227,7 @@ revisar o resultado antes de seguir. Marcar `[x]` só depois de feito e verifica
 | 1 | Tokens e regras | concluída |
 | 2 | Arte das molduras | em andamento |
 | 3 | Componentes base | concluída |
-| 4 | Página `/ui-kit` | pendente |
+| 4 | Página `/ui-kit` | em andamento (4.3 falta) |
 | 5 | Migrar a HUD | pendente |
 | 6 | Peças novas | pendente |
 
@@ -346,10 +346,10 @@ pressionado, selecionado e desabilitado, e exportado em `shared/ui/index.ts`. Su
 ### Fase 4: página `/ui-kit` (fica no repositório)
 
 **4.1 Página e rota**
-- [ ] Criar `features/ui-kit/UiKitPage.tsx` e registrar a rota em `app/`, acessível sem login.
+- [x] Criar `features/ui-kit/UiKitPage.tsx` e registrar a rota em `app/main.tsx` (`/ui-kit`), acessível sem login.
 
 **4.2 Conteúdo**
-- [ ] Mostrar cada componente em todos os estados e tamanhos.
+- [x] Mostrar cada componente em todos os estados e tamanhos, com seletor do tamanho do pixel (1px, 2px, 3px).
 - [ ] Mostrar também no tema compacto (celular).
 
 **4.3 Verificação visual**

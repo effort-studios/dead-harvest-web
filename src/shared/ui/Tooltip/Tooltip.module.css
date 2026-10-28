@@ -1,7 +1,7 @@
 /* Moldura de 4 pixels da arte (plate.png) */
 .tooltip {
   box-sizing: border-box;
-  display: flex;
+  display: inline-flex;
   flex-direction: column;
   gap: 1px;
   padding: 0 var(--space-1);

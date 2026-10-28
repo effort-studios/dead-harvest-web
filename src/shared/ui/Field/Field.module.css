@@ -20,5 +20,23 @@
 .control::placeholder { color: var(--text-muted); }
 .control:focus-visible { outline: 2px solid var(--frame-gold-light); outline-offset: 1px; }
 .control:disabled { filter: grayscale(0.8) brightness(0.8); cursor: not-allowed; }
-select.control { cursor: pointer; }
+/* Select: sem a seta do navegador; a seta é um triângulo de pixels (na cor do texto) por cima da moldura */
+.selectWrap { position: relative; display: block; }
+.selectWrap::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: var(--space-2);
+  width: 14px;
+  height: 8px;
+  transform: translateY(-50%);
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='4' shape-rendering='crispEdges'%3E%3Cpath fill='%23f3e6c8' d='M0 0h7v1H1zM1 1h5v1H2zM2 2h3v1H3z'/%3E%3C/svg%3E") no-repeat center / 14px 8px;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+.select {
+  appearance: none;
+  padding-right: calc(var(--space-4) + 12px);
+  cursor: pointer;
+}
 .invalid { outline: 2px solid var(--danger); outline-offset: 1px; }

@@ -21,6 +21,11 @@ export function Input({ invalid, className, ...props }: ComponentProps<'input'> 
   return <input aria-invalid={invalid} className={cx(styles.control, invalid && styles.invalid, className)} {...props} />
 }
 
+// A seta fica num invólucro: o fundo do select some por baixo do `fill` da moldura
 export function Select({ invalid, className, ...props }: ComponentProps<'select'> & ControlProps) {
-  return <select aria-invalid={invalid} className={cx(styles.control, invalid && styles.invalid, className)} {...props} />
+  return (
+    <span className={styles.selectWrap}>
+      <select aria-invalid={invalid} className={cx(styles.control, styles.select, invalid && styles.invalid, className)} {...props} />
+    </span>
+  )
 }
