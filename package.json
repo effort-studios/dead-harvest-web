@@ -53,7 +53,7 @@
     ],
     "win": {
       "target": "portable",
-      "artifactName": "${productName}.${ext}"
+      "artifactName": "Dead-Harvest-Windows.${ext}"
     },
     "mac": {
       "target": [
@@ -61,7 +61,7 @@
       ],
       "category": "public.app-category.games",
       "icon": "build/icon.icns",
-      "artifactName": "${productName}-mac-${arch}.${ext}"
+      "artifactName": "Dead-Harvest-macOS-AppleSilicon.${ext}"
     },
     "linux": {
       "target": [
@@ -69,7 +69,7 @@
       ],
       "category": "Game",
       "icon": "build/icon.png",
-      "artifactName": "${productName}-linux-${arch}.${ext}"
+      "artifactName": "Dead-Harvest-Linux.${ext}"
     }
   }
 }
