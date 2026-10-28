@@ -1,20 +1,14 @@
 /* Tokens do design system da HUD. Os componentes de shared/ui só usam estas variáveis (nada de valor solto).
    Importado uma vez, em app/main.tsx. */
 :root {
-  /* ---------- Cores atuais (HUD clara) ----------
-     Usadas pelo index.css até a migração (fase 5). --gold é o dourado vivo, que fica como cor de destaque
-     (selecionado, moeda) quando a HUD escura chegar. */
-  --outline: #4a2a12;
+  /* ---------- Cores de destaque ----------
+     O dourado vivo (selecionado, moeda, energia) e a sombra dura dos elementos soltos sobre o mapa. */
   --gold: #f2b234;
   --gold-light: #ffd75e;
   --gold-dark: #c67d1c;
-  --plate: #f8dfa8;
-  --plate-light: #fff0cc;
-  --plate-border: #7a4416;
-  --ink: #5a3414;
   --hard-shadow: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.35));
 
-  /* ---------- Cores da HUD escura (paleta do PLANO-DESIGN-SYSTEM.md) ---------- */
+  /* ---------- Cores da HUD (paleta do PLANO-DESIGN-SYSTEM.md) ---------- */
   --frame-outline: #2a1a0e;
   --frame-gold-light: #fbd594;
   --frame-gold: #c89e61;
@@ -26,10 +20,10 @@
   --text-muted: #b8a888;
   --danger: #d9482b;
 
-  /* ---------- Molduras 9-slice (public/assets/ui/v2) ----------
+  /* ---------- Molduras 9-slice (public/assets/ui) ----------
      --px: tamanho de um pixel da arte na tela (as peças são desenhadas em tamanho real e ampliadas sem borrar).
      --frame-*-slice: pixels da arte que cada peça reserva em cada lado (a borda do 9-slice). Na tela a borda
-     ocupa slice x --px. As peças foram geradas na PixelLab e montadas por scripts/build_ui_frames_dark.py. */
+     ocupa slice x --px. As peças foram geradas na PixelLab e montadas por scripts/build_ui_frames.py. */
   --px: 2px;
   --frame-panel-slice: 5;
   --frame-plate-slice: 4;

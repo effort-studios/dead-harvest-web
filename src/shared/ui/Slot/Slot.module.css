@@ -8,7 +8,7 @@
   height: var(--slot-size, 56px);
   padding: 0;
   border: calc(var(--frame-slot-slice) * var(--px)) solid transparent;
-  border-image: url('/assets/ui/v2/slot.png') var(--frame-slot-slice) fill / calc(var(--frame-slot-slice) * var(--px)) stretch;
+  border-image: url('/assets/ui/slot.png') var(--frame-slot-slice) fill / calc(var(--frame-slot-slice) * var(--px)) stretch;
   image-rendering: pixelated;
   background: none;
   color: var(--text);
@@ -17,7 +17,7 @@
 }
 .slot:hover:not(:disabled) { filter: brightness(1.3); }
 .slot:disabled { cursor: default; filter: saturate(0.6) brightness(0.9); }
-.selected { border-image-source: url('/assets/ui/v2/slot_selected.png'); }
+.selected { border-image-source: url('/assets/ui/slot_selected.png'); }
 
 .hotkey,
 .count {

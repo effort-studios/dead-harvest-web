@@ -228,7 +228,7 @@ revisar o resultado antes de seguir. Marcar `[x]` só depois de feito e verifica
 | 2 | Arte das molduras | em andamento |
 | 3 | Componentes base | concluída |
 | 4 | Página `/ui-kit` | em andamento (4.3 falta) |
-| 5 | Migrar a HUD | pendente |
+| 5 | Migrar a HUD | feita; falta conferir no jogo (5.7) |
 | 6 | Peças novas | pendente |
 
 Status: `pendente`, `em andamento`, `concluída`. Atualizar a tabela junto com os checks.
@@ -306,10 +306,10 @@ referências de estilo só quando forem planas.
 
 **2.3 Pipeline de arte**
 - [x] Guardar as saídas cruas em `art/pixellab/raw/ui` (`g2_*.png`).
-- [x] Script `scripts/build_ui_frames_dark.py`: recorta cada peça (já vêm em tamanho real, sem o 3x), refaz as bordas
-  repetindo o meio, deixa o miolo liso e recolore o botão (dourado e perigo). Saem em `public/assets/ui/v2/`
-  (`panel`, `plate`, `bar`, `slot`, `slot_selected`, `button`, `button_pressed`, `button_danger`); as atuais só
-  trocam na fase 5. Folha de conferência em `art/ui_frames_dark_preview.png`.
+- [x] Script `scripts/build_ui_frames.py`: recorta cada peça (já vêm em tamanho real, sem o 3x), refaz as bordas
+  repetindo o meio, deixa o miolo liso e recolore o botão (dourado e perigo). Saem em `public/assets/ui/`
+  (`panel`, `plate`, `bar`, `slot`, `slot_selected`, `button`, `button_pressed`, `button_danger`); as molduras antigas
+  saíram na fase 5. Folha de conferência em `art/ui_frames_dark_preview.png`.
 - [x] Ajustar `slice` por peça (painel 5, barra 5, placa 4, botão 3, slot 2) e as variáveis da fase 1 em um único lugar
   (`--px` e `--frame-*-slice` no `tokens.css`).
 
@@ -363,25 +363,25 @@ Um commit por atividade, de menor para maior risco. Em cada uma: trocar a classe
 `index.css` a classe que ficou sem uso e o trecho de sobrescrita do celular que virou variável, e conferir.
 
 **5.1 Botão de música e botões da lateral**
-- [ ] Migrar e limpar o CSS.
+- [x] Migrar e limpar o CSS.
 
 **5.2 Barra de itens (slots)**
-- [ ] Migrar e limpar o CSS.
+- [x] Migrar e limpar o CSS.
 
 **5.3 Placas do jogador e do relógio**
-- [ ] Migrar e limpar o CSS.
+- [x] Migrar e limpar o CSS.
 
 **5.4 Painéis laterais (loja, armazém, construir)**
-- [ ] Migrar e limpar o CSS.
+- [x] Migrar e limpar o CSS.
 
 **5.5 Painel do prédio e menu do clique no chão**
-- [ ] Migrar e limpar o CSS.
+- [x] Migrar e limpar o CSS.
 
 **5.6 Login, perfil e editor de avatar**
-- [ ] Migrar e limpar o CSS.
+- [x] Migrar e limpar o CSS.
 
 **5.7 Fechamento**
-- [ ] Revisar o `index.css`: sem classes de HUD sem uso e sem valores soltos.
+- [x] Revisar o `index.css`: sem classes de HUD sem uso (`.panel`, `.panel-light`, `.btn`, `.slot`, `.rail-btn`, `.panel-close`, `.chip`, `.progress`, `.ctx-item`, `.plant-tip` saíram).
 - [ ] Jogo jogável (login, plantar, loja, música) sem erros no console.
 
 ---

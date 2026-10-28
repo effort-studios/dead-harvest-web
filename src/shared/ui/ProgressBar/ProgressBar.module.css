@@ -5,7 +5,7 @@
   height: calc(11 * var(--px));
   padding: calc(3 * var(--px)) calc(4 * var(--px));
   border: 1px solid transparent;
-  border-image: url('/assets/ui/v2/bar.png') var(--frame-bar-slice) fill / calc(var(--frame-bar-slice) * var(--px)) stretch;
+  border-image: url('/assets/ui/bar.png') var(--frame-bar-slice) fill / calc(var(--frame-bar-slice) * var(--px)) stretch;
   image-rendering: pixelated;
 }
 .fill {

@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { AVATAR_OPTIONS, AVATAR_PARTS, OPTION_LABEL, PART_LABEL, type Avatar as AvatarData, type AvatarPart } from '@/features/profile/model/avatar'
 import { useProfileStore } from '../store'
 import { Avatar } from './Avatar'
+import { Button, Field, IconButton, Input, Panel, Tabs } from '@/shared/ui'
 import { CloseIcon } from '@/shared/ui/icons'
 
 // Janela para editar o nome e o avatar. As mudanças só valem ao salvar; cancelar descarta tudo.
@@ -38,31 +39,25 @@ export function ProfileEditor({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="modal-backdrop" onPointerDown={(e) => e.target === e.currentTarget && onClose()}>
-      <form className="panel-light editor" onSubmit={save} role="dialog" aria-label="Editar perfil">
+      <Panel className="editor">
+      <form onSubmit={save} role="dialog" aria-label="Editar perfil">
         <h2>
           <span className="panel-title">Editar perfil</span>
-          <button type="button" className="panel-close" aria-label="Fechar" onClick={onClose}>
+          <IconButton size="sm" aria-label="Fechar" onClick={onClose}>
             <CloseIcon size={20} />
-          </button>
+          </IconButton>
         </h2>
 
         <div className="editor-top">
           <div className="editor-preview">
             <Avatar avatar={avatar} size={160} />
           </div>
-          <label className="editor-name">
-            Nome no jogo
-            <input value={displayName} onChange={(e) => setDisplayName(e.target.value)} minLength={2} maxLength={30} required />
-          </label>
+          <Field label="Nome no jogo" className="editor-name">
+            <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} minLength={2} maxLength={30} required />
+          </Field>
         </div>
 
-        <div className="tabs" role="tablist">
-          {AVATAR_PARTS.map((p) => (
-            <button type="button" key={p} role="tab" aria-selected={part === p} className={part === p ? 'active' : ''} onClick={() => setPart(p)}>
-              {PART_LABEL[p]}
-            </button>
-          ))}
-        </div>
+        <Tabs className="editor-tabs" items={AVATAR_PARTS.map((p) => ({ id: p, label: PART_LABEL[p] }))} value={part} onChange={(id) => setPart(id as typeof part)} />
 
         <div className="option-grid" role="listbox" aria-label={PART_LABEL[part]}>
           {AVATAR_OPTIONS[part].map((option) => (
@@ -84,10 +79,11 @@ export function ProfileEditor({ onClose }: { onClose: () => void }) {
         {error && <p className="auth-error" role="alert">{error}</p>}
 
         <div className="editor-actions">
-          <button type="button" className="btn" onClick={onClose}>Cancelar</button>
-          <button className="btn" disabled={busy}>{busy ? 'Salvando...' : 'Salvar'}</button>
+          <Button onClick={onClose}>Cancelar</Button>
+          <Button type="submit" disabled={busy}>{busy ? 'Salvando...' : 'Salvar'}</Button>
         </div>
       </form>
+      </Panel>
     </div>
   )
 }

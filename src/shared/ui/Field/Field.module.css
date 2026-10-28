@@ -10,7 +10,7 @@
   min-height: 40px;
   padding: 0 var(--space-1);
   border: calc(var(--frame-plate-slice) * var(--px)) solid transparent;
-  border-image: url('/assets/ui/v2/plate.png') var(--frame-plate-slice) fill / calc(var(--frame-plate-slice) * var(--px)) stretch;
+  border-image: url('/assets/ui/plate.png') var(--frame-plate-slice) fill / calc(var(--frame-plate-slice) * var(--px)) stretch;
   image-rendering: pixelated;
   background: none;
   color: var(--text);

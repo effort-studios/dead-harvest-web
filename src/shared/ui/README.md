@@ -9,8 +9,8 @@ Peças reutilizáveis de interface. Regra de dependência: `app → features →
 
 ## Molduras e tamanho mínimo
 
-As molduras são 9-slice em `public/assets/ui/v2`, geradas na PixelLab e montadas por
-`scripts/build_ui_frames_dark.py`. Cada peça é desenhada em tamanho real da arte e ampliada sem borrar
+As molduras são 9-slice em `public/assets/ui`, geradas na PixelLab e montadas por
+`scripts/build_ui_frames.py`. Cada peça é desenhada em tamanho real da arte e ampliada sem borrar
 (`image-rendering: pixelated`). `--px` (em `tokens.css`) é o tamanho de um pixel da arte na tela. A borda de uma
 peça na tela é `slice x --px`.
 

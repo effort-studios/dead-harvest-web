@@ -7,7 +7,7 @@
   gap: var(--space-1);
   padding: 0 var(--space-1);
   border: calc(var(--frame-plate-slice) * var(--px)) solid transparent;
-  border-image: url('/assets/ui/v2/plate.png') var(--frame-plate-slice) fill / calc(var(--frame-plate-slice) * var(--px)) stretch;
+  border-image: url('/assets/ui/plate.png') var(--frame-plate-slice) fill / calc(var(--frame-plate-slice) * var(--px)) stretch;
   image-rendering: pixelated;
   color: var(--text);
   font-family: var(--font-ui);

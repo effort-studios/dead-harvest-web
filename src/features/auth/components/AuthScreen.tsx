@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { forgotPassword, resetPassword } from '../api'
+import { Button, Field, Input, Panel } from '@/shared/ui'
 import { EyeIcon, EyeOffIcon, FarmerIcon } from '@/shared/ui/icons'
 
 type Mode = 'login' | 'register' | 'forgot' | 'reset'
@@ -62,7 +63,8 @@ export function AuthScreen({ onLogin, onRegister }: Props) {
 
   return (
     <div className="auth-screen">
-      <form className="panel-light auth-card" onSubmit={submit}>
+      <Panel className="auth-card">
+      <form onSubmit={submit}>
         <div className="auth-logo">
           <FarmerIcon size={48} />
           <h1>Dead Harvest</h1>
@@ -73,29 +75,25 @@ export function AuthScreen({ onLogin, onRegister }: Props) {
         {notice && <p className="auth-notice">{notice}</p>}
 
         {mode === 'register' && (
-          <label>
-            Nome no jogo
-            <input value={displayName} onChange={(e) => setDisplayName(e.target.value)} minLength={2} maxLength={30} required autoComplete="nickname" />
-          </label>
+          <Field label="Nome no jogo">
+            <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} minLength={2} maxLength={30} required autoComplete="nickname" />
+          </Field>
         )}
 
-        <label>
-          E-mail
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" autoFocus />
-        </label>
+        <Field label="E-mail">
+          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" autoFocus />
+        </Field>
 
         {mode === 'reset' && (
-          <label>
-            Código recebido por e-mail
-            <input value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" pattern="\d{6}" placeholder="000000" required autoComplete="one-time-code" />
-          </label>
+          <Field label="Código recebido por e-mail">
+            <Input value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" pattern="\d{6}" placeholder="000000" required autoComplete="one-time-code" />
+          </Field>
         )}
 
         {mode !== 'forgot' && (
-          <label>
-            {mode === 'reset' ? 'Nova senha' : 'Senha'}
+          <Field label={mode === 'reset' ? 'Nova senha' : 'Senha'} hint={mode !== 'login' ? 'Pelo menos 8 caracteres.' : undefined}>
             <span className="password-field">
-              <input
+              <Input
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -115,15 +113,14 @@ export function AuthScreen({ onLogin, onRegister }: Props) {
                 {showPassword ? <EyeOffIcon size={22} /> : <EyeIcon size={22} />}
               </button>
             </span>
-            {mode !== 'login' && <small>Pelo menos 8 caracteres.</small>}
-          </label>
+          </Field>
         )}
 
         {error && <p className="auth-error" role="alert">{error}</p>}
 
-        <button className="btn auth-submit" disabled={busy}>
+        <Button type="submit" className="auth-submit" disabled={busy}>
           {busy ? 'Aguarde...' : mode === 'forgot' ? 'Enviar código' : TITLES[mode]}
-        </button>
+        </Button>
 
         <div className="auth-links">
           {mode === 'login' && (
@@ -136,6 +133,7 @@ export function AuthScreen({ onLogin, onRegister }: Props) {
           {(mode === 'forgot' || mode === 'reset') && <button type="button" onClick={() => go('login')}>Voltar para o login</button>}
         </div>
       </form>
+      </Panel>
     </div>
   )
 }

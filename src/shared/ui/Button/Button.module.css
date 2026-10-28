@@ -7,7 +7,7 @@
   gap: var(--space-1);
   padding: 0 var(--space-1);
   border: calc(var(--frame-button-slice) * var(--px)) solid transparent;
-  border-image: url('/assets/ui/v2/button.png') var(--frame-button-slice) fill / calc(var(--frame-button-slice) * var(--px)) stretch;
+  border-image: url('/assets/ui/button.png') var(--frame-button-slice) fill / calc(var(--frame-button-slice) * var(--px)) stretch;
   image-rendering: pixelated;
   background: none;
   color: var(--frame-outline);
@@ -23,16 +23,16 @@
 .button:hover:not(:disabled) { filter: brightness(1.1); }
 .button:active:not(:disabled),
 .on {
-  border-image-source: url('/assets/ui/v2/button_pressed.png');
+  border-image-source: url('/assets/ui/button_pressed.png');
   padding-top: var(--px); /* o texto desce junto com a moldura */
 }
 .button:disabled { filter: grayscale(0.8) brightness(0.8); cursor: not-allowed; }
 
 .danger {
-  border-image-source: url('/assets/ui/v2/button_danger.png');
+  border-image-source: url('/assets/ui/button_danger.png');
   color: var(--text);
 }
 .danger:active:not(:disabled) {
-  border-image-source: url('/assets/ui/v2/button_pressed.png');
+  border-image-source: url('/assets/ui/button_pressed.png');
   filter: hue-rotate(-38deg) saturate(1.6);
 }

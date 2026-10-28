@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useProfileStore } from '../store'
 import { Avatar } from './Avatar'
-import { Panel, Plate } from '@/shared/ui'
+import { Button, Panel, Plate } from '@/shared/ui'
 import { CoinIcon } from '@/shared/ui/icons'
 import { ProfileEditor } from './ProfileEditor'
 
@@ -50,21 +50,22 @@ export function ProfileMenu({ money, onLogout }: { money: number; onLogout: () =
       </Panel>
 
       {open && (
-        <div className="panel-light profile-menu" role="menu">
+        <Panel className="profile-menu" role="menu">
           <p className="profile-email">{user.email}</p>
-          <button
+          <Button
             role="menuitem"
+            size="sm"
             onClick={() => {
               setOpen(false)
               setEditing(true)
             }}
           >
             Editar perfil
-          </button>
-          <button role="menuitem" className="danger" onClick={() => onLogout()}>
+          </Button>
+          <Button role="menuitem" size="sm" variant="danger" onClick={() => onLogout()}>
             Sair
-          </button>
-        </div>
+          </Button>
+        </Panel>
       )}
 
       {editing && <ProfileEditor onClose={() => setEditing(false)} />}
