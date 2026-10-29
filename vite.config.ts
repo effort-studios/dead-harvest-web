@@ -10,8 +10,6 @@ export default defineConfig({
   preview: {
     allowedHosts: true, // em produção (Railway) o host é o domínio gerado
     // Produção: o front serve a API em /api (mesma origem: cookie de login e sem CORS), encaminhando pela rede interna
-    proxy: process.env.API_INTERNAL_URL
-      ? { '/api': { target: process.env.API_INTERNAL_URL, rewrite: (path) => path.replace(/^\/api/, '') } }
-      : undefined,
+    proxy: process.env.API_INTERNAL_URL ? { '/api': { target: process.env.API_INTERNAL_URL, rewrite: (path) => path.replace(/^\/api/, '') } } : undefined,
   },
 })

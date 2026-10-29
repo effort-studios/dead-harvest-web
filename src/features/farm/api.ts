@@ -53,4 +53,7 @@ export const buyAnimal = (animalId: string) => post<SaveData>('/game/animals/buy
 export const feedAnimals = () => post<SaveData>('/game/animals/feed')
 // Prédio arrastado no mapa para a célula (row, col)
 export const moveBuilding = (building: BuildingRef, row: number, col: number) =>
-  post<SaveData>('/game/buildings/move', building.kind === 'machine' ? { kind: 'machine', machineId: building.id, row, col } : { kind: building.kind, row, col })
+  post<SaveData>(
+    '/game/buildings/move',
+    building.kind === 'machine' ? { kind: 'machine', machineId: building.id, row, col } : { kind: building.kind, row, col },
+  )

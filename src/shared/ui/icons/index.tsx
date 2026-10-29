@@ -8,15 +8,7 @@ export type IconProps = { size?: number }
 
 export function Svg({ size = 24, children }: { size?: number; children: ReactNode }) {
   return (
-    <svg
-      className="svg-icon"
-      width={size}
-      height={size}
-      viewBox="0 0 32 32"
-      strokeLinejoin="round"
-      strokeLinecap="round"
-      aria-hidden="true"
-    >
+    <svg className="svg-icon" width={size} height={size} viewBox="0 0 32 32" strokeLinejoin="round" strokeLinecap="round" aria-hidden="true">
       {children}
     </svg>
   )
@@ -24,17 +16,7 @@ export function Svg({ size = 24, children }: { size?: number; children: ReactNod
 
 // Ícone em pixel art (public/assets/icons/<nome>.png, 32x32, gerado na PixelLab): ampliado sem borrar
 export function PixelIcon({ name, size = 24, src }: { name: string; size?: number; src?: string }) {
-  return (
-    <img
-      className="svg-icon pixel-icon"
-      src={src ?? `/assets/icons/${name}.png`}
-      width={size}
-      height={size}
-      alt=""
-      draggable={false}
-      aria-hidden="true"
-    />
-  )
+  return <img className="svg-icon pixel-icon" src={src ?? `/assets/icons/${name}.png`} width={size} height={size} alt="" draggable={false} aria-hidden="true" />
 }
 
 export const CoinIcon = ({ size }: IconProps) => <PixelIcon name="coin" size={size} />

@@ -56,32 +56,32 @@ Dourado e escuros medidos nas referências; o escuro foi esquentado (marrom em v
 bege-dourado sóbrio (tokens `--frame-*`). O amarelo vivo atual (`--gold`, `#f2b234`) fica só para destaques
 (selecionado, moeda).
 
-| Papel | Token | Hex |
-|---|---|---|
-| Contorno | `--frame-outline` | `#2a1a0e` |
-| Dourado, luz | `--frame-gold-light` | `#fbd594` |
-| Dourado, base | `--frame-gold` | `#c89e61` |
-| Dourado, sombra | `--frame-gold-dark` | `#6c4620` |
-| Interior do painel | `--panel-bg` | `#2b2118` |
-| Slot afundado | `--slot-bg` | `#1d160f` |
-| Borda do slot (luz de 1px) | `--slot-edge` | `#4a3a28` |
-| Texto principal | `--text` | `#f3e6c8` |
-| Texto secundário | `--text-muted` | `#b8a888` |
-| Alerta | `--danger` | `#d9482b` |
+| Papel                      | Token                | Hex       |
+| -------------------------- | -------------------- | --------- |
+| Contorno                   | `--frame-outline`    | `#2a1a0e` |
+| Dourado, luz               | `--frame-gold-light` | `#fbd594` |
+| Dourado, base              | `--frame-gold`       | `#c89e61` |
+| Dourado, sombra            | `--frame-gold-dark`  | `#6c4620` |
+| Interior do painel         | `--panel-bg`         | `#2b2118` |
+| Slot afundado              | `--slot-bg`          | `#1d160f` |
+| Borda do slot (luz de 1px) | `--slot-edge`        | `#4a3a28` |
+| Texto principal            | `--text`             | `#f3e6c8` |
+| Texto secundário           | `--text-muted`       | `#b8a888` |
+| Alerta                     | `--danger`           | `#d9482b` |
 
 ### Moldura (8px de arte)
 
 Cinco anéis visíveis, da borda para dentro. A luz fica só em cima e à esquerda; a sombra, só embaixo e à direita.
 Cantos chanfrados de 1 a 2px, sem enfeites.
 
-| Anel | Largura | Cor |
-|---|---|---|
-| 1. Contorno | 1px | `--frame-outline` |
-| 2. Luz | 1px | `--frame-gold-light` |
-| 3. Base | 2px | `--frame-gold` |
-| 4. Sombra | 1px | `--frame-gold-dark` |
-| 5. Contorno interno | 1px | `--frame-outline` |
-| Respiro até o interior | 2px | `--panel-bg` |
+| Anel                   | Largura | Cor                  |
+| ---------------------- | ------- | -------------------- |
+| 1. Contorno            | 1px     | `--frame-outline`    |
+| 2. Luz                 | 1px     | `--frame-gold-light` |
+| 3. Base                | 2px     | `--frame-gold`       |
+| 4. Sombra              | 1px     | `--frame-gold-dark`  |
+| 5. Contorno interno    | 1px     | `--frame-outline`    |
+| Respiro até o interior | 2px     | `--panel-bg`         |
 
 ### Prompt do grupo 1 (painéis, PixelLab)
 
@@ -104,6 +104,7 @@ Variantes a pedir no mesmo estilo: painel normal e painel inativo (mesma estrutu
 ## 3. Referências
 
 **Escolhidas** (as imagens não entram no repositório; vão direto para a PixelLab como referência de estilo):
+
 - Molduras douradas ornamentadas: moldura dos painéis (borda fina dourada com luz e sombra, interior escuro).
 - UI de crafting escura: aba, campo de busca, rolagem, passo de quantidade, linha de ingrediente, slot afundado.
 - Barra de itens escura de bronze: barra de atalhos com slots repetidos e quase sem moldura própria.
@@ -113,6 +114,7 @@ Nenhuma página informa a espessura da borda em pixels: medir no preview. Se alg
 licença.
 
 Clima madeira, fazenda e aconchegante:
+
 - [Ui Background 9-Slices Vol. 1](https://ome6a1717.itch.io/ui-background-nine-slices): molduras de madeira
   em 9-slice, 2 cores alternativas, uso comercial permitido.
 - [Alya Pixel Frames](https://kasayaa.itch.io/alya-frames): madeira aconchegante, uso pessoal e comercial.
@@ -121,10 +123,12 @@ Clima madeira, fazenda e aconchegante:
 - [Farm game UI](https://nyknck.itch.io/farm-game-ui): estilo Stardew, poucas avaliações.
 
 Bordas simples, boas para recolorir para dourado:
+
 - [Simple Pixel Borders](https://naughtymolegames.itch.io/pixel-ui-borders): grátis, PNGs 9-slice e tingíveis.
 - [UI borders Art Deco](https://piposchpatz.itch.io/ui-borders-art-deco-pixel-art): CC BY 4.0 (exige atribuição).
 
 Só como referência de estrutura (cores fora da paleta):
+
 - [Fantasy RPG UI Pixel Pack](https://veyroa.itch.io/fantasy-minimal-pixel-art-gui) (CC0),
   [Free UI Nature Pack](https://qiuro.itch.io/free-uinature-pack),
   [Free Basic Pixel UI for RPG](https://free-game-assets.itch.io/free-basic-pixel-art-ui-for-rpg).
@@ -162,11 +166,11 @@ completo.
 
 ### O que precisa de arte e o que fica em CSS
 
-| Com arte nova (3 peças) | Só CSS na mesma paleta |
-|---|---|
-| Painel (interior escuro quente, moldura dourada; variante clara só para pequenos destaques) | Placas de texto, input, select, aba, chip, card |
-| Slot | Barra de progresso, tooltip, avisos, slider, rolagem |
-| Botão (inclui a variante de perigo, só com outra cor) | Tipografia e estados |
+| Com arte nova (3 peças)                                                                     | Só CSS na mesma paleta                               |
+| ------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| Painel (interior escuro quente, moldura dourada; variante clara só para pequenos destaques) | Placas de texto, input, select, aba, chip, card      |
+| Slot                                                                                        | Barra de progresso, tooltip, avisos, slider, rolagem |
+| Botão (inclui a variante de perigo, só com outra cor)                                       | Tipografia e estados                                 |
 
 Ícones já têm arte própria e só serão gerados se faltar algum.
 
@@ -207,6 +211,7 @@ public/assets/ui/        # PNGs das molduras
 ```
 
 Escolhas:
+
 - **CSS Modules (`*.module.css`) ao lado de cada componente.** Escopo local, sem colisão com as classes globais
   durante a migração, e o CSS acompanha o componente. O Vite já suporta, sem dependência nova.
 - **Tokens em `shared/ui/tokens.css`**, importado uma vez em `app/main.tsx`. Os módulos só usam `var(--...)`.
@@ -221,19 +226,20 @@ revisar o resultado antes de seguir. Marcar `[x]` só depois de feito e verifica
 
 ### Progresso
 
-| Fase | Tema | Status |
-|---|---|---|
-| 0 | Decidir o visual | concluída |
-| 1 | Tokens e regras | concluída |
-| 2 | Arte das molduras | em andamento |
-| 3 | Componentes base | concluída |
-| 4 | Página `/ui-kit` | em andamento (4.3 falta) |
-| 5 | Migrar a HUD | feita; falta conferir no jogo (5.7) |
-| 6 | Peças novas | pendente |
+| Fase | Tema              | Status                              |
+| ---- | ----------------- | ----------------------------------- |
+| 0    | Decidir o visual  | concluída                           |
+| 1    | Tokens e regras   | concluída                           |
+| 2    | Arte das molduras | em andamento                        |
+| 3    | Componentes base  | concluída                           |
+| 4    | Página `/ui-kit`  | em andamento (4.3 falta)            |
+| 5    | Migrar a HUD      | feita; falta conferir no jogo (5.7) |
+| 6    | Peças novas       | pendente                            |
 
 Status: `pendente`, `em andamento`, `concluída`. Atualizar a tabela junto com os checks.
 
 ### Pré-requisitos
+
 - [x] Criar uma branch para o trabalho (ex.: `feat/design-system`), separada da `poc/electron-ci`.
 
 ---
@@ -241,18 +247,22 @@ Status: `pendente`, `em andamento`, `concluída`. Atualizar a tabela junto com o
 ### Fase 0: decidir o visual (sem código)
 
 **0.1 Decisões já tomadas**
+
 - [x] Fonte da arte: PixelLab.
 - [x] Espessura da borda: 8px.
 - [x] Estilo e referências escolhidos (seções 2 e 3).
 
 **0.2 Paleta**
+
 - [x] Definir os hex: contorno, dourado (luz, base, sombra), interior escuro, texto claro, vermelho de alerta.
 - [x] Anotar a paleta neste arquivo (seção 2).
 
 **0.3 Moldura**
+
 - [x] Definir o número de anéis (4 a 6) e a espessura de cada um dentro dos 8px (seção 2).
 
 **0.4 Prompt do grupo 1**
+
 - [x] Escrever o prompt dos painéis (seção 2). Aprovar o resultado só depois de gerar, na atividade 2.1.
 
 ---
@@ -260,24 +270,29 @@ Status: `pendente`, `em andamento`, `concluída`. Atualizar a tabela junto com o
 ### Fase 1: tokens e regras (sem mudança visual)
 
 **1.1 Tokens**
+
 - [x] Criar `src/shared/ui/tokens.css` com cores (movendo o `:root` do `index.css`), espaçamento, fontes, ícones,
-  escala de borda (1x/2x), z-index e sombra.
+      escala de borda (1x/2x), z-index e sombra.
 - [x] Criar tokens de texto claro sobre fundo escuro (o `--ink` atual é marrom escuro).
 - [x] Importar o `tokens.css` em `app/main.tsx`.
 
 **1.2 Estrutura de pastas**
+
 - [x] Mover `shared/ui/icons.tsx` para `shared/ui/icons/index.tsx` (os imports `@/shared/ui/icons` continuam valendo).
 - [x] Criar `shared/ui/index.ts` (vazio por enquanto).
 
 **1.3 Regra de dependência**
+
 - [x] Adicionar no `.oxlintrc.json`: `src/shared/**` não importa de `@/features/*` nem `@/app/*`.
 - [x] Conferir que a regra falha ao importar errado e passa no código atual.
 
 **1.4 Regras de encaixe das molduras**
+
 - [x] Definir as variáveis por moldura (`--frame-panel-art`, `--frame-panel-pad`...).
 - [x] Documentar em `src/shared/ui/README.md` o tamanho mínimo do miolo por moldura.
 
 **1.5 Verificação**
+
 - [x] `npm run build` e `npm run lint` passam; o jogo está igual a antes.
 
 ---
@@ -294,6 +309,7 @@ Por isso: um elemento por job, prompts com a lista do que não pode aparecer (re
 referências de estilo só quando forem planas.
 
 **2.1 Peças (um job cada; gerado, aguardando aprovação)**
+
 - [x] Painel (`panel`): moldura dourada fina, interior escuro liso.
 - [x] Slot afundado (`panel`, descrição de slot de item).
 - [x] Botão (`button`): dourado, com a variante de perigo gerada a partir dele (recolorida).
@@ -301,44 +317,53 @@ referências de estilo só quando forem planas.
 - [x] Aba (`tab`).
 
 **2.2 Aprovação, uma peça por vez**
+
 - [x] Aprovar cada peça (poucos anéis de tons vizinhos, sem ornamento, interior liso, bordas retas para o 9-slice).
 - [x] Se não passar, ajustar o prompt e repetir só aquela peça: não foi preciso; o botão saiu bege e foi recolorido.
 
 **2.3 Pipeline de arte**
+
 - [x] Guardar as saídas cruas em `art/pixellab/raw/ui` (`g2_*.png`).
 - [x] Script `scripts/build_ui_frames.py`: recorta cada peça (já vêm em tamanho real, sem o 3x), refaz as bordas
-  repetindo o meio, deixa o miolo liso e recolore o botão (dourado e perigo). Saem em `public/assets/ui/`
-  (`panel`, `plate`, `bar`, `slot`, `slot_selected`, `button`, `button_pressed`, `button_danger`); as molduras antigas
-  saíram na fase 5. Folha de conferência em `art/ui_frames_dark_preview.png`.
+      repetindo o meio, deixa o miolo liso e recolore o botão (dourado e perigo). Saem em `public/assets/ui/`
+      (`panel`, `plate`, `bar`, `slot`, `slot_selected`, `button`, `button_pressed`, `button_danger`); as molduras antigas
+      saíram na fase 5. Folha de conferência em `art/ui_frames_dark_preview.png`.
 - [x] Ajustar `slice` por peça (painel 5, barra 5, placa 4, botão 3, slot 2) e as variáveis da fase 1 em um único lugar
-  (`--px` e `--frame-*-slice` no `tokens.css`).
+      (`--px` e `--frame-*-slice` no `tokens.css`).
 
 **2.4 Verificação**
+
 - [ ] Conferir as PNGs e o resultado no navegador (hard reload).
 
 ### Fase 3: componentes base
+
 Cada componente: `Nome.tsx` + `Nome.module.css`, variações por prop (`variant`, `size`), estados normal, hover,
 pressionado, selecionado e desabilitado, e exportado em `shared/ui/index.ts`. Substituem as classes CSS
 (`.panel`, `.btn`, `.slot`...): as globais saem do `index.css` na fase 5.
 
 **3.1 Molduras**
+
 - [x] `Panel`
 - [x] `Slot`
 
 **3.2 Ações**
+
 - [x] `Button` (com `IconButton` como variante e variante de perigo)
 
 **3.3 Campos e navegação**
+
 - [x] `Field` (input e select)
 - [x] `Tabs`
 
 **3.4 Informação**
+
 - [x] `Plate`
 - [x] `Chip`
 - [x] `ProgressBar` (variantes: progresso, vida, energia, dano)
 - [x] `Tooltip`
 
 **3.5 Verificação**
+
 - [x] `npm run build` e `npm run lint` passam.
 
 ---
@@ -346,41 +371,52 @@ pressionado, selecionado e desabilitado, e exportado em `shared/ui/index.ts`. Su
 ### Fase 4: página `/ui-kit` (fica no repositório)
 
 **4.1 Página e rota**
+
 - [x] Criar `features/ui-kit/UiKitPage.tsx` e registrar a rota em `app/main.tsx` (`/ui-kit`), acessível sem login.
 
 **4.2 Conteúdo**
+
 - [x] Mostrar cada componente em todos os estados e tamanhos, com seletor do tamanho do pixel (1px, 2px, 3px).
 - [ ] Mostrar também no tema compacto (celular).
 
 **4.3 Verificação visual**
+
 - [ ] Conferir em 1920x1080, 1366x768, 900px de largura e celular em pé e deitado.
 - [ ] Ajustar molduras e componentes pelo `/ui-kit` antes de seguir para a HUD.
 
 ---
 
 ### Fase 5: migrar a HUD
+
 Um commit por atividade, de menor para maior risco. Em cada uma: trocar a classe global pelo componente, apagar do
 `index.css` a classe que ficou sem uso e o trecho de sobrescrita do celular que virou variável, e conferir.
 
 **5.1 Botão de música e botões da lateral**
+
 - [x] Migrar e limpar o CSS.
 
 **5.2 Barra de itens (slots)**
+
 - [x] Migrar e limpar o CSS.
 
 **5.3 Placas do jogador e do relógio**
+
 - [x] Migrar e limpar o CSS.
 
 **5.4 Painéis laterais (loja, armazém, construir)**
+
 - [x] Migrar e limpar o CSS.
 
 **5.5 Painel do prédio e menu do clique no chão**
+
 - [x] Migrar e limpar o CSS.
 
 **5.6 Login, perfil e editor de avatar**
+
 - [x] Migrar e limpar o CSS.
 
 **5.7 Fechamento**
+
 - [x] Revisar o `index.css`: sem classes de HUD sem uso (`.panel`, `.panel-light`, `.btn`, `.slot`, `.rail-btn`, `.panel-close`, `.chip`, `.progress`, `.ctx-item`, `.plant-tip` saíram).
 - [ ] Jogo jogável (login, plantar, loja, música) sem erros no console.
 
@@ -389,16 +425,19 @@ Um commit por atividade, de menor para maior risco. Em cada uma: trocar a classe
 ### Fase 6: peças novas (depois do MVP)
 
 **6.1 Combate**
+
 - [ ] Barras de vida e energia do jogador.
 - [ ] Barra de vida de zumbis e construções.
 - [ ] Alerta de ataque noturno.
 
 **6.2 Utilidades**
+
 - [ ] Toast e janela de confirmação.
 - [ ] Minimapa.
 - [ ] Inventário completo.
 
 **6.3 Só quando uma tela pedir** (todos em CSS, sem arte nova)
+
 - [ ] Passo de quantidade (`x10`), linha de lista com estado "selecionado", tag e título de seção.
 
 ## 7. Como validar

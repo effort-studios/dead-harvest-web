@@ -20,28 +20,28 @@ marcações da interface (seleção, prévia de construção, balões).
 
 ## Tamanho de cada coisa (pixels da arte)
 
-| Coisa | Canvas na PixelLab | Ocupa |
-|---|---|---|
-| Tile de chão | 64 × 64 (losango 64 × 32 no meio) | 1 célula |
-| Celeiro | 200 × 200 | 3 × 3 |
-| Máquina grande (moinho, laticínios...) | 128 × 144 a 128 × 176 | 2 × 2 |
-| Máquina pequena (prensa, forno...), poço | 64 × 80 | 1 × 1 |
-| Árvore | 96 × 112 | 1 × 1 |
-| Fardo, palete, arbusto, pedra, saco | 40 a 64 | 1 × 1 |
-| Planta (3 estágios) | 64 × 64 | 1 × 1 |
-| Animais | 32 (galinha) a 56 (vaca) | — |
-| Fazendeiro | 48 × 48 (folha em células de 64) | — |
-| Ícone da interface | 32 × 32 | — |
+| Coisa                                    | Canvas na PixelLab                | Ocupa    |
+| ---------------------------------------- | --------------------------------- | -------- |
+| Tile de chão                             | 64 × 64 (losango 64 × 32 no meio) | 1 célula |
+| Celeiro                                  | 200 × 200                         | 3 × 3    |
+| Máquina grande (moinho, laticínios...)   | 128 × 144 a 128 × 176             | 2 × 2    |
+| Máquina pequena (prensa, forno...), poço | 64 × 80                           | 1 × 1    |
+| Árvore                                   | 96 × 112                          | 1 × 1    |
+| Fardo, palete, arbusto, pedra, saco      | 40 a 64                           | 1 × 1    |
+| Planta (3 estágios)                      | 64 × 64                           | 1 × 1    |
+| Animais                                  | 32 (galinha) a 56 (vaca)          | —        |
+| Fazendeiro                               | 48 × 48 (folha em células de 64)  | —        |
+| Ícone da interface                       | 32 × 32                           | —        |
 
 ## Ferramentas da PixelLab por tipo
 
-| Tipo | Ferramenta | Observação |
-|---|---|---|
-| Chão (grama, terra) | `create_tiles_pro` (isometric, tile 64, ângulo 30, profundidade 0) | grama sem a beirada escura de baixo (o build tira) |
-| Prédios, máquinas, objetos, animais | `create_map_object` (view `high top-down`, `single color outline`, `medium shading`) | descreva "isometric ..., corner facing viewer, cozy farm game, bright colors" |
-| Plantas e ícones | `create_1_direction_object` com `item_descriptions` (16 por vez em 64 px, 64 por vez em 32 px) | sai um lote coerente; escolha os quadros |
-| Fazendeiro | `create_character` (v3, 48 px) + `animate_character` | andar e abaixar por template; enxada em v3 |
-| Molduras da interface | `create_ui_asset` | vêm com cada pixel em 3 × 3; o build reduz |
+| Tipo                                | Ferramenta                                                                                     | Observação                                                                    |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Chão (grama, terra)                 | `create_tiles_pro` (isometric, tile 64, ângulo 30, profundidade 0)                             | grama sem a beirada escura de baixo (o build tira)                            |
+| Prédios, máquinas, objetos, animais | `create_map_object` (view `high top-down`, `single color outline`, `medium shading`)           | descreva "isometric ..., corner facing viewer, cozy farm game, bright colors" |
+| Plantas e ícones                    | `create_1_direction_object` com `item_descriptions` (16 por vez em 64 px, 64 por vez em 32 px) | sai um lote coerente; escolha os quadros                                      |
+| Fazendeiro                          | `create_character` (v3, 48 px) + `animate_character`                                           | andar e abaixar por template; enxada em v3                                    |
+| Molduras da interface               | `create_ui_asset`                                                                              | vêm com cada pixel em 3 × 3; o build reduz                                    |
 
 O registro do que foi gerado (ids) está em `art/pixellab/ledger.tsv`; as imagens originais, em `art/pixellab/raw`.
 

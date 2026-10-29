@@ -12,5 +12,12 @@
   color: var(--text);
   font-family: var(--font-ui);
 }
-.md { min-height: 32px; font-size: var(--text-sm); }
-.lg { min-height: 40px; font-size: var(--text-xl); letter-spacing: 1px; }
+.md {
+  min-height: 32px;
+  font-size: var(--text-sm);
+}
+.lg {
+  min-height: 40px;
+  font-size: var(--text-xl);
+  letter-spacing: 1px;
+}

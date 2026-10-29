@@ -10,4 +10,7 @@
   font-family: var(--font-ui);
   font-size: var(--text-xs);
 }
-.lacking { border-color: var(--danger); color: var(--danger); }
+.lacking {
+  border-color: var(--danger);
+  color: var(--danger);
+}

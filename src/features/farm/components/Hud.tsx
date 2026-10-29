@@ -71,7 +71,14 @@ export function Hud({ onLogout }: { onLogout: () => void }) {
               onClick={() => item && select(item)}
               title={item ? slotTitle(item) : undefined}
             >
-              {item && (item === 'fertilizer' ? <ItemIcon itemId={FERTILIZER.itemId} size={34} /> : item === 'can' ? <CanIcon size={34} /> : <CropIcon crop={item} size={34} />)}
+              {item &&
+                (item === 'fertilizer' ? (
+                  <ItemIcon itemId={FERTILIZER.itemId} size={34} />
+                ) : item === 'can' ? (
+                  <CanIcon size={34} />
+                ) : (
+                  <CropIcon crop={item} size={34} />
+                ))}
             </Slot>
           )
         })}

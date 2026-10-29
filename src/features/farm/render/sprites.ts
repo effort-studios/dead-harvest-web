@@ -31,9 +31,7 @@ let cache: Promise<void> | null = null
 export function loadSprites(): Promise<void> {
   cache ??= Promise.all(
     // animados: a tira fica em <nome>_anim.png; <nome>.png é o quadro parado (usado nos ícones dos menus)
-    Object.entries(FRAMES).map(async ([name, f]) =>
-      images.set(name, await loadImage(`/assets/world/${name}${(f.frames ?? 1) > 1 ? '_anim' : ''}.png`)),
-    ),
+    Object.entries(FRAMES).map(async ([name, f]) => images.set(name, await loadImage(`/assets/world/${name}${(f.frames ?? 1) > 1 ? '_anim' : ''}.png`))),
   ).then(() => undefined)
   return cache
 }

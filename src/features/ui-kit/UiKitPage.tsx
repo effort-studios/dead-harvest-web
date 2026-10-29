@@ -47,9 +47,15 @@ export function UiKitPage() {
           </Button>
         </Row>
         <Row label="só ícone">
-          <IconButton aria-label="Música"><MusicIcon size={26} /></IconButton>
-          <IconButton size="sm" aria-label="Fechar"><CloseIcon size={18} /></IconButton>
-          <IconButton disabled aria-label="Desabilitado"><MusicIcon size={26} /></IconButton>
+          <IconButton aria-label="Música">
+            <MusicIcon size={26} />
+          </IconButton>
+          <IconButton size="sm" aria-label="Fechar">
+            <CloseIcon size={18} />
+          </IconButton>
+          <IconButton disabled aria-label="Desabilitado">
+            <MusicIcon size={26} />
+          </IconButton>
         </Row>
       </Section>
 

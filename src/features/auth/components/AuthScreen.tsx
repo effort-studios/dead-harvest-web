@@ -23,7 +23,6 @@ type Props = {
 }
 
 export function AuthScreen({ onLogin, onRegister, onVerifyEmail }: Props) {
-
   const [mode, setMode] = useState<Mode>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -98,73 +97,101 @@ export function AuthScreen({ onLogin, onRegister, onVerifyEmail }: Props) {
         <p>Plante de dia. Sobreviva à noite.</p>
       </header>
       <Panel className="auth-card">
-      <form onSubmit={submit}>
-        {/* entrar e criar conta: o botão já diz o que faz; só a recuperação de senha precisa de título */}
-        {(mode === 'forgot' || mode === 'reset' || mode === 'verify') && <h2>{TITLES[mode]}</h2>}
-        {(mode === 'login' || mode === 'register') && <h2>{mode === 'login' ? 'Bem-vindo de volta' : 'Comece sua fazenda'}</h2>}
+        <form onSubmit={submit}>
+          {/* entrar e criar conta: o botão já diz o que faz; só a recuperação de senha precisa de título */}
+          {(mode === 'forgot' || mode === 'reset' || mode === 'verify') && <h2>{TITLES[mode]}</h2>}
+          {(mode === 'login' || mode === 'register') && <h2>{mode === 'login' ? 'Bem-vindo de volta' : 'Comece sua fazenda'}</h2>}
 
-        {notice && <p className="auth-notice">{notice}</p>}
+          {notice && <p className="auth-notice">{notice}</p>}
 
-        {mode === 'register' && (
-          <Field label="Nome no jogo">
-            <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} minLength={2} maxLength={30} required autoComplete="nickname" />
-          </Field>
-        )}
-
-        <Field label="E-mail">
-          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" autoFocus />
-        </Field>
-
-        {(mode === 'reset' || mode === 'verify') && (
-          <Field label="Código recebido por e-mail">
-            <Input value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" pattern="\d{6}" placeholder="000000" required autoComplete="one-time-code" />
-          </Field>
-        )}
-
-        {mode !== 'forgot' && mode !== 'verify' && (
-          <Field label={mode === 'reset' ? 'Nova senha' : 'Senha'} hint={mode !== 'login' ? 'Pelo menos 8 caracteres.' : undefined}>
-            <span className="password-field">
-              <Input
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                minLength={mode === 'login' ? 1 : 8}
-                maxLength={128}
-                required
-                autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-              />
-              <button
-                type="button"
-                className="password-toggle"
-                aria-label={showPassword ? 'Esconder senha' : 'Mostrar senha'}
-                aria-pressed={showPassword}
-                title={showPassword ? 'Esconder senha' : 'Mostrar senha'}
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <EyeOffIcon size={22} /> : <EyeIcon size={22} />}
-              </button>
-            </span>
-          </Field>
-        )}
-
-        {error && <p className="auth-error" role="alert">{error}</p>}
-
-        <Button type="submit" className="auth-submit" disabled={busy}>
-          {busy ? 'Aguarde...' : mode === 'forgot' ? 'Enviar código' : mode === 'verify' ? 'Confirmar e entrar' : TITLES[mode]}
-        </Button>
-
-        <div className="auth-links">
-          {mode === 'login' && (
-            <>
-              <button type="button" onClick={() => go('register')}>Criar conta</button>
-              <button type="button" onClick={() => go('forgot')}>Esqueci minha senha</button>
-            </>
+          {mode === 'register' && (
+            <Field label="Nome no jogo">
+              <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} minLength={2} maxLength={30} required autoComplete="nickname" />
+            </Field>
           )}
-          {mode === 'register' && <button type="button" onClick={() => go('login')}>Já tenho conta</button>}
-          {mode === 'verify' && <button type="button" onClick={resend}>Reenviar código</button>}
-          {(mode === 'forgot' || mode === 'reset' || mode === 'verify') && <button type="button" onClick={() => go('login')}>Voltar para o login</button>}
-        </div>
-      </form>
+
+          <Field label="E-mail">
+            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" autoFocus />
+          </Field>
+
+          {(mode === 'reset' || mode === 'verify') && (
+            <Field label="Código recebido por e-mail">
+              <Input
+                value={code}
+                onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                inputMode="numeric"
+                pattern="\d{6}"
+                placeholder="000000"
+                required
+                autoComplete="one-time-code"
+              />
+            </Field>
+          )}
+
+          {mode !== 'forgot' && mode !== 'verify' && (
+            <Field label={mode === 'reset' ? 'Nova senha' : 'Senha'} hint={mode !== 'login' ? 'Pelo menos 8 caracteres.' : undefined}>
+              <span className="password-field">
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  minLength={mode === 'login' ? 1 : 8}
+                  maxLength={128}
+                  required
+                  autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  aria-label={showPassword ? 'Esconder senha' : 'Mostrar senha'}
+                  aria-pressed={showPassword}
+                  title={showPassword ? 'Esconder senha' : 'Mostrar senha'}
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOffIcon size={22} /> : <EyeIcon size={22} />}
+                </button>
+              </span>
+            </Field>
+          )}
+
+          {error && (
+            <p className="auth-error" role="alert">
+              {error}
+            </p>
+          )}
+
+          <Button type="submit" className="auth-submit" disabled={busy}>
+            {busy ? 'Aguarde...' : mode === 'forgot' ? 'Enviar código' : mode === 'verify' ? 'Confirmar e entrar' : TITLES[mode]}
+          </Button>
+
+          <div className="auth-links">
+            {mode === 'login' && (
+              <>
+                <button type="button" onClick={() => go('register')}>
+                  Criar conta
+                </button>
+                <button type="button" onClick={() => go('forgot')}>
+                  Esqueci minha senha
+                </button>
+              </>
+            )}
+            {mode === 'register' && (
+              <button type="button" onClick={() => go('login')}>
+                Já tenho conta
+              </button>
+            )}
+            {mode === 'verify' && (
+              <button type="button" onClick={resend}>
+                Reenviar código
+              </button>
+            )}
+            {(mode === 'forgot' || mode === 'reset' || mode === 'verify') && (
+              <button type="button" onClick={() => go('login')}>
+                Voltar para o login
+              </button>
+            )}
+          </div>
+        </form>
       </Panel>
     </div>
   )

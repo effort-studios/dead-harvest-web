@@ -48,7 +48,17 @@ function pointAt(hour: number, k: number) {
 const TICK_HOURS = [0, 6, 12, 18]
 
 // Estrelas fixas (x, y; as com true são em cruz, maiores)
-const STARS: [number, number, boolean][] = [[10, 14, true], [22, 7, false], [6, 26, false], [15, 36, true], [26, 16, false], [8, 40, false], [20, 44, false], [29, 9, true], [13, 22, false]]
+const STARS: [number, number, boolean][] = [
+  [10, 14, true],
+  [22, 7, false],
+  [6, 26, false],
+  [15, 36, true],
+  [26, 16, false],
+  [8, 40, false],
+  [20, 44, false],
+  [29, 9, true],
+  [13, 22, false],
+]
 
 const hex = (c: string) => [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16))
 const luminance = (c: string) => {
@@ -112,7 +122,14 @@ function drawDial(ctx: CanvasRenderingContext2D, hour: number, phase: DayPhase) 
   if (STARRY.includes(phase)) {
     for (const [x, y, big] of STARS) {
       put(x, y, STAR, true)
-      if (big) for (const [ox, oy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) put(x + ox, y + oy, '#c9cfef', true)
+      if (big)
+        for (const [ox, oy] of [
+          [1, 0],
+          [-1, 0],
+          [0, 1],
+          [0, -1],
+        ])
+          put(x + ox, y + oy, '#c9cfef', true)
     }
   }
 
@@ -134,10 +151,33 @@ function drawDial(ctx: CanvasRenderingContext2D, hour: number, phase: DayPhase) 
   const from = { x: PIVOT.x - 2, y: PIVOT.y - 0.5 }
   const steps = Math.ceil(Math.max(Math.abs(tip.x - from.x), Math.abs(tip.y - from.y)))
   const line = Array.from({ length: steps + 1 }, (_, i) => ({ x: from.x + ((tip.x - from.x) * i) / steps, y: from.y + ((tip.y - from.y) * i) / steps }))
-  for (const p of line) for (const [ox, oy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) put(p.x + ox, p.y + oy, OUTLINE)
-  for (const [ox, oy] of [[2, 0], [-2, 0], [0, 2], [0, -2], [1, 1], [1, -1], [-1, 1], [-1, -1]]) put(tip.x + ox, tip.y + oy, OUTLINE)
+  for (const p of line)
+    for (const [ox, oy] of [
+      [1, 0],
+      [-1, 0],
+      [0, 1],
+      [0, -1],
+    ])
+      put(p.x + ox, p.y + oy, OUTLINE)
+  for (const [ox, oy] of [
+    [2, 0],
+    [-2, 0],
+    [0, 2],
+    [0, -2],
+    [1, 1],
+    [1, -1],
+    [-1, 1],
+    [-1, -1],
+  ])
+    put(tip.x + ox, tip.y + oy, OUTLINE)
   for (const p of line) put(p.x, p.y, HAND)
-  for (const [ox, oy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) put(tip.x + ox, tip.y + oy, HAND)
+  for (const [ox, oy] of [
+    [1, 0],
+    [-1, 0],
+    [0, 1],
+    [0, -1],
+  ])
+    put(tip.x + ox, tip.y + oy, HAND)
 
   // pino do ponteiro
   for (let y = -4; y <= 4; y++) {

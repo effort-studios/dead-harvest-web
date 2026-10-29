@@ -15,9 +15,16 @@
   font: inherit;
   cursor: pointer;
 }
-.slot:hover:not(:disabled) { filter: brightness(1.3); }
-.slot:disabled { cursor: default; filter: saturate(0.6) brightness(0.9); }
-.selected { border-image-source: url('/assets/ui/slot_selected.png'); }
+.slot:hover:not(:disabled) {
+  filter: brightness(1.3);
+}
+.slot:disabled {
+  cursor: default;
+  filter: saturate(0.6) brightness(0.9);
+}
+.selected {
+  border-image-source: url('/assets/ui/slot_selected.png');
+}
 
 .hotkey,
 .count {
@@ -26,5 +33,11 @@
   font-size: var(--text-xs);
   pointer-events: none;
 }
-.hotkey { left: -5px; color: var(--text-muted); }
-.count { right: -5px; font-weight: 700; }
+.hotkey {
+  left: -5px;
+  color: var(--text-muted);
+}
+.count {
+  right: -5px;
+  font-weight: 700;
+}

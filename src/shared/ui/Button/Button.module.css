@@ -15,18 +15,33 @@
   font-size: var(--text-md);
   cursor: pointer;
 }
-.md { min-height: 40px; }
-.sm { min-height: 32px; font-size: var(--text-sm); }
-.icon { min-width: 40px; padding: 0; }
-.icon.sm { min-width: 32px; }
+.md {
+  min-height: 40px;
+}
+.sm {
+  min-height: 32px;
+  font-size: var(--text-sm);
+}
+.icon {
+  min-width: 40px;
+  padding: 0;
+}
+.icon.sm {
+  min-width: 32px;
+}
 
-.button:hover:not(:disabled) { filter: brightness(1.1); }
+.button:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
 .button:active:not(:disabled),
 .on {
   border-image-source: url('/assets/ui/button_pressed.png');
   padding-top: var(--px); /* o texto desce junto com a moldura */
 }
-.button:disabled { filter: grayscale(0.8) brightness(0.8); cursor: not-allowed; }
+.button:disabled {
+  filter: grayscale(0.8) brightness(0.8);
+  cursor: not-allowed;
+}
 
 .danger {
   border-image-source: url('/assets/ui/button_danger.png');

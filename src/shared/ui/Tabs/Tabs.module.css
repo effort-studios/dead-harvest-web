@@ -1,4 +1,7 @@
-.tabs { display: flex; gap: var(--space-1); }
+.tabs {
+  display: flex;
+  gap: var(--space-1);
+}
 
 /* Aba apagada: placa escura (plate.png). Aba ativa: dourada, como o botão. */
 .tab {
@@ -15,7 +18,10 @@
   font-size: var(--text-sm);
   cursor: pointer;
 }
-.tab:hover:not(.active) { color: var(--text); filter: brightness(1.2); }
+.tab:hover:not(.active) {
+  color: var(--text);
+  filter: brightness(1.2);
+}
 .active {
   border-width: calc(var(--frame-button-slice) * var(--px));
   border-image: url('/assets/ui/button.png') var(--frame-button-slice) fill / calc(var(--frame-button-slice) * var(--px)) stretch;

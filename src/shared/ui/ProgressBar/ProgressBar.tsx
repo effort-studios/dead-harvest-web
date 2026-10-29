@@ -15,7 +15,14 @@ type ProgressBarProps = {
 export function ProgressBar({ value, variant = 'progress', size = 'md', label, className }: ProgressBarProps) {
   const pct = Math.round(Math.min(1, Math.max(0, value)) * 100)
   return (
-    <div className={cx(styles.bar, size === 'sm' && styles.sm, className)} role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct}>
+    <div
+      className={cx(styles.bar, size === 'sm' && styles.sm, className)}
+      role="progressbar"
+      aria-label={label}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={pct}
+    >
       <span className={cx(styles.fill, styles[variant])} style={{ width: `${pct}%` }} />
     </div>
   )
