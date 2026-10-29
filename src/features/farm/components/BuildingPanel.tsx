@@ -172,7 +172,14 @@ function RecipeRow({ recipe, canStart }: { recipe: RecipeInfo; canStart?: boolea
             {recipe.outputQuantity > 1 && ` ×${recipe.outputQuantity}`}
           </b>
           <small>
-            {formatDuration(recipe.seconds)} · {out?.sellPrice != null ? <>vende por <Price value={out.sellPrice} /></> : 'para usar na fazenda'}
+            {formatDuration(recipe.seconds)} ·{' '}
+            {out?.sellPrice != null ? (
+              <>
+                vende por <Price value={out.sellPrice} />
+              </>
+            ) : (
+              'para usar na fazenda'
+            )}
           </small>
         </div>
         {canStart !== undefined && (
@@ -220,7 +227,11 @@ function WellBody() {
   return (
     <>
       <p>
-        Regador: <b>{data.canCharges}/{WATERING_CAN.charges}</b> cargas
+        Regador:{' '}
+        <b>
+          {data.canCharges}/{WATERING_CAN.charges}
+        </b>{' '}
+        cargas
       </p>
       <Progress value={data.canCharges / WATERING_CAN.charges} />
       <Button className="wide" disabled={full || going} onClick={refillCan}>
@@ -242,10 +253,7 @@ function BuyBarn() {
   const startPlacing = useFarmStore((s) => s.startPlacing)
   return (
     <>
-      <p>
-        No celeiro moram os animais: galinhas dão ovos, vacas dão leite e ovelhas dão lã. Eles comem a ração da
-        Fábrica de ração.
-      </p>
+      <p>No celeiro moram os animais: galinhas dão ovos, vacas dão leite e ovelhas dão lã. Eles comem a ração da Fábrica de ração.</p>
       <p>
         Começa com <b>{BARN.startCapacity} baias</b> e dá para ampliar até {BARN.maxCapacity}.
       </p>
@@ -274,7 +282,11 @@ function Barn() {
   return (
     <>
       <p className="muted">
-        Baias: <b>{barn.animals.length}/{barn.capacity}</b> ·{' '}
+        Baias:{' '}
+        <b>
+          {barn.animals.length}/{barn.capacity}
+        </b>{' '}
+        ·{' '}
         {feedItems.map((id) => (
           <span key={id}>
             {itemName(id)} no armazém: <b>{inventory[id] ?? 0}</b>
@@ -323,8 +335,7 @@ function Barn() {
             <b>{a.name}</b>
             <small>
               come {a.feedQuantity} {itemName(a.feedItemId).toLowerCase()} · dá {itemName(a.productItemId).toLowerCase()}
-              {a.byproductItemId && ` + ${a.byproductQuantity} ${itemName(a.byproductItemId).toLowerCase()}`} a cada{' '}
-              {formatDuration(a.produceSeconds)}
+              {a.byproductItemId && ` + ${a.byproductQuantity} ${itemName(a.byproductItemId).toLowerCase()}`} a cada {formatDuration(a.produceSeconds)}
             </small>
           </div>
           <Button disabled={full || money < a.buyPrice} onClick={() => buyAnimal(a.id)}>

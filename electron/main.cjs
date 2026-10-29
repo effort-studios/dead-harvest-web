@@ -4,9 +4,7 @@ const { pathToFileURL } = require('node:url')
 
 // O build do Vite usa caminhos absolutos ("/assets/..."), que não funcionam em file://.
 // Servimos o dist/ por um protocolo próprio (app://game/), que também conta como origem segura.
-protocol.registerSchemesAsPrivileged([
-  { scheme: 'app', privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true } },
-])
+protocol.registerSchemesAsPrivileged([{ scheme: 'app', privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true } }])
 
 const YOUTUBE_REFERER = 'https://deadharvest.game/'
 const DIST = path.join(__dirname, '..', 'dist')

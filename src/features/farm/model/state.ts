@@ -63,7 +63,12 @@ export function freeSlots(data: SaveData): { x: number; y: number }[] {
   const taken = new Set(data.plots.map((p) => `${p.x},${p.y}`))
   const free = new Map<string, { x: number; y: number }>()
   for (const { x, y } of data.plots) {
-    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+    for (const [dx, dy] of [
+      [1, 0],
+      [-1, 0],
+      [0, 1],
+      [0, -1],
+    ]) {
       const key = `${x + dx},${y + dy}`
       if (!taken.has(key)) free.set(key, { x: x + dx, y: y + dy })
     }
@@ -137,7 +142,6 @@ export function sellItem(data: SaveData, itemId: string, qty?: number): SaveData
     inventory: { ...data.inventory, [itemId]: have - n },
   }
 }
-
 
 // Como o clique age: só no tile, ou em toda a linha / coluna dele
 export type ClickMode = 'tile' | 'row' | 'col'
@@ -264,7 +268,11 @@ export function tileMenu(
     if ((data.inventory[FERTILIZER.itemId] ?? 0) > 0 || tile.fertilized)
       items.push({ action: 'fertilize', label: 'Adubar', disabled: tile.fertilized ? 'Já está adubado' : undefined })
     if (data.canCharges !== null)
-      items.push({ action: 'water', label: 'Regar', disabled: tile.watered ? 'Já está regado' : data.canCharges < 1 ? 'O regador está vazio: encha no poço' : undefined })
+      items.push({
+        action: 'water',
+        label: 'Regar',
+        disabled: tile.watered ? 'Já está regado' : data.canCharges < 1 ? 'O regador está vazio: encha no poço' : undefined,
+      })
   }
   // terra arada e vazia volta a ser terra
   if (tile.state === 'tilled') items.push({ action: 'untill', label: 'Desfazer aragem' })

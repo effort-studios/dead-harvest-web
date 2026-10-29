@@ -40,49 +40,60 @@ export function ProfileEditor({ onClose }: { onClose: () => void }) {
   return (
     <div className="modal-backdrop" onPointerDown={(e) => e.target === e.currentTarget && onClose()}>
       <Panel className="editor">
-      <form onSubmit={save} role="dialog" aria-label="Editar perfil">
-        <h2>
-          <span className="panel-title">Editar perfil</span>
-          <IconButton size="sm" aria-label="Fechar" onClick={onClose}>
-            <CloseIcon size={20} />
-          </IconButton>
-        </h2>
+        <form onSubmit={save} role="dialog" aria-label="Editar perfil">
+          <h2>
+            <span className="panel-title">Editar perfil</span>
+            <IconButton size="sm" aria-label="Fechar" onClick={onClose}>
+              <CloseIcon size={20} />
+            </IconButton>
+          </h2>
 
-        <div className="editor-top">
-          <div className="editor-preview">
-            <Avatar avatar={avatar} size={160} />
+          <div className="editor-top">
+            <div className="editor-preview">
+              <Avatar avatar={avatar} size={160} />
+            </div>
+            <Field label="Nome no jogo" className="editor-name">
+              <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} minLength={2} maxLength={30} required />
+            </Field>
           </div>
-          <Field label="Nome no jogo" className="editor-name">
-            <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} minLength={2} maxLength={30} required />
-          </Field>
-        </div>
 
-        <Tabs className="editor-tabs" items={AVATAR_PARTS.map((p) => ({ id: p, label: PART_LABEL[p] }))} value={part} onChange={(id) => setPart(id as typeof part)} />
+          <Tabs
+            className="editor-tabs"
+            items={AVATAR_PARTS.map((p) => ({ id: p, label: PART_LABEL[p] }))}
+            value={part}
+            onChange={(id) => setPart(id as typeof part)}
+          />
 
-        <div className="option-grid" role="listbox" aria-label={PART_LABEL[part]}>
-          {AVATAR_OPTIONS[part].map((option) => (
-            <button
-              type="button"
-              key={option}
-              role="option"
-              aria-selected={avatar[part] === option}
-              className={`option ${avatar[part] === option ? 'chosen' : ''}`}
-              onClick={() => setAvatar({ ...avatar, [part]: option })}
-            >
-              {/* cada opção mostra como o avatar ficaria com ela */}
-              <Avatar avatar={{ ...avatar, [part]: option }} size={80} />
-              <span>{(OPTION_LABEL[part] as Record<string, string>)[option]}</span>
-            </button>
-          ))}
-        </div>
+          <div className="option-grid" role="listbox" aria-label={PART_LABEL[part]}>
+            {AVATAR_OPTIONS[part].map((option) => (
+              <button
+                type="button"
+                key={option}
+                role="option"
+                aria-selected={avatar[part] === option}
+                className={`option ${avatar[part] === option ? 'chosen' : ''}`}
+                onClick={() => setAvatar({ ...avatar, [part]: option })}
+              >
+                {/* cada opção mostra como o avatar ficaria com ela */}
+                <Avatar avatar={{ ...avatar, [part]: option }} size={80} />
+                <span>{(OPTION_LABEL[part] as Record<string, string>)[option]}</span>
+              </button>
+            ))}
+          </div>
 
-        {error && <p className="auth-error" role="alert">{error}</p>}
+          {error && (
+            <p className="auth-error" role="alert">
+              {error}
+            </p>
+          )}
 
-        <div className="editor-actions">
-          <Button onClick={onClose}>Cancelar</Button>
-          <Button type="submit" disabled={busy}>{busy ? 'Salvando...' : 'Salvar'}</Button>
-        </div>
-      </form>
+          <div className="editor-actions">
+            <Button onClick={onClose}>Cancelar</Button>
+            <Button type="submit" disabled={busy}>
+              {busy ? 'Salvando...' : 'Salvar'}
+            </Button>
+          </div>
+        </form>
       </Panel>
     </div>
   )

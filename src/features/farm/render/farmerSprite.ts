@@ -37,8 +37,11 @@ export function loadFarmerSheet(): Promise<void> {
 
 // Matiz (0-360), luminosidade e saturação (0-1) do pixel
 function hls(d: Uint8ClampedArray, i: number) {
-  const r = d[i] / 255, g = d[i + 1] / 255, b = d[i + 2] / 255
-  const max = Math.max(r, g, b), min = Math.min(r, g, b)
+  const r = d[i] / 255,
+    g = d[i + 1] / 255,
+    b = d[i + 2] / 255
+  const max = Math.max(r, g, b),
+    min = Math.min(r, g, b)
   const l = (max + min) / 2
   if (max === min) return { h: 0, l, s: 0 }
   const c = max - min
@@ -69,23 +72,37 @@ function sheetFor(avatar: Avatar): CanvasImageSource | null {
     if (top === undefined) {
       top = CELL
       for (let y = 0; y < CELL && top === CELL; y++) {
-        for (let x = 0; x < CELL; x++) if (d[((cy * CELL + y) * w + cx * CELL + x) * 4 + 3] > 0) { top = y; break }
+        for (let x = 0; x < CELL; x++)
+          if (d[((cy * CELL + y) * w + cx * CELL + x) * 4 + 3] > 0) {
+            top = y
+            break
+          }
       }
       tops.set(k, top)
     }
     return top
   }
-  const isOutfit = (i: number) => { const c = hls(d, i); return c.h >= 185 && c.h <= 255 && c.s >= 0.25 }
-  const isSkin = (i: number) => { const c = hls(d, i); return c.h >= 10 && c.h <= 40 && c.l >= 0.55 && c.s >= 0.45 }
+  const isOutfit = (i: number) => {
+    const c = hls(d, i)
+    return c.h >= 185 && c.h <= 255 && c.s >= 0.25
+  }
+  const isSkin = (i: number) => {
+    const c = hls(d, i)
+    return c.h >= 10 && c.h <= 40 && c.l >= 0.55 && c.s >= 0.45
+  }
   const isHair = (i: number) => {
     const c = hls(d, i)
     if (c.h > 35 || c.l < 0.15 || c.l > 0.55 || c.s < 0.35) return false
-    const x = (i / 4) % w, y = Math.floor(i / 4 / w)
-    const cx = Math.floor(x / CELL), cy = Math.floor(y / CELL)
+    const x = (i / 4) % w,
+      y = Math.floor(i / 4 / w)
+    const cx = Math.floor(x / CELL),
+      cy = Math.floor(y / CELL)
     return y - cy * CELL < topOf(cx, cy) + 14
   }
   // as máscaras saem do desenho original, antes de qualquer troca
-  const outfit = new Set<number>(), skin = new Set<number>(), hair = new Set<number>()
+  const outfit = new Set<number>(),
+    skin = new Set<number>(),
+    hair = new Set<number>()
   for (let i = 0; i < d.length; i += 4) {
     if (d[i + 3] === 0) continue
     if (isOutfit(i)) outfit.add(i)

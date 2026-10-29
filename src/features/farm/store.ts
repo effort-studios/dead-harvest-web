@@ -146,14 +146,11 @@ export const useFarmStore = create<FarmState>((set, get) => ({
 
   // Cancelar para o fazendeiro onde ele está: a tela já mostra a fila vazia, sem esperar o servidor
   cancelQueue: () =>
-    run(
-      (data) => {
-        if (data.farmer.jobs.length === 0) return data
-        const here = farmerPose(data.farmer, serverNow(), { dr: 1, dc: 0 })
-        return { ...data, farmer: { row: here.r, col: here.c, jobs: [] } }
-      },
-      api.cancelJobs,
-    ),
+    run((data) => {
+      if (data.farmer.jobs.length === 0) return data
+      const here = farmerPose(data.farmer, serverNow(), { dr: 1, dc: 0 })
+      return { ...data, farmer: { row: here.r, col: here.c, jobs: [] } }
+    }, api.cancelJobs),
 
   walkTo: (row, col, phase) => {
     const { data, active } = useFarmStore.getState()
@@ -174,15 +171,26 @@ export const useFarmStore = create<FarmState>((set, get) => ({
       return { data: tick(s.data), readyTrees: readyTreeIds(s.data, now).join(), readyBuildings: production.readyKey(s.data, now) }
     }),
 
-  buySeed: (crop, qty = 1) => run((d) => buySeed(d, crop, qty), () => api.buySeed(crop, qty)),
+  buySeed: (crop, qty = 1) =>
+    run(
+      (d) => buySeed(d, crop, qty),
+      () => api.buySeed(crop, qty),
+    ),
 
-  sellItem: (itemId, qty) => run((d) => sellItem(d, itemId, qty), () => api.sellItem(itemId, qty)),
+  sellItem: (itemId, qty) =>
+    run(
+      (d) => sellItem(d, itemId, qty),
+      () => api.sellItem(itemId, qty),
+    ),
 
   setBuyingPlot: (on) => set({ buyingPlot: on, placing: null }),
 
   buyPlot: (x, y) => {
     set({ buyingPlot: false })
-    run((d) => buyPlot(d, x, y), () => api.buyPlot(x, y))
+    run(
+      (d) => buyPlot(d, x, y),
+      () => api.buyPlot(x, y),
+    )
   },
 
   openBuilding: (building) => set({ building }),
@@ -195,18 +203,38 @@ export const useFarmStore = create<FarmState>((set, get) => ({
     const problem = placementProblem(data, placing, r, c)
     if (problem) return showError(problem) // continua escolhendo
     set({ placing: null })
-    if (placing.kind === 'barn') run((d) => production.buyBarn(d, r, c), () => api.buyBarn(r, c))
-    else if (placing.kind === 'well') run((d) => production.buyWell(d, r, c), () => api.buyWell(r, c))
-    else run((d) => production.buyMachine(d, placing.id, r, c), () => api.buyMachine(placing.id, r, c))
+    if (placing.kind === 'barn')
+      run(
+        (d) => production.buyBarn(d, r, c),
+        () => api.buyBarn(r, c),
+      )
+    else if (placing.kind === 'well')
+      run(
+        (d) => production.buyWell(d, r, c),
+        () => api.buyWell(r, c),
+      )
+    else
+      run(
+        (d) => production.buyMachine(d, placing.id, r, c),
+        () => api.buyMachine(placing.id, r, c),
+      )
   },
 
-  startRecipe: (recipeId) => run((d) => production.startRecipe(d, recipeId, serverNow()), () => api.startRecipe(recipeId)),
+  startRecipe: (recipeId) =>
+    run(
+      (d) => production.startRecipe(d, recipeId, serverNow()),
+      () => api.startRecipe(recipeId),
+    ),
 
   collectMachine: (machineId) => run(undefined, () => api.enqueueJob({ action: 'collect_machine', machineId })),
 
   expandBarn: () => run(production.expandBarn, api.expandBarn),
 
-  buyAnimal: (animalId) => run((d) => production.buyAnimal(d, animalId, serverNow()), () => api.buyAnimal(animalId)),
+  buyAnimal: (animalId) =>
+    run(
+      (d) => production.buyAnimal(d, animalId, serverNow()),
+      () => api.buyAnimal(animalId),
+    ),
 
   feedAnimals: () => run((d) => production.feedAnimals(d, serverNow()), api.feedAnimals),
 
@@ -223,7 +251,10 @@ export const useFarmStore = create<FarmState>((set, get) => ({
     if (!at || (at.r === r && at.c === c)) return
     const problem = placementProblem(data, building, r, c)
     if (problem) return showError(problem)
-    run((d) => production.moveBuilding(d, building, r, c), () => api.moveBuilding(building, r, c))
+    run(
+      (d) => production.moveBuilding(d, building, r, c),
+      () => api.moveBuilding(building, r, c),
+    )
   },
 }))
 

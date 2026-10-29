@@ -13,4 +13,7 @@
   font-size: var(--text-sm);
   white-space: nowrap;
 }
-.tooltip small { color: var(--text-muted); font-size: var(--text-xs); }
+.tooltip small {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+}

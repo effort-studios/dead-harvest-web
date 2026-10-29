@@ -181,9 +181,15 @@ function BuySeeds() {
       <div className="seed-card">
         <CropIcon crop={crop} size={52} />
         <ul>
-          <li>Amadurece em <b>{formatDuration(info.growSeconds)}</b></li>
-          <li>A colheita vale <CoinIcon size={13} /> <b>{info.sellPrice}</b> (lucro <b>{info.sellPrice - info.seedPrice}</b>)</li>
-          <li>Você tem <b>{inventory[crop] ?? 0}</b> semente(s)</li>
+          <li>
+            Amadurece em <b>{formatDuration(info.growSeconds)}</b>
+          </li>
+          <li>
+            A colheita vale <CoinIcon size={13} /> <b>{info.sellPrice}</b> (lucro <b>{info.sellPrice - info.seedPrice}</b>)
+          </li>
+          <li>
+            Você tem <b>{inventory[crop] ?? 0}</b> semente(s)
+          </li>
         </ul>
       </div>
       <p className="muted buy-label">Comprar:</p>
@@ -213,8 +219,16 @@ function BuyPlot() {
       <div className="seed-card">
         <PlotIcon size={52} />
         <ul>
-          <li>Você tem <b>{plotCount}</b> terreno{plotCount === 1 ? '' : 's'}</li>
-          <li>Novo terreno <b>{GRID_SIZE}x{GRID_SIZE}</b>, colado a um seu</li>
+          <li>
+            Você tem <b>{plotCount}</b> terreno{plotCount === 1 ? '' : 's'}
+          </li>
+          <li>
+            Novo terreno{' '}
+            <b>
+              {GRID_SIZE}x{GRID_SIZE}
+            </b>
+            , colado a um seu
+          </li>
           <li>
             Custa <CoinIcon size={13} /> <b>{price}</b>
             {missing > 0 && <span className="plot-missing"> (faltam {missing})</span>}
@@ -222,7 +236,13 @@ function BuyPlot() {
         </ul>
       </div>
       <Button className="plot-buy" variant={buyingPlot ? 'danger' : 'primary'} disabled={!buyingPlot && missing > 0} onClick={() => setBuyingPlot(!buyingPlot)}>
-        {buyingPlot ? 'Cancelar escolha' : <>Escolher no mapa · <CoinIcon size={15} /> {price}</>}
+        {buyingPlot ? (
+          'Cancelar escolha'
+        ) : (
+          <>
+            Escolher no mapa · <CoinIcon size={15} /> {price}
+          </>
+        )}
       </Button>
       {buyingPlot && <p className="muted plot-hint">Clique num dos terrenos destacados no mapa (Esc cancela).</p>}
     </div>
@@ -368,12 +388,14 @@ function BuyBuildings() {
                 <small>{b.detail}</small>
               </span>
             </button>
-            <Button
- variant={active ? 'danger' : 'primary'}
- disabled={!active && data.money < b.price}
- onClick={() => startPlacing(active ? null : b.ref)}
- >
-              {active ? 'Cancelar' : <><CoinIcon size={14} /> {b.price}</>}
+            <Button variant={active ? 'danger' : 'primary'} disabled={!active && data.money < b.price} onClick={() => startPlacing(active ? null : b.ref)}>
+              {active ? (
+                'Cancelar'
+              ) : (
+                <>
+                  <CoinIcon size={14} /> {b.price}
+                </>
+              )}
             </Button>
           </div>
         )
@@ -446,25 +468,50 @@ function TipsPanel() {
       <ul>
         <li>Arraste o mapa com o mouse para se mover.</li>
         <li>Role a roda do mouse para aproximar e afastar.</li>
-        <li><b>W A S D</b>: o fazendeiro anda para cima, esquerda, baixo e direita da tela (segure para continuar).</li>
+        <li>
+          <b>W A S D</b>: o fazendeiro anda para cima, esquerda, baixo e direita da tela (segure para continuar).
+        </li>
         <li>Clique esquerdo no chão: o fazendeiro anda até lá.</li>
-        <li>Clique direito num tile: abre um menu com o que dá para fazer ali (arar, desfazer a aragem, plantar, colher, regar, adubar). No celular, é só tocar no tile.</li>
-        <li><b>Shift</b> + clique: ação direta na linha inteira, sem menu.</li>
-        <li><b>Ctrl</b> + clique: ação direta na coluna inteira, sem menu.</li>
-        <li>Teclas <b>1</b> a <b>9</b>: escolhem o item da barra (só aparece o que você tem).</li>
+        <li>
+          Clique direito num tile: abre um menu com o que dá para fazer ali (arar, desfazer a aragem, plantar, colher, regar, adubar). No celular, é só tocar no
+          tile.
+        </li>
+        <li>
+          <b>Shift</b> + clique: ação direta na linha inteira, sem menu.
+        </li>
+        <li>
+          <b>Ctrl</b> + clique: ação direta na coluna inteira, sem menu.
+        </li>
+        <li>
+          Teclas <b>1</b> a <b>9</b>: escolhem o item da barra (só aparece o que você tem).
+        </li>
         <li>Clique numa árvore com frutas para colher.</li>
-        <li>Tudo que você colhe vai para o <b>Armazém</b>: venda lá ou use nas máquinas.</li>
-        <li>Na <b>Loja</b>, escolha um prédio e clique no mapa onde construir. Clique num prédio para usar; arraste para mudar de lugar.</li>
+        <li>
+          Tudo que você colhe vai para o <b>Armazém</b>: venda lá ou use nas máquinas.
+        </li>
+        <li>
+          Na <b>Loja</b>, escolha um prédio e clique no mapa onde construir. Clique num prédio para usar; arraste para mudar de lugar.
+        </li>
         <li>Máquinas: escolha a receita, espere e mande o fazendeiro coletar. A fila tem 2 lugares.</li>
         <li>Celeiro: os animais comem a ração da Fábrica de ração e produzem ovos, leite e lã.</li>
-        <li>Adubo (da Composteira): escolha na barra e clique na terra arada. A planta cresce 30% mais rápido. Dá para fazer de tomate ou do esterco da galinha e da vaca. Vale antes ou depois de plantar.</li>
+        <li>
+          Adubo (da Composteira): escolha na barra e clique na terra arada. A planta cresce 30% mais rápido. Dá para fazer de tomate ou do esterco da galinha e
+          da vaca. Vale antes ou depois de plantar.
+        </li>
         <li>Regador (Loja): escolha na barra e clique na terra arada ou na planta: mais 30%, somando com o adubo. Gasta 1 carga por tile; encha no poço.</li>
-        <li><b>Esc</b> fecha este menu.</li>
+        <li>
+          <b>Esc</b> fecha este menu.
+        </li>
       </ul>
       <h3>Plantas</h3>
       <table className="crops">
         <thead>
-          <tr><th>Planta</th><th>Cresce</th><th>Semente</th><th>Colheita</th></tr>
+          <tr>
+            <th>Planta</th>
+            <th>Cresce</th>
+            <th>Semente</th>
+            <th>Colheita</th>
+          </tr>
         </thead>
         <tbody>
           {CROP_ORDER.map((id) => (

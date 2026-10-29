@@ -116,4 +116,3 @@ export function drawBubble(ctx: CanvasRenderingContext2D, x: number, y: number, 
   }
   ctx.restore()
 }
-

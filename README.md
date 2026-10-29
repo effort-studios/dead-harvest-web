@@ -3,18 +3,22 @@
 Frontend do **Dead Harvest**: Vite + React + TypeScript, Zustand para o estado e Canvas 2D para o mundo.
 
 ## Pré-requisitos
+
 - Node.js 22 (com o npm 10.8 do Node 20 a instalação do template falhou; no 22 funcionou)
 - A [dead-harvest-api](../dead-harvest-api) rodando
 
 ## Como rodar
+
 ```bash
 npm install
 cp .env.example .env     # VITE_API_URL aponta para a API (nunca commite o .env)
 npm run dev              # http://localhost:5173
 ```
+
 A `WEB_URL` do `.env` da API precisa ser `http://localhost:5173` (senão o CORS bloqueia).
 
 ## Estrutura
+
 Organizada por feature (o que o jogador vê), não por tipo de arquivo. O alias `@/` aponta para `src/`
 (por exemplo `@/features/farm/model/state`).
 
@@ -42,6 +46,7 @@ ações a caminho, deslogar e limpar tudo) e de voltar ao login quando o servido
 Os componentes de `auth` e `profile` recebem essas ações por props (`onLogin`, `onRegister`, `onLogout`).
 
 ## Como funciona o save
+
 Não existe save no navegador: o servidor é a fonte da verdade. Ao abrir, o jogo pede `GET /auth/me`; com sessão
 (cookie `dh_session`) carrega o catálogo (`GET /game/catalog`) e o estado (`GET /game/state`), senão mostra o login.
 Cada ação do jogador vai para a API, uma de cada vez, e a tela mostra uma previsão até a resposta trazer o estado
@@ -49,9 +54,11 @@ de verdade (`features/farm/store.ts`). O formato (`SaveData`) está em `src/feat
 ser igual ao da API.
 
 ## Créditos
+
 Arte (mundo, fazendeiro, ícones e molduras da interface): pixel art gerada na [PixelLab](https://pixellab.ai) e montada pelos scripts em `scripts/` (originais em `art/pixellab`). Fonte: Duality (`public/assets/fonts/duality.otf`). Regras de estilo em [DESIGN.md](DESIGN.md).
 
 ## Controles
+
 - Arrastar com o mouse (ou o dedo) move o mapa; a página nunca rola. Roda do mouse ou pinça com dois dedos dá zoom.
 - **Clicar no chão ou num tile** abre um menu com o que dá para fazer ali: arar, desfazer a aragem, plantar, regar, adubar, colher e **Mover para cá**. Os botões **Linha** e **Coluna** do menu repetem a ação na linha/coluna inteira. Esc fecha o menu.
 - **Shift + clique**: faz a ação direto em toda a linha do tile (só nos tiles no mesmo estado que o clicado), sem menu. **Ctrl + clique**: o mesmo na coluna.

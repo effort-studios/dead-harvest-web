@@ -55,8 +55,13 @@ canvas:active {
   align-items: flex-start;
   gap: 8px;
 }
-.hud-left .hud-player { padding: 4px 8px 4px 4px; filter: var(--hard-shadow); }
-.hud-left .hud-player:hover { filter: var(--hard-shadow) brightness(1.1); }
+.hud-left .hud-player {
+  padding: 4px 8px 4px 4px;
+  filter: var(--hard-shadow);
+}
+.hud-left .hud-player:hover {
+  filter: var(--hard-shadow) brightness(1.1);
+}
 .hud-player-btn {
   display: flex;
   align-items: center;
@@ -79,12 +84,27 @@ canvas:active {
   font-size: 26px;
   line-height: 1;
 }
-.svg-icon { vertical-align: middle; flex-shrink: 0; }
-.pixel-icon { image-rendering: pixelated; object-fit: contain; } /* pixel art ampliado sem borrar */
+.svg-icon {
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+.pixel-icon {
+  image-rendering: pixelated;
+  object-fit: contain;
+} /* pixel art ampliado sem borrar */
 /* Dentro das molduras o ícone vira bloco centralizado (sem o respiro de linha de texto) */
 .portrait .svg-icon,
-.panel-title { display: inline-flex; align-items: center; gap: 8px; }
-.player-info { display: flex; flex-direction: column; gap: 4px; min-width: 96px; }
+.panel-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.player-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 96px;
+}
 .sky-tint {
   position: absolute;
   inset: 0;
@@ -92,7 +112,10 @@ canvas:active {
   mix-blend-mode: multiply;
   transition: background-color 1s linear; /* 1 tick por segundo: a mudança fica contínua */
 }
-.hud-player .money { justify-content: flex-start; font-size: 20px; }
+.hud-player .money {
+  justify-content: flex-start;
+  font-size: 20px;
+}
 
 .day-clock {
   position: absolute;
@@ -104,7 +127,15 @@ canvas:active {
   pointer-events: none;
 }
 /* cúpula desenhada em 40x52 e ampliada 2x sem suavizar */
-.clock-dome { position: relative; z-index: 1; margin-right: -10px; flex: none; width: 80px; height: 104px; image-rendering: pixelated; }
+.clock-dome {
+  position: relative;
+  z-index: 1;
+  margin-right: -10px;
+  flex: none;
+  width: 80px;
+  height: 104px;
+  image-rendering: pixelated;
+}
 .day-clock .clock-frame {
   display: flex;
   flex-direction: column;
@@ -112,9 +143,18 @@ canvas:active {
   width: 150px;
   padding: 2px 2px 2px 12px; /* a cúpula cobre a esquerda da moldura */
 }
-.day-clock .clock-day { min-height: 28px; font-size: 16px; }
-.day-clock .clock-phase { min-height: 28px; font-size: 13px; } /* "Entardecer" precisa caber */
-.day-clock .clock-time { min-height: 36px; font-size: 22px; } /* a hora é a informação principal */
+.day-clock .clock-day {
+  min-height: 28px;
+  font-size: 16px;
+}
+.day-clock .clock-phase {
+  min-height: 28px;
+  font-size: 13px;
+} /* "Entardecer" precisa caber */
+.day-clock .clock-time {
+  min-height: 36px;
+  font-size: 22px;
+} /* a hora é a informação principal */
 
 .game .hud-hotbar {
   position: absolute;
@@ -126,8 +166,14 @@ canvas:active {
   padding: 4px 6px;
   --slot-size: clamp(32px, 5vw, 58px); /* o Slot do design system lê este tamanho */
 }
-.hud-hotbar .svg-icon { display: block; width: 90%; height: 90%; } /* acompanha o slot, que muda com a janela */
-.hud-hotbar [aria-pressed='true'] { transform: translateY(-3px); }
+.hud-hotbar .svg-icon {
+  display: block;
+  width: 90%;
+  height: 90%;
+} /* acompanha o slot, que muda com a janela */
+.hud-hotbar [aria-pressed='true'] {
+  transform: translateY(-3px);
+}
 
 .hud-save {
   position: absolute;
@@ -137,10 +183,14 @@ canvas:active {
   align-items: center;
   gap: 10px;
 }
-.error { color: #ff6b6b; }
+.error {
+  color: #ff6b6b;
+}
 
 /* ---------- Menu lateral ---------- */
-.side-menu { position: relative; } /* o painel aberto se posiciona em relação à faixa de ícones */
+.side-menu {
+  position: relative;
+} /* o painel aberto se posiciona em relação à faixa de ícones */
 .side-rail {
   display: flex;
   flex-direction: column;
@@ -150,10 +200,20 @@ canvas:active {
   transition: opacity 0.15s;
 }
 .side-rail:hover,
-.side-rail.has-open { opacity: 1; }
+.side-rail.has-open {
+  opacity: 1;
+}
 /* Botões da lateral: IconButton do design system; aqui só o tamanho (o ícone preenche o miolo da moldura) */
-.side-rail .rail-btn { width: 46px; height: 46px; padding: 0; }
-.rail-btn .svg-icon { display: block; width: 100%; height: 100%; }
+.side-rail .rail-btn {
+  width: 46px;
+  height: 46px;
+  padding: 0;
+}
+.rail-btn .svg-icon {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
 
 .game .side-panel {
   position: absolute;
@@ -182,7 +242,9 @@ canvas:active {
   scrollbar-color: var(--gold-dark) #ecc98a;
 }
 .side-body::-webkit-scrollbar,
-.select-list::-webkit-scrollbar { width: 12px; }
+.select-list::-webkit-scrollbar {
+  width: 12px;
+}
 .side-body::-webkit-scrollbar-track,
 .select-list::-webkit-scrollbar-track {
   background: #ecc98a;
@@ -194,10 +256,14 @@ canvas:active {
   background: var(--gold);
   border: 2px solid var(--frame-outline);
   border-radius: 6px;
-  box-shadow: inset 0 2px 0 var(--gold-light), inset 0 -2px 0 var(--gold-dark);
+  box-shadow:
+    inset 0 2px 0 var(--gold-light),
+    inset 0 -2px 0 var(--gold-dark);
 }
 .side-body::-webkit-scrollbar-thumb:hover,
-.select-list::-webkit-scrollbar-thumb:hover { background: #f6c04a; }
+.select-list::-webkit-scrollbar-thumb:hover {
+  background: #f6c04a;
+}
 .side-panel h2 {
   flex: none;
   margin: 0 0 8px;
@@ -207,9 +273,20 @@ canvas:active {
   justify-content: space-between;
   align-items: center;
 }
-.side-panel h3 { margin: 14px 0 6px; font-size: 15px; color: var(--frame-gold); }
-.side-panel p { margin: 6px 0; line-height: 1.4; }
-.side-panel ul { margin: 6px 0; padding-left: 18px; line-height: 1.55; }
+.side-panel h3 {
+  margin: 14px 0 6px;
+  font-size: 15px;
+  color: var(--frame-gold);
+}
+.side-panel p {
+  margin: 6px 0;
+  line-height: 1.4;
+}
+.side-panel ul {
+  margin: 6px 0;
+  padding-left: 18px;
+  line-height: 1.55;
+}
 .shop-row {
   display: flex;
   align-items: center;
@@ -217,15 +294,35 @@ canvas:active {
   padding: 8px 0;
   border-top: 2px dashed var(--frame-gold-dark);
 }
-.shop-row:first-of-type { border-top: none; }
-.shop-info { flex: 1; }
-.shop-info small { display: block; opacity: 0.8; }
-table.crops { width: 100%; border-collapse: collapse; font-size: 14px; }
-table.crops th, table.crops td { text-align: left; padding: 3px 4px; border-bottom: 2px dashed var(--frame-gold-dark); }
-.muted { opacity: 0.75; font-size: 13px; }
+.shop-row:first-of-type {
+  border-top: none;
+}
+.shop-info {
+  flex: 1;
+}
+.shop-info small {
+  display: block;
+  opacity: 0.8;
+}
+table.crops {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+table.crops th,
+table.crops td {
+  text-align: left;
+  padding: 3px 4px;
+  border-bottom: 2px dashed var(--frame-gold-dark);
+}
+.muted {
+  opacity: 0.75;
+  font-size: 13px;
+}
 
 /* Select de sementes: a lista abre no fluxo da página (empurra o conteúdo), sem rolagem própria */
-.select-btn, .select-list li {
+.select-btn,
+.select-list li {
   display: grid;
   align-items: center;
   column-gap: 8px;
@@ -242,10 +339,25 @@ table.crops th, table.crops td { text-align: left; padding: 3px 4px; border-bott
   box-shadow: 0 2px 0 var(--frame-gold-dark);
   cursor: pointer;
 }
-.select-btn:hover { background: var(--slot-bg); }
-.select-name { text-align: left; font-weight: 600; }
-.select-price { display: inline-flex; align-items: center; justify-content: flex-end; gap: 4px; font-weight: 600; }
-.select-time { font-size: 12px; opacity: 0.7; text-align: right; }
+.select-btn:hover {
+  background: var(--slot-bg);
+}
+.select-name {
+  text-align: left;
+  font-weight: 600;
+}
+.select-price {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  font-weight: 600;
+}
+.select-time {
+  font-size: 12px;
+  opacity: 0.7;
+  text-align: right;
+}
 .select-caret {
   width: 0;
   height: 0;
@@ -254,7 +366,9 @@ table.crops th, table.crops td { text-align: left; padding: 3px 4px; border-bott
   border-top: 7px solid var(--frame-gold);
   transition: transform 0.15s;
 }
-.select-caret.up { transform: rotate(180deg); }
+.select-caret.up {
+  transform: rotate(180deg);
+}
 .select-list {
   margin: 6px 0 0;
   padding: 4px;
@@ -270,9 +384,14 @@ table.crops th, table.crops td { text-align: left; padding: 3px 4px; border-bott
   border-radius: 7px;
   cursor: pointer;
 }
-.select-list li:hover { background: var(--slot-edge); }
-.select-list li.chosen { background: var(--frame-gold-dark); }
-.select-list li.chosen::before { /* barra do item escolhido */
+.select-list li:hover {
+  background: var(--slot-edge);
+}
+.select-list li.chosen {
+  background: var(--frame-gold-dark);
+}
+.select-list li.chosen::before {
+  /* barra do item escolhido */
   content: '';
   position: absolute;
   left: 2px;
@@ -282,8 +401,13 @@ table.crops th, table.crops td { text-align: left; padding: 3px 4px; border-bott
   border-radius: 2px;
   background: var(--frame-gold);
 }
-.select-list li.chosen .select-name::after { content: ' ✓'; color: #7fcf5a; }
-.select-list li.poor .select-price { color: var(--danger); }
+.select-list li.chosen .select-name::after {
+  content: ' ✓';
+  color: #7fcf5a;
+}
+.select-list li.poor .select-price {
+  color: var(--danger);
+}
 
 .seed-card {
   display: flex;
@@ -295,16 +419,49 @@ table.crops th, table.crops td { text-align: left; padding: 3px 4px; border-bott
   border: 2px dashed var(--frame-gold-dark);
   border-radius: 10px;
 }
-.seed-card ul { margin: 0; padding: 0; list-style: none; line-height: 1.5; font-size: 14px; }
-.buy-label { margin: 0 0 4px; }
-.buy-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-.buy-row button { justify-content: center; gap: 3px; min-width: 0; font-size: 13px; padding-inline: 0; white-space: nowrap; }
+.seed-card ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  line-height: 1.5;
+  font-size: 14px;
+}
+.buy-label {
+  margin: 0 0 4px;
+}
+.buy-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.buy-row button {
+  justify-content: center;
+  gap: 3px;
+  min-width: 0;
+  font-size: 13px;
+  padding-inline: 0;
+  white-space: nowrap;
+}
 
 /* Terreno na loja: separado das sementes, com card e botão largo como o resto da loja */
-.plot-shop { margin-top: 14px; padding-top: 10px; border-top: 2px dashed var(--frame-gold-dark); }
-.plot-missing { color: var(--danger); font-weight: 600; }
-.plot-buy { width: 100%; justify-content: center; font-size: 15px; }
-.plot-hint { margin: 6px 0 0; text-align: center; }
+.plot-shop {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 2px dashed var(--frame-gold-dark);
+}
+.plot-missing {
+  color: var(--danger);
+  font-weight: 600;
+}
+.plot-buy {
+  width: 100%;
+  justify-content: center;
+  font-size: 15px;
+}
+.plot-hint {
+  margin: 6px 0 0;
+  text-align: center;
+}
 
 /* ---------- Armazém, quintal e painel do prédio ---------- */
 /* Painel do prédio clicado: à direita, abaixo do relógio, sem bloquear o mapa */
@@ -316,32 +473,99 @@ table.crops th, table.crops td { text-align: left; padding: 3px 4px; border-bott
   width: 350px;
   max-height: calc(100vh - 300px);
 }
-.side-panel .wide { width: 100%; margin: 8px 0 2px; }
-.center { text-align: center; }
-.sell-buttons { display: flex; gap: 4px; }
-.queue-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-top: 2px dashed var(--frame-gold-dark); }
-.queue-row:first-of-type { border-top: none; }
-.ready-text { color: #7fcf5a; font-weight: 600; }
-.hungry-text { color: #f0894a; font-weight: 600; }
-.recipe { padding: 8px 0; border-top: 2px dashed var(--frame-gold-dark); }
-.recipe-head { display: flex; align-items: center; gap: 10px; }
-.recipe-inputs { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0 0 48px; }
-.chip-have { opacity: 0.7; font-size: 12px; }
-.buy-row.two { grid-template-columns: repeat(2, 1fr); margin-bottom: 6px; }
-.yard-row { width: 100%; text-align: left; font: inherit; color: inherit; background: none; border-left: none; border-right: none; border-bottom: none; cursor: pointer; border-radius: 6px; }
-.yard-row:hover { background: rgba(0, 0, 0, 0.25); }
+.side-panel .wide {
+  width: 100%;
+  margin: 8px 0 2px;
+}
+.center {
+  text-align: center;
+}
+.sell-buttons {
+  display: flex;
+  gap: 4px;
+}
+.queue-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-top: 2px dashed var(--frame-gold-dark);
+}
+.queue-row:first-of-type {
+  border-top: none;
+}
+.ready-text {
+  color: #7fcf5a;
+  font-weight: 600;
+}
+.hungry-text {
+  color: #f0894a;
+  font-weight: 600;
+}
+.recipe {
+  padding: 8px 0;
+  border-top: 2px dashed var(--frame-gold-dark);
+}
+.recipe-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.recipe-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 6px 0 0 48px;
+}
+.chip-have {
+  opacity: 0.7;
+  font-size: 12px;
+}
+.buy-row.two {
+  grid-template-columns: repeat(2, 1fr);
+  margin-bottom: 6px;
+}
+.yard-row {
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  cursor: pointer;
+  border-radius: 6px;
+}
+.yard-row:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
 
 /* Telas estreitas: barra de itens sobe para não cobrir o botão Salvar */
 @media (max-width: 900px) {
-  .game .hud-hotbar { bottom: 60px; }
-  .game .building-panel { top: 150px; width: 300px; max-height: calc(100vh - 260px); }
-  .day-clock { transform: scale(0.8); transform-origin: top right; }
+  .game .hud-hotbar {
+    bottom: 60px;
+  }
+  .game .building-panel {
+    top: 150px;
+    width: 300px;
+    max-height: calc(100vh - 260px);
+  }
+  .day-clock {
+    transform: scale(0.8);
+    transform-origin: top right;
+  }
 }
 
 /* Janelas baixas: botões do menu menores para a coluna da esquerda não bater no botão Salvar */
 @media (max-height: 640px) {
-  .side-rail .rail-btn { width: 40px; height: 40px; }
-  .game .side-panel { max-height: calc(100vh - 210px); }
+  .side-rail .rail-btn {
+    width: 40px;
+    height: 40px;
+  }
+  .game .side-panel {
+    max-height: calc(100vh - 210px);
+  }
 }
 
 /* ---------- Tela de login ---------- */
@@ -380,9 +604,19 @@ table.crops th, table.crops td { text-align: left; padding: 3px 4px; border-bott
   font-size: 76px;
   line-height: 0.95;
   color: var(--frame-gold-light);
-  text-shadow: 0 4px 0 var(--frame-gold-dark), 0 7px 0 rgba(0, 0, 0, 0.45), -2px 0 0 var(--frame-outline), 2px 0 0 var(--frame-outline), 0 -2px 0 var(--frame-outline);
+  text-shadow:
+    0 4px 0 var(--frame-gold-dark),
+    0 7px 0 rgba(0, 0, 0, 0.45),
+    -2px 0 0 var(--frame-outline),
+    2px 0 0 var(--frame-outline),
+    0 -2px 0 var(--frame-outline);
 }
-.auth-hero p { margin: 0; font-size: 24px; color: var(--text); text-shadow: 0 2px 0 rgba(0, 0, 0, 0.7); }
+.auth-hero p {
+  margin: 0;
+  font-size: 24px;
+  color: var(--text);
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.7);
+}
 .auth-screen .auth-card {
   position: relative;
   z-index: 1;
@@ -391,23 +625,67 @@ table.crops th, table.crops td { text-align: left; padding: 3px 4px; border-bott
   padding: 16px 22px 22px;
   font-size: 15px;
 }
-.auth-card h2 { margin: 0 0 4px; font-size: 22px; color: var(--frame-gold-light); }
+.auth-card h2 {
+  margin: 0 0 4px;
+  font-size: 22px;
+  color: var(--frame-gold-light);
+}
 @media (max-width: 1100px) {
-  .auth-hero { width: 416px; height: 144px; padding: 22px 18px 8px; }
-  .auth-hero h1 { font-size: 50px; }
-  .auth-hero p { font-size: 17px; }
+  .auth-hero {
+    width: 416px;
+    height: 144px;
+    padding: 22px 18px 8px;
+  }
+  .auth-hero h1 {
+    font-size: 50px;
+  }
+  .auth-hero p {
+    font-size: 17px;
+  }
 }
 @media (max-width: 900px) {
-  .auth-screen { justify-content: center; align-items: flex-end; padding: 0 16px 5vh; }
-  .auth-hero { left: 50%; top: 3vh; transform: translateX(-50%); }
+  .auth-screen {
+    justify-content: center;
+    align-items: flex-end;
+    padding: 0 16px 5vh;
+  }
+  .auth-hero {
+    left: 50%;
+    top: 3vh;
+    transform: translateX(-50%);
+  }
 }
 
-.auth-card form > * + * { margin-top: 14px; }
+.auth-card form > * + * {
+  margin-top: 14px;
+}
 .auth-submit {
-  min-height: 48px; width: 100%; justify-content: center; margin-top: 14px; font-size: 17px; }
-.auth-error { margin: 10px 0 0; padding: 6px 10px; color: var(--danger); background: rgba(217, 72, 43, 0.15); border: 2px solid var(--danger); }
-.auth-notice { margin: 0 0 4px; padding: 6px 10px; color: #7fcf5a; background: rgba(127, 207, 90, 0.12); border: 2px solid #7fcf5a; }
-.auth-links { display: flex; justify-content: space-between; gap: 8px; margin-top: 12px; }
+  min-height: 48px;
+  width: 100%;
+  justify-content: center;
+  margin-top: 14px;
+  font-size: 17px;
+}
+.auth-error {
+  margin: 10px 0 0;
+  padding: 6px 10px;
+  color: var(--danger);
+  background: rgba(217, 72, 43, 0.15);
+  border: 2px solid var(--danger);
+}
+.auth-notice {
+  margin: 0 0 4px;
+  padding: 6px 10px;
+  color: #7fcf5a;
+  background: rgba(127, 207, 90, 0.12);
+  border: 2px solid #7fcf5a;
+}
+.auth-links {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 12px;
+}
 .auth-links button {
   padding: 0;
   font: inherit;
@@ -418,8 +696,13 @@ table.crops th, table.crops td { text-align: left; padding: 3px 4px; border-bott
   border: none;
   cursor: pointer;
 }
-.password-field { position: relative; display: block; }
-.password-field input { padding-right: 42px; }
+.password-field {
+  position: relative;
+  display: block;
+}
+.password-field input {
+  padding-right: 42px;
+}
 .password-toggle {
   position: absolute;
   top: 50%;
@@ -432,13 +715,24 @@ table.crops th, table.crops td { text-align: left; padding: 3px 4px; border-bott
   border-radius: 6px;
   cursor: pointer;
 }
-.password-toggle:hover { background: rgba(255, 255, 255, 0.12); }
-.password-toggle:focus-visible { outline: 2px solid var(--frame-gold-light); }
+.password-toggle:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+.password-toggle:focus-visible {
+  outline: 2px solid var(--frame-gold-light);
+}
 
 /* ---------- Menu do perfil e editor de avatar ---------- */
-.profile { position: relative; }
-.player-info { flex: 1; }
-.hud-player .select-caret { border-top-color: var(--text); margin-left: 2px; }
+.profile {
+  position: relative;
+}
+.player-info {
+  flex: 1;
+}
+.hud-player .select-caret {
+  border-top-color: var(--text);
+  margin-left: 2px;
+}
 .profile-menu {
   position: absolute;
   z-index: 6;
@@ -446,8 +740,17 @@ table.crops th, table.crops td { text-align: left; padding: 3px 4px; border-bott
   left: 0;
   min-width: 220px;
 }
-.profile-email { margin: 4px 0 8px; font-size: 13px; color: var(--text-muted); overflow-wrap: anywhere; }
-.profile-menu button { width: 100%; margin-top: 4px; justify-content: flex-start; }
+.profile-email {
+  margin: 4px 0 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+.profile-menu button {
+  width: 100%;
+  margin-top: 4px;
+  justify-content: flex-start;
+}
 
 .modal-backdrop {
   position: fixed;
@@ -460,9 +763,25 @@ table.crops th, table.crops td { text-align: left; padding: 3px 4px; border-bott
   overflow-y: auto;
   background: rgba(20, 12, 4, 0.6);
 }
-.modal-backdrop .editor { width: 520px; max-width: 100%; padding: 10px 14px 14px; font-size: 15px; }
-.editor h2 { display: flex; align-items: center; justify-content: space-between; margin: 6px 0 10px; font-size: 18px; }
-.editor-top { display: flex; align-items: center; gap: 14px; margin-bottom: 4px; }
+.modal-backdrop .editor {
+  width: 520px;
+  max-width: 100%;
+  padding: 10px 14px 14px;
+  font-size: 15px;
+}
+.editor h2 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 6px 0 10px;
+  font-size: 18px;
+}
+.editor-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 4px;
+}
 .editor-preview {
   flex: none;
   padding: 6px;
@@ -470,9 +789,17 @@ table.crops th, table.crops td { text-align: left; padding: 3px 4px; border-bott
   border: 3px solid var(--frame-gold-dark);
   border-radius: 16px;
 }
-.editor-preview .svg-icon { display: block; }
-.editor-name { flex: 1; }
-.option-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 6px; }
+.editor-preview .svg-icon {
+  display: block;
+}
+.editor-name {
+  flex: 1;
+}
+.option-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 6px;
+}
 .option {
   display: flex;
   flex-direction: column;
@@ -486,12 +813,30 @@ table.crops th, table.crops td { text-align: left; padding: 3px 4px; border-bott
   border: 2px solid var(--frame-gold-dark);
   cursor: pointer;
 }
-.option:hover { background: var(--slot-edge); }
-.option.chosen { background: rgba(251, 213, 148, 0.18); border-color: var(--frame-gold-light); font-weight: 600; }
-.option .svg-icon { display: block; }
-.editor-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
-.editor-tabs { flex-wrap: wrap; margin: 8px 0 12px; }
-.editor-tabs button { min-width: 70px; }
+.option:hover {
+  background: var(--slot-edge);
+}
+.option.chosen {
+  background: rgba(251, 213, 148, 0.18);
+  border-color: var(--frame-gold-light);
+  font-weight: 600;
+}
+.option .svg-icon {
+  display: block;
+}
+.editor-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+.editor-tabs {
+  flex-wrap: wrap;
+  margin: 8px 0 12px;
+}
+.editor-tabs button {
+  min-width: 70px;
+}
 
 /* retrato em pixel art: área interna de 80px = grade de 40 em 2x */
 /* a foto ocupa a moldura inteira: borda fina no lugar do aro da moldura do pacote de UI */
@@ -504,18 +849,55 @@ table.crops th, table.crops td { text-align: left; padding: 3px 4px; border-bott
 }
 
 /* retrato do avatar (montado a partir das camadas em public/assets/avatar) */
-.avatar-img { display: block; }
-.avatar-loading { background: #e2c99a; }
-.editor-preview { padding: 0; background: none; border-color: #2a170a; border-radius: 10px; overflow: hidden; }
+.avatar-img {
+  display: block;
+}
+.avatar-loading {
+  background: #e2c99a;
+}
+.editor-preview {
+  padding: 0;
+  background: none;
+  border-color: #2a170a;
+  border-radius: 10px;
+  overflow: hidden;
+}
 
-.loading-screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
+.loading-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
 
 /* ---------- Construir ---------- */
 /* Loja de prédios: a parte da esquerda da linha mostra o que o prédio faz; o botão escolhe o lugar no mapa */
-.build-shop { margin-top: 14px; }
-.build-info { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; text-align: left; font: inherit; color: inherit; background: none; border: none; padding: 0; cursor: pointer; }
-.build-info:hover b { text-decoration: underline; }
-.build-shop button { white-space: nowrap; }
+.build-shop {
+  margin-top: 14px;
+}
+.build-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+.build-info:hover b {
+  text-decoration: underline;
+}
+.build-shop button {
+  white-space: nowrap;
+}
 /* Aviso no topo do mapa enquanto o jogador escolhe onde construir */
 .game .place-hint {
   position: absolute;
@@ -529,7 +911,9 @@ table.crops th, table.crops td { text-align: left; padding: 3px 4px; border-bott
   filter: var(--hard-shadow);
   z-index: 5;
 }
-.place-hint button { margin-left: 4px; }
+.place-hint button {
+  margin-left: 4px;
+}
 
 /* Balão da planta sob o mouse (o canvas move a âncora com transform) */
 .plant-tip-anchor {
@@ -549,7 +933,9 @@ table.crops th, table.crops td { text-align: left; padding: 3px 4px; border-bott
   align-items: flex-end;
   gap: 8px;
 }
-.music-toggle .svg-icon { display: block; }
+.music-toggle .svg-icon {
+  display: block;
+}
 .music-player .music-panel {
   display: flex;
   flex-direction: column;
@@ -559,7 +945,10 @@ table.crops th, table.crops td { text-align: left; padding: 3px 4px; border-bott
   padding: 6px 8px 8px;
 }
 /* fechado, o painel sai da tela mas o player continua tocando */
-.music-panel.closed { position: fixed; left: -9999px; }
+.music-panel.closed {
+  position: fixed;
+  left: -9999px;
+}
 .music-head {
   display: flex;
   align-items: center;
@@ -569,7 +958,13 @@ table.crops th, table.crops td { text-align: left; padding: 3px 4px; border-bott
   color: var(--text);
 }
 /* o vídeo do YouTube toca fora da tela: só o áudio importa */
-.music-video { position: fixed; left: -9999px; top: 0; width: 200px; height: 200px; }
+.music-video {
+  position: fixed;
+  left: -9999px;
+  top: 0;
+  width: 200px;
+  height: 200px;
+}
 .music-now {
   display: flex;
   align-items: center;
@@ -581,17 +976,65 @@ table.crops th, table.crops td { text-align: left; padding: 3px 4px; border-bott
   border: 2px solid var(--frame-gold-dark);
   color: var(--text);
 }
-.music-now svg { flex: none; }
-.music-link { display: flex; margin-left: auto; padding: 3px; background: var(--frame-gold); border: 2px solid var(--frame-outline); color: var(--frame-outline); }
-.music-link:hover { filter: brightness(1.1); }
-.music-now-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; }
-.music-now-text b { font-size: 14px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-.music-now-text small { font-size: 12px; opacity: 0.75; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.music-controls { display: flex; gap: 10px; justify-content: center; align-items: center; }
-.music-controls .music-btn { min-width: 44px; }
-.music-controls .music-btn.big { min-width: 64px; min-height: 44px; }
-.music-volume { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; color: var(--text); }
-.music-volume b { min-width: 38px; text-align: right; }
+.music-now svg {
+  flex: none;
+}
+.music-link {
+  display: flex;
+  margin-left: auto;
+  padding: 3px;
+  background: var(--frame-gold);
+  border: 2px solid var(--frame-outline);
+  color: var(--frame-outline);
+}
+.music-link:hover {
+  filter: brightness(1.1);
+}
+.music-now-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.2;
+}
+.music-now-text b {
+  font-size: 14px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.music-now-text small {
+  font-size: 12px;
+  opacity: 0.75;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.music-controls {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+}
+.music-controls .music-btn {
+  min-width: 44px;
+}
+.music-controls .music-btn.big {
+  min-width: 64px;
+  min-height: 44px;
+}
+.music-volume {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+.music-volume b {
+  min-width: 38px;
+  text-align: right;
+}
 .music-volume input[type='range'] {
   flex: 1;
   min-width: 0;
@@ -641,62 +1084,185 @@ table.crops th, table.crops td { text-align: left; padding: 3px 4px; border-bott
   gap: 4px;
   z-index: 5;
 }
-.ctx-title { padding: 0 4px 2px; font-size: 14px; font-weight: 700; color: var(--frame-gold); border-bottom: 2px solid var(--frame-gold-dark); }
-.ctx-sub { margin-top: -2px; padding: 0 4px; font-size: 13px; color: var(--text-muted); }
-.ctx-menu button { justify-content: flex-start; padding: 0 var(--space-2); }
-.ctx-line { display: flex; gap: 4px; }
-.ctx-line button { flex: 1; justify-content: center; }
+.ctx-title {
+  padding: 0 4px 2px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--frame-gold);
+  border-bottom: 2px solid var(--frame-gold-dark);
+}
+.ctx-sub {
+  margin-top: -2px;
+  padding: 0 4px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.ctx-menu button {
+  justify-content: flex-start;
+  padding: 0 var(--space-2);
+}
+.ctx-line {
+  display: flex;
+  gap: 4px;
+}
+.ctx-line button {
+  flex: 1;
+  justify-content: center;
+}
 
 /* ---------- Celular ---------- */
 /* Toque: alvos maiores (o dedo é menos preciso que o mouse) */
 @media (pointer: coarse) {
-  .ctx-menu button { min-height: 44px; font-size: 16px; }
+  .ctx-menu button {
+    min-height: 44px;
+    font-size: 16px;
+  }
 }
 /* Telas estreitas: relógio menor, painel do prédio vira uma folha na parte de baixo */
 @media (max-width: 600px) {
-  .day-clock { transform: scale(0.62); }
-  .game .building-panel { top: auto; bottom: 130px; left: 8px; right: 8px; width: auto; max-height: 42vh; }
-  .game .side-panel { width: calc(100vw - 100px); }
+  .day-clock {
+    transform: scale(0.62);
+  }
+  .game .building-panel {
+    top: auto;
+    bottom: 130px;
+    left: 8px;
+    right: 8px;
+    width: auto;
+    max-height: 42vh;
+  }
+  .game .side-panel {
+    width: calc(100vw - 100px);
+  }
 }
 
 /* ---------- Celular: HUD compacta e colada nas bordas ----------
    Vale para telas baixas (celular deitado) e estreitas (celular em pé). No computador nada muda. */
 @media (max-height: 500px), (max-width: 600px) {
-  :root { --px: 1px; } /* molduras do design system no tamanho de 1 pixel da arte */
-  .hud-left { top: 4px; left: 4px; gap: 4px; }
-  .hud-left .hud-player { padding: 2px 4px; }
-  .hud-player-btn { gap: 5px; }
-  .hud-player .avatar-img { width: 40px; height: 40px; }
-  .hud-player .portrait { border-width: 1px; border-radius: 4px; }
-  .player-info { min-width: 76px; gap: 2px; }
-  .hud-player .player-info > div { min-height: 22px; padding: 0 4px; font-size: 11px; }
-  .hud-player .money { font-size: 13px; gap: 4px; }
-  .hud-player .money .svg-icon { width: 15px; height: 15px; }
-  .hud-player .select-caret { transform: scale(0.75); }
-  .side-rail { gap: 4px; }
-  .side-rail .rail-btn { width: 34px; height: 34px; }
-  .day-clock { top: 4px; right: 4px; transform: scale(0.5); transform-origin: top right; }
-  .game .hud-hotbar { bottom: 4px; left: 4px; transform: none; padding: 2px 4px; gap: 3px; --slot-size: clamp(30px, 8vw, 40px); } /* à esquerda: o canto direito é do botão de música */
-  .hud-hotbar .svg-icon { width: 100%; height: 100%; }
+  :root {
+    --px: 1px;
+  } /* molduras do design system no tamanho de 1 pixel da arte */
+  .hud-left {
+    top: 4px;
+    left: 4px;
+    gap: 4px;
+  }
+  .hud-left .hud-player {
+    padding: 2px 4px;
+  }
+  .hud-player-btn {
+    gap: 5px;
+  }
+  .hud-player .avatar-img {
+    width: 40px;
+    height: 40px;
+  }
+  .hud-player .portrait {
+    border-width: 1px;
+    border-radius: 4px;
+  }
+  .player-info {
+    min-width: 76px;
+    gap: 2px;
+  }
+  .hud-player .player-info > div {
+    min-height: 22px;
+    padding: 0 4px;
+    font-size: 11px;
+  }
+  .hud-player .money {
+    font-size: 13px;
+    gap: 4px;
+  }
+  .hud-player .money .svg-icon {
+    width: 15px;
+    height: 15px;
+  }
+  .hud-player .select-caret {
+    transform: scale(0.75);
+  }
+  .side-rail {
+    gap: 4px;
+  }
+  .side-rail .rail-btn {
+    width: 34px;
+    height: 34px;
+  }
+  .day-clock {
+    top: 4px;
+    right: 4px;
+    transform: scale(0.5);
+    transform-origin: top right;
+  }
+  .game .hud-hotbar {
+    bottom: 4px;
+    left: 4px;
+    transform: none;
+    padding: 2px 4px;
+    gap: 3px;
+    --slot-size: clamp(30px, 8vw, 40px);
+  } /* à esquerda: o canto direito é do botão de música */
+  .hud-hotbar .svg-icon {
+    width: 100%;
+    height: 100%;
+  }
   /* moldura mais fina (a de 9px comia o miolo); em 390px os 9 slots ainda deixam lugar para o botão de música */
-  .hud-save { bottom: 4px; left: 4px; }
-  .music-player { bottom: 4px; right: 4px; }
-  .music-player .music-toggle { width: 36px; height: 36px; }
-  .music-toggle .svg-icon { width: 22px; height: 22px; }
-  .game .place-hint { top: 4px; padding: 2px 8px; font-size: 13px; }
+  .hud-save {
+    bottom: 4px;
+    left: 4px;
+  }
+  .music-player {
+    bottom: 4px;
+    right: 4px;
+  }
+  .music-player .music-toggle {
+    width: 36px;
+    height: 36px;
+  }
+  .music-toggle .svg-icon {
+    width: 22px;
+    height: 22px;
+  }
+  .game .place-hint {
+    top: 4px;
+    padding: 2px 8px;
+    font-size: 13px;
+  }
 }
 /* Celular deitado: os painéis ocupam a lateral e deixam a barra de itens livre */
 @media (max-height: 500px) and (min-width: 601px) {
-  .game .building-panel { top: 56px; right: 4px; width: 270px; max-height: calc(100vh - 116px); }
-  .game .side-panel { width: 290px; max-height: calc(100vh - 100px); font-size: 14px; }
+  .game .building-panel {
+    top: 56px;
+    right: 4px;
+    width: 270px;
+    max-height: calc(100vh - 116px);
+  }
+  .game .side-panel {
+    width: 290px;
+    max-height: calc(100vh - 100px);
+    font-size: 14px;
+  }
 }
 @media (max-height: 500px), (max-width: 600px) {
-  .hud-save button { min-height: 32px; font-size: 12px; padding: 0 8px; }
+  .hud-save button {
+    min-height: 32px;
+    font-size: 12px;
+    padding: 0 8px;
+  }
 }
 /* menu do clique menor na tela compacta (ainda com alvo de toque confortável) */
 @media (max-height: 500px), (max-width: 600px) {
-  .ctx-menu { gap: 3px; }
-  .ctx-title { font-size: 13px; }
-  .ctx-sub { font-size: 12px; }
-  .ctx-menu button { min-height: 34px; font-size: 14px; }
+  .ctx-menu {
+    gap: 3px;
+  }
+  .ctx-title {
+    font-size: 13px;
+  }
+  .ctx-sub {
+    font-size: 12px;
+  }
+  .ctx-menu button {
+    min-height: 34px;
+    font-size: 14px;
+  }
 }

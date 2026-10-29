@@ -100,7 +100,13 @@ export function MusicPlayer() {
     function readTrack(player: YTPlayer) {
       const { title, author, video_id } = player.getVideoData()
       if (!title) return
-      setTrack({ title, author: author ?? '', index: player.getPlaylistIndex() + 1, total: player.getPlaylist()?.length ?? 0, url: `https://www.youtube.com/watch?v=${video_id}&list=${PLAYLIST_ID}` })
+      setTrack({
+        title,
+        author: author ?? '',
+        index: player.getPlaylistIndex() + 1,
+        total: player.getPlaylist()?.length ?? 0,
+        url: `https://www.youtube.com/watch?v=${video_id}&list=${PLAYLIST_ID}`,
+      })
     }
 
     function unlock() {
@@ -219,7 +225,13 @@ export function MusicPlayer() {
           </IconButton>
         </div>
         <div className="music-volume">
-          <IconButton size="sm" className="music-mute" onClick={toggleMute} aria-label={volume === 0 ? 'Ativar o som' : 'Silenciar'} title={volume === 0 ? 'Ativar o som' : 'Silenciar'}>
+          <IconButton
+            size="sm"
+            className="music-mute"
+            onClick={toggleMute}
+            aria-label={volume === 0 ? 'Ativar o som' : 'Silenciar'}
+            title={volume === 0 ? 'Ativar o som' : 'Silenciar'}
+          >
             <VolumeIcon size={22} level={volume === 0 ? 0 : volume < 0.5 ? 1 : 2} />
           </IconButton>
           <input

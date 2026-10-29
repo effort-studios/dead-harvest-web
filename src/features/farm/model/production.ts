@@ -133,9 +133,7 @@ export function readyMachineIds(data: SaveData, now: number): string[] {
 
 // Quantos ingredientes de cada faltam para a receita (vazio = dá para fazer)
 export function missingInputs(inventory: Record<string, number>, recipe: RecipeInfo) {
-  return recipe.inputs
-    .map((i) => ({ itemId: i.itemId, missing: i.quantity - (inventory[i.itemId] ?? 0) }))
-    .filter((i) => i.missing > 0)
+  return recipe.inputs.map((i) => ({ itemId: i.itemId, missing: i.quantity - (inventory[i.itemId] ?? 0) })).filter((i) => i.missing > 0)
 }
 
 // Estado de um animal: com fome, produzindo (com o progresso de 0 a 1) ou pronto para coletar
@@ -178,9 +176,11 @@ export const isBuilt = (data: SaveData, b: BuildingRef) => buildingPos(data, b) 
 // Chão do prédio na célula (r, c)
 export function footprint(b: BuildingRef, r: number, c: number): Area {
   const f =
-    b.kind === 'barn' ? LAYOUT.barnFootprint
-    : b.kind === 'well' ? LAYOUT.wellFootprint
-    : { r0: 0, r1: (machineById(b.id)?.size ?? 1) - 1, c0: 0, c1: (machineById(b.id)?.size ?? 1) - 1 }
+    b.kind === 'barn'
+      ? LAYOUT.barnFootprint
+      : b.kind === 'well'
+        ? LAYOUT.wellFootprint
+        : { r0: 0, r1: (machineById(b.id)?.size ?? 1) - 1, c0: 0, c1: (machineById(b.id)?.size ?? 1) - 1 }
   return { r0: r + f.r0, r1: r + f.r1, c0: c + f.c0, c1: c + f.c1 }
 }
 

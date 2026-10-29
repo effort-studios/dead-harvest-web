@@ -127,9 +127,17 @@ export function GameCanvas() {
     if (pose.walking || pose.acting) facing.current = pose.facing
     const queued = data.farmer.jobs.filter((j) => j.row !== null).map((j) => ({ r: j.targetRow, c: j.targetCol }))
     drawWorld(
-      ctx, data.plots, ready, { x, y, zoom: fitZoom(size) * userZoom.current }, size, dpr, hover.current,
-      buyingPlot ? freeSlots(data) : [], avatar ? { pose, avatar, queued } : null,
-      yardView(data, serverNow(), ghost.current), ghost.current?.target ?? buildingHover.current,
+      ctx,
+      data.plots,
+      ready,
+      { x, y, zoom: fitZoom(size) * userZoom.current },
+      size,
+      dpr,
+      hover.current,
+      buyingPlot ? freeSlots(data) : [],
+      avatar ? { pose, avatar, queued } : null,
+      yardView(data, serverNow(), ghost.current),
+      ghost.current?.target ?? buildingHover.current,
       { hover: treeHover.current, queued: data.farmer.jobs.filter((j) => j.treeId !== null).map((j) => j.treeId!) },
     )
   }, [sprites, size, readyTrees, freeWalk])
@@ -250,11 +258,7 @@ export function GameCanvas() {
       const world = screenToWorld(sx, sy, { ...camera.current, zoom: oldZoom }, size)
       userZoom.current = next
       const zoom = fit * next
-      camera.current = clampCamera(
-        world.x - (sx - size.width / 2) / zoom,
-        world.y - (sy - size.height / 2) / zoom,
-        useFarmStore.getState().data?.plots ?? [],
-      )
+      camera.current = clampCamera(world.x - (sx - size.width / 2) / zoom, world.y - (sy - size.height / 2) / zoom, useFarmStore.getState().data?.plots ?? [])
       scheduleDraw()
     }
     canvas.addEventListener('wheel', onWheel, { passive: false })
@@ -553,8 +557,12 @@ export function GameCanvas() {
       {menu && <TileMenu at={menu} size={size} onClose={() => setMenu(null)} />}
       {placing && (
         <Panel className="place-hint">
-          Clique no mapa onde construir {placing.kind === 'barn' ? 'o celeiro' : placing.kind === 'well' ? 'o poço' : machineById(placing.id)?.name.toLowerCase()} · verde
-          pode, vermelho não · <Button size="sm" onClick={() => useFarmStore.getState().startPlacing(null)}>Cancelar (Esc)</Button>
+          Clique no mapa onde construir{' '}
+          {placing.kind === 'barn' ? 'o celeiro' : placing.kind === 'well' ? 'o poço' : machineById(placing.id)?.name.toLowerCase()} · verde pode, vermelho não
+          ·{' '}
+          <Button size="sm" onClick={() => useFarmStore.getState().startPlacing(null)}>
+            Cancelar (Esc)
+          </Button>
         </Panel>
       )}
       {/* Luz do dia: cobre só o mapa (a HUD fica de fora) e muda aos poucos com a hora */}
@@ -653,11 +661,7 @@ function TreeTip({ id }: { id: string }) {
   return (
     <Tooltip>
       <b>Árvore de {fruit.name.toLowerCase()}</b>
-      {left === 0 ? (
-        <span className="ready-text">{tree.fruitsPerHarvest} frutas para colher!</span>
-      ) : (
-        <span>frutas voltam em {formatDuration(left)}</span>
-      )}
+      {left === 0 ? <span className="ready-text">{tree.fruitsPerHarvest} frutas para colher!</span> : <span>frutas voltam em {formatDuration(left)}</span>}
     </Tooltip>
   )
 }

@@ -57,9 +57,17 @@ export function fitZoom({ width, height }: Size) {
 
 // Área do jogo: a área principal mais os terrenos (e uma fileira de posições livres em volta)
 function worldBounds(plots: Plot[]) {
-  let left = 0, top = 0, right = WORLD_WIDTH, bottom = WORLD_HEIGHT
+  let left = 0,
+    top = 0,
+    right = WORLD_WIDTH,
+    bottom = WORLD_HEIGHT
   for (const { x, y } of plots) {
-    for (const [dx, dy] of [[-1, -1], [2, -1], [-1, 2], [2, 2]]) {
+    for (const [dx, dy] of [
+      [-1, -1],
+      [2, -1],
+      [-1, 2],
+      [2, 2],
+    ]) {
       const p = cellToWorld((y + dy) * PLOT_STEP, (x + dx) * PLOT_STEP)
       left = Math.min(left, p.x - HALF_W)
       right = Math.max(right, p.x + HALF_W)
@@ -220,10 +228,20 @@ type Item = {
 // Objetos soltos em volta da plantação (r/c fora da grade 0..9)
 const prop = (kind: PropKind, r: number, c: number): Item => ({ r, c, prop: kind })
 const DECOR: Item[] = [
-  prop('hayStack', -2, 3), prop('hay', -2, 6), prop('sack', -3, 9),
-  prop('hay', 11, 2), prop('sack', 12, 6), prop('platform', 6, 12), prop('hayStack', 3, 11),
-  prop('bush', -3, 6), prop('bush', -2, -1), prop('bush', 13, 9),
-  prop('rock', 11, 8), prop('rock', 9, 12), prop('rock', -1, 12), prop('rock', 10, -3),
+  prop('hayStack', -2, 3),
+  prop('hay', -2, 6),
+  prop('sack', -3, 9),
+  prop('hay', 11, 2),
+  prop('sack', 12, 6),
+  prop('platform', 6, 12),
+  prop('hayStack', 3, 11),
+  prop('bush', -3, 6),
+  prop('bush', -2, -1),
+  prop('bush', 13, 9),
+  prop('rock', 11, 8),
+  prop('rock', 9, 12),
+  prop('rock', -1, 12),
+  prop('rock', 10, -3),
 ]
 
 // Objeto de cenário que cairia em cima de um terreno (ou da cerca dele) some
@@ -356,13 +374,13 @@ function drawFertilizer(ctx: CanvasRenderingContext2D, x: number, y: number, r: 
   ctx.fillStyle = 'rgba(40, 20, 6, 0.28)'
   ctx.fill()
   let seed = (r * 92821 + c * 68917) >>> 0
-  const rand = () => ((seed = (seed * 1103515245 + 12345) >>> 0) / 0xffffffff)
+  const rand = () => (seed = (seed * 1103515245 + 12345) >>> 0) / 0xffffffff
   for (let i = 0; i < 9; i++) {
     const u = rand() - 0.5
     const v = rand() - 0.5
     ctx.fillStyle = i % 3 === 0 ? 'rgba(146, 223, 98, 0.9)' : 'rgba(255, 240, 200, 0.85)'
-    const px = Math.round((u - v) * (HALF_W - 14) / PX) * PX
-    const py = Math.round((u + v) * (HALF_H - 7) / PX) * PX
+    const px = Math.round(((u - v) * (HALF_W - 14)) / PX) * PX
+    const py = Math.round(((u + v) * (HALF_H - 7)) / PX) * PX
     ctx.fillRect(x + px, y + py, PX * 2, PX)
   }
   ctx.restore()

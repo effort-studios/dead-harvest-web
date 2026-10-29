@@ -14,13 +14,13 @@ As molduras são 9-slice em `public/assets/ui`, geradas na PixelLab e montadas p
 (`image-rendering: pixelated`). `--px` (em `tokens.css`) é o tamanho de um pixel da arte na tela. A borda de uma
 peça na tela é `slice x --px`.
 
-| Peça | Arquivo | `slice` | Borda na tela (`--px: 2px`) | Usada em |
-|---|---|---|---|---|
-| Painel | `panel.png` | 5 | 10px | `Panel` |
-| Placa | `plate.png` | 4 | 8px | `Plate`, `Input`, `Select`, `Tabs`, `Tooltip` |
-| Barra | `bar.png` | 5 | 10px (altura fixa de 22px) | `ProgressBar` |
-| Slot | `slot.png`, `slot_selected.png` | 2 | 4px | `Slot` |
-| Botão | `button.png`, `button_pressed.png`, `button_danger.png` | 3 | 6px | `Button`, `IconButton`, aba ativa |
+| Peça   | Arquivo                                                 | `slice` | Borda na tela (`--px: 2px`) | Usada em                                      |
+| ------ | ------------------------------------------------------- | ------- | --------------------------- | --------------------------------------------- |
+| Painel | `panel.png`                                             | 5       | 10px                        | `Panel`                                       |
+| Placa  | `plate.png`                                             | 4       | 8px                         | `Plate`, `Input`, `Select`, `Tabs`, `Tooltip` |
+| Barra  | `bar.png`                                               | 5       | 10px (altura fixa de 22px)  | `ProgressBar`                                 |
+| Slot   | `slot.png`, `slot_selected.png`                         | 2       | 4px                         | `Slot`                                        |
+| Botão  | `button.png`, `button_pressed.png`, `button_danger.png` | 3       | 6px                         | `Button`, `IconButton`, aba ativa             |
 
 Regras de encaixe:
 

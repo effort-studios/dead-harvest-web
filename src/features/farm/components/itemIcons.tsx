@@ -9,9 +9,28 @@ import { CropIcon, FruitIcon } from './icons'
 // sprite do mapa (public/assets/world), reduzido.
 
 const ITEM_ICONS = new Set([
-  'egg', 'milk', 'wool', 'feed', 'fertilizer', 'apple_juice', 'orange_juice', 'lemonade', 'cornmeal', 'tomato_sauce',
-  'pickled_carrot', 'potato_chips', 'butter', 'cheese', 'strawberry_jam', 'pumpkin_sweet', 'yarn', 'corn_cake',
-  'apple_pie', 'strawberry_ice_cream', 'watermelon_sorbet', 'polenta',
+  'egg',
+  'milk',
+  'wool',
+  'feed',
+  'fertilizer',
+  'apple_juice',
+  'orange_juice',
+  'lemonade',
+  'cornmeal',
+  'tomato_sauce',
+  'pickled_carrot',
+  'potato_chips',
+  'butter',
+  'cheese',
+  'strawberry_jam',
+  'pumpkin_sweet',
+  'yarn',
+  'corn_cake',
+  'apple_pie',
+  'strawberry_ice_cream',
+  'watermelon_sorbet',
+  'polenta',
 ])
 
 // Ícone de qualquer item do armazém pelo id
@@ -23,9 +42,7 @@ export function ItemIcon({ itemId, size }: { itemId: string; size?: number }) {
 }
 
 // Sprite do mapa como ícone
-const WorldIcon = ({ name, size }: { name: string; size?: number }) => (
-  <PixelIcon name={name} src={`/assets/world/${name}.png`} size={size} />
-)
+const WorldIcon = ({ name, size }: { name: string; size?: number }) => <PixelIcon name={name} src={`/assets/world/${name}.png`} size={size} />
 
 export const MachineIcon = ({ machineId, size = 24 }: { machineId: string; size?: number }) => <WorldIcon name={machineId} size={size} />
 export const BarnIcon = ({ size }: IconProps) => <WorldIcon name="barn" size={size} />
